@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import dev.mechanium.api.model.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
@@ -98,6 +99,62 @@ class SqliteDataStoreTest {
         try (SqliteDataStore reopened = new SqliteDataStore(database, Logger.getLogger("test"))) {
             assertEquals(List.of(machine), List.copyOf(reopened.loadMachines()));
             assertEquals(List.of(drop), List.copyOf(reopened.loadMobDrops()));
+        }
+    }
+
+
+    @Test
+    void ownedContentIsReconciledAndInactiveOwnersArePruned() throws Exception {
+        Path database = directory.resolve("owned-content.db");
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            store.saveCategory(new ContentCategory("demo_category", "Demo", "Owned category"));
+            store.saveItem(new ItemDefinition("demo_item", "Demo item", "IRON_INGOT",
+                    List.of(), 0, 64, "demo_category", null));
+
+            store.beginContentTransaction();
+            store.reconcileContentOwner("module:demo", Map.of(
+                    "category", Set.of("demo_category"),
+                    "item", Set.of("demo_item")));
+            store.commitContentTransaction();
+
+            store.beginContentTransaction();
+            Map<String, Set<String>> removed = store.reconcileContentOwner("module:demo", Map.of(
+                    "category", Set.of("demo_category")));
+            store.commitContentTransaction();
+            assertEquals(Set.of("demo_item"), removed.get("item"));
+            assertEquals(List.of("demo_category"), store.loadCategories().stream().map(ContentCategory::id).toList());
+            assertTrue(store.loadItems().isEmpty());
+
+            store.beginContentTransaction();
+            store.pruneInactiveContentOwners(Set.of());
+            store.commitContentTransaction();
+            assertTrue(store.loadCategories().isEmpty());
+        }
+    }
+
+    @Test
+    void contentOwnershipTransactionRollsBackDatabaseChanges() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("owned-rollback.db"), Logger.getLogger("test"))) {
+            store.beginContentTransaction();
+            store.saveCategory(new ContentCategory("temporary", "Temporary", "Must roll back"));
+            store.rollbackContentTransaction();
+            assertTrue(store.loadCategories().isEmpty());
+        }
+    }
+
+    @Test
+    void contentCannotBeClaimedByTwoOwners() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("owned-conflict.db"), Logger.getLogger("test"))) {
+            store.saveCategory(new ContentCategory("shared", "Shared", "Single owner"));
+            store.beginContentTransaction();
+            store.reconcileContentOwner("module:first", Map.of("category", Set.of("shared")));
+            store.commitContentTransaction();
+
+            store.beginContentTransaction();
+            assertThrows(IllegalStateException.class,
+                    () -> store.reconcileContentOwner("addon:second", Map.of("category", Set.of("shared"))));
+            store.rollbackContentTransaction();
+            assertEquals("shared", store.loadCategories().iterator().next().id());
         }
     }
 

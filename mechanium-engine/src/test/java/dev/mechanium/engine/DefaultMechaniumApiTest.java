@@ -176,4 +176,47 @@ class DefaultMechaniumApiTest {
         }
     }
 
+
+    @Test
+    void contentScopeReconcilesOwnedDefinitionsAfterSuccessfulRegistration() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("scope-reconcile.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            try (var scope = api.openContentScope("module:demo")) {
+                assertTrue(api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                        "demo_category", "Demo", "Owned")));
+                assertTrue(api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                        "demo_item", "Demo", "IRON_INGOT", List.of(), 0, 64, "demo_category", null)));
+                scope.commit();
+            }
+
+            try (var scope = api.openContentScope("module:demo")) {
+                assertTrue(api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                        "demo_category", "Demo", "Owned")));
+                scope.commit();
+            }
+
+            assertTrue(api.getCategory("demo_category").isPresent());
+            assertTrue(api.getItem("demo_item").isEmpty());
+            assertTrue(store.loadItems().isEmpty());
+        }
+    }
+
+    @Test
+    void uncommittedContentScopeRestoresMemoryAndDatabase() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("scope-rollback.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            try (var scope = api.openContentScope("addon:temporary")) {
+                api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                        "temporary_category", "Temporary", "Must roll back"));
+                api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                        "temporary_item", "Temporary", "IRON_INGOT", List.of(), 0, 64,
+                        "temporary_category", null));
+            }
+            assertTrue(api.getCategory("temporary_category").isEmpty());
+            assertTrue(api.getItem("temporary_item").isEmpty());
+            assertTrue(store.loadCategories().isEmpty());
+            assertTrue(store.loadItems().isEmpty());
+        }
+    }
+
 }

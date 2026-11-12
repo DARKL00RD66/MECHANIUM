@@ -48,7 +48,7 @@
 - [ ] Validar cada implementação em Paper e Purpur
 
 ## Marco 4 — Addon SDK
-- [ ] Exemplo de addon Maven independente e compilável
+- [x] Exemplo de addon Maven independente e compilável (CI compila separadamente)
 - [x] API de eventos e registro de conteúdos
 - [x] Validação de descriptor, dependências e ciclo de vida
 - [ ] Ferramenta independente para validar o descriptor de um JAR

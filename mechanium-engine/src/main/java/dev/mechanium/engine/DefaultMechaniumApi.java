@@ -151,8 +151,12 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         RecipeDefinition recipe = recipes.get(normalize(id));
         if (recipe == null) return false;
         ItemDefinition result = items.get(recipe.resultItemId());
-        return result != null && canUseItem(player, result.id())
-                && (recipe.requiredTechnologyId() == null || canUseTechnology(player, recipe.requiredTechnologyId()));
+        if (result == null || !canUseItem(player, result.id())) return false;
+        if (recipe.requiredTechnologyId() != null && !canUseTechnology(player, recipe.requiredTechnologyId())) return false;
+        return recipe.ingredients().values().stream()
+                .filter(ingredient -> ingredient.startsWith("mechanium:"))
+                .map(ingredient -> ingredient.substring(10))
+                .allMatch(itemId -> canUseItem(player, itemId));
     }
     @Override public List<String> validateContent() {
         List<String> errors = new ArrayList<>();

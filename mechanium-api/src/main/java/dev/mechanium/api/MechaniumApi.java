@@ -1,12 +1,11 @@
 package dev.mechanium.api;
 
-import dev.mechanium.api.model.EraDefinition;
-import dev.mechanium.api.model.TechnologyDefinition;
-import dev.mechanium.api.model.UnlockResult;
+import dev.mechanium.api.model.*;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.bukkit.inventory.ItemStack;
 
 /** Public, versioned entry point for MECHANIUM and third-party addons. */
 public interface MechaniumApi {
@@ -26,4 +25,17 @@ public interface MechaniumApi {
     boolean canUseTechnology(UUID playerId, String technologyId);
     void registerModule(String moduleId);
     Set<String> getRegisteredModules();
+
+    boolean registerCategory(ContentCategory category);
+    Optional<ContentCategory> getCategory(String categoryId);
+    Collection<ContentCategory> getCategories();
+    boolean registerItem(ItemDefinition item);
+    Optional<ItemDefinition> getItem(String itemId);
+    Collection<ItemDefinition> getItems();
+    Optional<ItemStack> createItemStack(String itemId, int amount);
+    boolean canUseItem(UUID playerId, String itemId);
+    boolean registerRecipe(RecipeDefinition recipe);
+    Optional<RecipeDefinition> getRecipe(String recipeId);
+    Collection<RecipeDefinition> getRecipes();
+    boolean canCraft(UUID playerId, String recipeId);
 }

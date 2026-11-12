@@ -49,6 +49,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             moduleManager = new ModuleManager();
             moduleManager.enable(BuiltinModules.create(), getConfig(),
                     new MechaniumModuleContext(api, this, getDataFolder().toPath().resolve("modules"), getLogger()));
+            if (api.getRegisteredModules().contains("geology")) {
+                Bukkit.getPluginManager().registerEvents(new GeologicalSurveyListener(this, api), this);
+            }
 
             addonLoader = new MechaniumAddonLoader(api, getClass().getClassLoader(),
                     getDataFolder().toPath().resolve(getConfig().getString("addons.directory", "addons")), getLogger());

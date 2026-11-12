@@ -23,7 +23,9 @@ public interface MechaniumApi {
     Collection<TechnologyDefinition> getTechnologies();
     UnlockResult unlockTechnology(UUID playerId, String technologyId);
     boolean canUseTechnology(UUID playerId, String technologyId);
-    boolean hasUnlockedTechnology(UUID playerId, String technologyId);
+    default boolean hasUnlockedTechnology(UUID playerId, String technologyId) {
+        return canUseTechnology(playerId, technologyId);
+    }
     void registerModule(String moduleId);
     Set<String> getRegisteredModules();
 

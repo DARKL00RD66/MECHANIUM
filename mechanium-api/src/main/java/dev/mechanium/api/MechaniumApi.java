@@ -41,5 +41,8 @@ public interface MechaniumApi {
     Optional<RecipeDefinition> getRecipe(String recipeId);
     Collection<RecipeDefinition> getRecipes();
     boolean canCraft(UUID playerId, String recipeId);
+    default boolean registerMobDrop(MobDropDefinition drop) { return false; }
+    default Optional<MobDropDefinition> getMobDrop(String dropId) { return Optional.empty(); }
+    default Collection<MobDropDefinition> getMobDrops() { return java.util.List.of(); }
     java.util.List<String> validateContent();
 }

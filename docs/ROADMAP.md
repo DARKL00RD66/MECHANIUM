@@ -11,7 +11,7 @@
 - [x] Carregador de addons externos
 - [x] Bootstrap e configuração Bukkit
 - [x] Documentação e workflow de CI
-- [x] CI Java 21 aprovado no commit `0535006` (33 testes)
+- [x] CI Java 21 aprovado no commit `4c8013e` (36 testes)
 - [ ] Teste real em Paper 1.21.11
 - [ ] Teste real em Purpur 1.21.11
 

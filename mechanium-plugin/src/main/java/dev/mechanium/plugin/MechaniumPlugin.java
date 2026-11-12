@@ -55,6 +55,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             if (!contentErrors.isEmpty()) throw new IllegalStateException("Conteúdo MECHANIUM inválido: " + String.join("; ", contentErrors));
             recipeBridge = new MechaniumRecipeBridge(this, api);
             recipeBridge.registerAll();
+            Bukkit.getPluginManager().registerEvents(recipeBridge, this);
 
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);

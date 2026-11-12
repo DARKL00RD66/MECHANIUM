@@ -38,4 +38,5 @@ public interface MechaniumApi {
     Optional<RecipeDefinition> getRecipe(String recipeId);
     Collection<RecipeDefinition> getRecipes();
     boolean canCraft(UUID playerId, String recipeId);
+    java.util.List<String> validateContent();
 }

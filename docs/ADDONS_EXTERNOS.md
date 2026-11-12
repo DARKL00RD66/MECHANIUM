@@ -67,3 +67,12 @@ Coloque o JAR em `plugins/MECHANIUM/addons/` e reinicie. O carregador valida des
 - Documentar licenças e bibliotecas incluídas.
 
 Addons executam código Java no servidor. Instale apenas extensões de fontes confiáveis.
+
+
+## Dependências entre addons
+
+Quando um addon declara outro addon em `dependencies`, o carregador garante a ordem topológica e disponibiliza as classes e recursos dos addons declarados como dependências. Addons não declarados não são adicionados ao classpath do consumidor.
+
+A compatibilidade de API é verificada pelo campo `api-version`. O campo `version` identifica a versão do addon e deve seguir versionamento semântico.
+
+**Limite de segurança:** addons são código Java executado dentro do processo do servidor. O carregador não é uma sandbox e não consegue impedir que um addon malicioso acesse recursos do processo. Use somente JARs confiáveis e faça backup do servidor.

@@ -25,6 +25,7 @@ public final class MechaniumAddonLoader implements AutoCloseable {
     private final Path addonDirectory;
     private final Logger logger;
     private final List<LoadedAddon> loaded = new ArrayList<>();
+    private final Map<String, LoadedAddon> loadedById = new HashMap<>();
 
     public MechaniumAddonLoader(MechaniumApi api, ClassLoader parent, Path addonDirectory, Logger logger) {
         this.api = Objects.requireNonNull(api, "api");
@@ -95,7 +96,14 @@ public final class MechaniumAddonLoader implements AutoCloseable {
         URLClassLoader classLoader = null;
         MechaniumAddon instance = null;
         try {
-            classLoader = new URLClassLoader(new java.net.URL[]{candidate.jarPath().toUri().toURL()}, parent);
+            List<ClassLoader> dependencyLoaders = candidate.dependencies().stream()
+                    .map(loadedById::get)
+                    .filter(Objects::nonNull)
+                    .map(LoadedAddon::classLoader)
+                    .map(loader -> (ClassLoader) loader)
+                    .toList();
+            ClassLoader dependencyParent = new AddonDependencyClassLoader(parent, dependencyLoaders);
+            classLoader = new URLClassLoader(new java.net.URL[]{candidate.jarPath().toUri().toURL()}, dependencyParent);
             Class<?> entryClass = Class.forName(candidate.mainClass(), true, classLoader);
             Object object = entryClass.getDeclaredConstructor().newInstance();
             if (!(object instanceof MechaniumAddon addon)) {
@@ -108,7 +116,9 @@ public final class MechaniumAddonLoader implements AutoCloseable {
                     Logger.getLogger("MECHANIUM.Addon." + candidate.id()));
             instance = addon;
             addon.onEnable(context);
-            loaded.add(new LoadedAddon(candidate.id(), addon, classLoader));
+            LoadedAddon loadedAddon = new LoadedAddon(candidate.id(), addon, classLoader);
+            loaded.add(loadedAddon);
+            loadedById.put(candidate.id(), loadedAddon);
             logger.info("Addon externo carregado: " + candidate.id() + " v" + candidate.version());
             return true;
         } catch (Exception exception) {
@@ -143,6 +153,7 @@ public final class MechaniumAddonLoader implements AutoCloseable {
             }
         }
         loaded.clear();
+        loadedById.clear();
     }
 
     private record LoadedAddon(String id, MechaniumAddon instance, URLClassLoader classLoader) { }

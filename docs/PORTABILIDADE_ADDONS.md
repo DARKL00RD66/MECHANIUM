@@ -39,7 +39,7 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 ## Implementações parciais
 
 - **SFMobDrops (parcial / clean-room):** API pública `MobDropDefinition` aceita entidade Bukkit, item MECHANIUM, quantidade mínima/máxima, chance e tecnologia necessária. `MechaniumMobDropRegisterEvent` informa addons quando uma regra é registrada.
-- O listener preserva drops vanilla e acrescenta apenas os subprodutos personalizados cujo jogador responsável pelo abate atende à tecnologia exigida. Definições com chance e quantidades são registradas por módulos/addons durante o bootstrap; não são salvas como conteúdo arbitrário no SQLite.
+- O listener preserva drops vanilla e acrescenta apenas os subprodutos personalizados cujo jogador responsável pelo abate atende à tecnologia exigida. Definições com chance e quantidades são persistidas no SQLite (schema 3) e restauradas ao inicializar a API; o módulo/addon ainda deve registrar seu listener de gameplay a cada inicialização.
 - O módulo de agricultura registra gordura animal como subproduto de vacas, porcos e ovelhas após `crop_rotation`, além de receitas iniciais de composto, fertilizante e tochas de sebo.
 - Ainda não há configuração por bioma, Looting, dificuldade, multiplicadores administrativos ou painel de edição de tabelas.
 - **PrivateStorage (parcial):** o módulo `storage` registra `private_storage_crate` e uma receita condicionada a `warehouse_accounting`. O plugin protege o barril por UUID do proprietário, permite até 32 UUIDs confiáveis e bloqueia abertura/retirada por funil, quebra por terceiros, pistões e explosões. O acesso é gerenciado com `/mechanium storage trust|untrust|list`.

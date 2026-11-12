@@ -35,6 +35,8 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             contentStore.loadCategories().forEach(value -> categories.put(value.id(), value));
             contentStore.loadItems().forEach(value -> items.put(value.id(), value));
             contentStore.loadRecipes().forEach(value -> recipes.put(value.id(), value));
+            contentStore.loadMobDrops().forEach(value -> mobDrops.put(value.id(), value));
+            contentStore.loadMachines().forEach(value -> machines.put(value.id(), value));
         }
         categories.putIfAbsent("general", new ContentCategory("general", "Geral", "Conteúdo geral"));
     }
@@ -195,8 +197,10 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         if (value.maxAmount() > resultItem.maxStackSize()) throw new IllegalArgumentException(
                 "Mob drop maximum amount exceeds item max stack size for " + resultItem.id());
         if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
-        MobDropDefinition old = mobDrops.putIfAbsent(value.id(), value);
+        MobDropDefinition old = mobDrops.get(value.id());
         if (old != null) return old.equals(value);
+        persist(() -> contentStore.saveMobDrop(value));
+        mobDrops.put(value.id(), value);
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumMobDropRegisterEvent(value));
         return true;
     }
@@ -237,8 +241,10 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             }
         }
         validateTechnology(value.requiredTechnologyId());
-        MachineDefinition old = machines.putIfAbsent(value.id(), value);
+        MachineDefinition old = machines.get(value.id());
         if (old != null) return old.equals(value);
+        persist(() -> contentStore.saveMachine(value));
+        machines.put(value.id(), value);
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumMachineRegisterEvent(value));
         return true;
     }

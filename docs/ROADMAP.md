@@ -32,7 +32,8 @@
 - [ ] Máquinas com inventário, proprietário, energia e manutenção
 - [ ] Filas de produção com limites por tick
 - [ ] Redes de energia e fluidos
-- [ ] Armazéns, propriedade e logística
+- [x] Cofre privado inicial com proprietário, lista de acesso e proteções de bloco
+- [ ] Rede completa de armazéns, propriedade compartilhada e logística
 - [ ] Agricultura, geologia e processamento com gameplay funcional
 - [ ] Persistência e recuperação de máquinas após reinício
 

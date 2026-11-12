@@ -9,6 +9,7 @@
 - API pública para eras, tecnologias, progressão, módulos e addons.
 - Registro persistente de categorias, itens e receitas.
 - Criação de `ItemStack` com identificador PDC, lore, modelo customizado e limite de pilha configurável.
+- Validação de materiais de itens customizados sem exigir inicialização de servidor Bukkit; materiais de ar são rejeitados.
 - Receitas Bukkit nativas (shaped e shapeless), incluindo ingredientes MECHANIUM exatos.
 - Verificação central de tecnologia ao fabricar, usar, consumir e posicionar itens personalizados.
 - Estado separado de pesquisa desbloqueada e autorização de uso segundo a era.
@@ -23,7 +24,7 @@
 - Receitas criadas por addons após a inicialização são encaminhadas automaticamente ao registro de crafting; receitas do MECHANIUM são removidas no desligamento.
 - Primeiro sistema funcional do domínio PrivateStorage: barril privado com proprietário UUID persistente, até 32 usuários autorizados, comandos de confiança, proteção contra quebra não autorizada, funis, pistões e explosões.
 - API extensível de drops de criaturas: definições públicas com entidade, item de saída, intervalo de quantidade, chance e tecnologia exigida; listener acrescenta subprodutos sem remover drops vanilla.
-- Primeira máquina funcional: prensa mecânica em dispenser com inventário de entrada/saída, proprietário e progresso persistentes em PDC, processamento a cada segundo e autorização central por pesquisa/era.
+- Primeira máquina funcional: prensa mecânica em dispenser com inventário de entrada/saída, proprietário e progresso persistentes em PDC, processamento a cada segundo e autorização central por pesquisa/era. A API rejeita tipos de bloco que o runtime atual ainda não consegue processar.
 - **Prospecção geológica inicial:** módulo oficial `geology`, pesquisa `geological_surveying` e kit de prospecção que conta minérios em uma área de 9×9×9 ao redor do bloco selecionado. O scanner ignora chunks não carregados para não gerar terreno; há cooldown e testes unitários da agregação.
 - Empacotamento Maven em um JAR com módulos e dependências de runtime.
 
@@ -43,12 +44,12 @@
 ## Validação
 
 - Workflow: Java 21 / Maven `clean verify`.
-- [GitHub Actions — run 43323097264](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323097264): **BUILD SUCCESS** no commit `0535006c4b9a503e1bd015cbc0beeae1f14d91ae`.
-- Testes automatizados: **33 executados, 0 falhas, 0 erros** (13 API/modelos, 5 SQLite, 6 motor de progressão/conteúdo/máquinas/drops, 2 classloader de addons, 7 testes do plugin incluindo prospecção geológica).
+- [GitHub Actions — run 43323554006](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323554006): **BUILD SUCCESS** no commit `4c8013e2f79ff3d7ccfbcb8fe0d4f628fc706d39`.
+- Testes automatizados: **36 executados, 0 falhas, 0 erros** (16 API/modelos, 5 SQLite, 6 motor de progressão/conteúdo/máquinas/drops, 2 classloader de addons, 7 testes do plugin).
 - O projeto principal passou por `mvn clean verify`; a API foi instalada no repositório Maven local e o addon de exemplo compilou e empacotou.
 - O JAR sombreado foi gerado. O upload do artefato falhou por limite de armazenamento do GitHub Actions e está configurado como não bloqueante; não há download do JAR disponível neste run.
 - Ainda não realizado: inicialização em Paper/Purpur real, testes funcionais de gameplay, integração de addons externos reais e validação em servidores de produção.
 
 ## Classificação
 
-**Fundação em desenvolvimento; build e 33 testes automatizados aprovados no commit `0535006`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.
+**Fundação em desenvolvimento; build e 36 testes automatizados aprovados no commit `4c8013e`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.

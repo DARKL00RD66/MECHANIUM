@@ -5,6 +5,8 @@ import java.util.List;
 
 final class EnergyModule extends AbstractBuiltinModule {
     @Override public String id() { return "energy"; }
+    @Override public boolean optional() { return true; }
+    @Override public java.util.Set<String> dependencies() { return java.util.Set.of("industry"); }
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(
             new TechnologyDefinition("water_power", "Energia hidráulica", "medieval", 10, List.of()),

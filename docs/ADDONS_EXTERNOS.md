@@ -47,6 +47,9 @@ Addons podem registrar listeners Bukkit para acompanhar mudanças do motor:
 - `MechaniumTechnologyUnlockedEvent`: jogador, definição da tecnologia e saldo após o desbloqueio.
 - `MechaniumCategoryRegisterEvent`, `MechaniumItemRegisterEvent` e `MechaniumRecipeRegisterEvent`: novos conteúdos registrados.
 - `MechaniumMobDropRegisterEvent`: nova regra de drop de criatura registrada.
+- `MechaniumMachineRegisterEvent`: nova definição de máquina industrial registrada.
+
+Addons também podem registrar máquinas com `api.registerMachine(new MachineDefinition(...))`. O modelo atual define item de máquina, bloco-base, item e quantidade de entrada, item e quantidade de saída, tempo em ticks e tecnologia exigida. O runtime inicial implementa máquinas hospedadas em `DISPENSER`, com primeiro espaço como entrada e último como saída; o registro de outras classes de máquinas aguarda evolução do runtime. O progresso e UUID do proprietário ficam em PDC do bloco e são preservados por reinício/chunk unload. Não há sistema de energia nem rede de máquinas nesta etapa.
 
 Addons podem registrar regras de drops com `api.registerMobDrop(new MobDropDefinition(...))`. A definição informa o tipo de entidade Bukkit, ID do item MECHANIUM, quantidade mínima/máxima, chance entre 0 e 1 e tecnologia opcional. A regra e o próprio item são verificados contra a progressão do jogador antes do drop. Regras são declaradas pelos módulos/addons durante o bootstrap e não são persistidas como configuração editável no SQLite.
 

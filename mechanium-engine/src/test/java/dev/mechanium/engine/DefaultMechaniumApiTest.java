@@ -99,6 +99,38 @@ class DefaultMechaniumApiTest {
     }
 
     @Test
+    void registersMachinesOnlyWhenTheirItemsAndResearchAreValid() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("machines.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("renaissance", "Renascimento", 2));
+            api.registerTechnology(new TechnologyDefinition("basic_mechanics", "Mecânica básica", "renaissance", 10, List.of()));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory("industry", "Indústria", "Industrial"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("mechanical_press", "Prensa", "DISPENSER",
+                    List.of(), 0, 1, "industry", "basic_mechanics"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("mechanical_parts", "Peças", "IRON_INGOT",
+                    List.of(), 0, 64, "industry", "basic_mechanics"));
+
+            var machine = new dev.mechanium.api.model.MachineDefinition(
+                    "mechanical_press", "Prensa", "mechanical_press", "DISPENSER",
+                    "IRON_INGOT", 2, "mechanical_parts", 1, 100, "basic_mechanics");
+            assertTrue(api.registerMachine(machine));
+            assertTrue(api.registerMachine(machine), "Identical machine registration must be idempotent");
+            assertEquals(machine, api.getMachine("MECHANICAL_PRESS").orElseThrow());
+            assertEquals(List.of(machine), api.getMachines());
+            assertTrue(api.validateContent().isEmpty());
+
+            assertThrows(IllegalArgumentException.class, () -> api.registerMachine(
+                    new dev.mechanium.api.model.MachineDefinition(
+                            "missing_output", "Invalid", "mechanical_press", "DISPENSER",
+                            "IRON_INGOT", 2, "unknown_output", 1, 100, "basic_mechanics")));
+            assertThrows(IllegalArgumentException.class, () -> api.registerMachine(
+                    new dev.mechanium.api.model.MachineDefinition(
+                            "missing_input", "Invalid", "mechanical_press", "DISPENSER",
+                            "mechanium:unknown_input", 1, "mechanical_parts", 1, 100, "basic_mechanics")));
+        }
+    }
+
+    @Test
     void refusesTechnologyWithUnknownEra() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(directory.resolve("unknown-era.db"), Logger.getLogger("test"))) {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);

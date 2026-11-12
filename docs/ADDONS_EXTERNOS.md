@@ -101,6 +101,24 @@ Coloque o JAR em `plugins/MECHANIUM/addons/` e reinicie. O carregador valida des
 
 Addons executam código Java no servidor. O carregador não é uma sandbox e não consegue impedir que um addon malicioso acesse recursos do processo. Instale somente JARs de fontes confiáveis e faça backup do servidor.
 
+
+## Propriedade e ciclo de vida do conteúdo
+
+Durante `onEnable`, MECHANIUM abre automaticamente um escopo transacional para o addon. Os registros de categorias, itens, receitas, máquinas e drops feitos nesse callback ficam associados a `addon:<id>`. O escopo é confirmado somente quando `onEnable` termina com sucesso; em caso de falha, as gravações SQLite e as definições em memória são revertidas.
+
+A cada inicialização, o addon deve registrar novamente todo o conteúdo que deseja manter. Se um addon carregar sem registrar uma definição que era sua, essa definição antiga é removida durante a reconciliação. Se o addon deixar de carregar, todas as definições com ownership dele são removidas. Um ID de conteúdo tem um único proprietário: não reutilize IDs pertencentes a módulos oficiais ou a outros addons. Declare sempre as dependências no descriptor.
+
+Para registrar conteúdo dinamicamente depois do `onEnable`, abra explicitamente um escopo:
+
+```java
+try (var scope = context.api().openContentScope("addon:" + "exemplo-industria")) {
+    // Registrar ou atualizar o conjunto de conteúdo pertencente ao addon.
+    scope.commit();
+}
+```
+
+Cada escopo representa o conjunto completo de conteúdo daquele proprietário; portanto, registre nele todos os IDs que devem continuar ativos, não apenas um item isolado. O fechamento sem `commit()` faz rollback. A migração SQLite v4 adota os IDs conhecidos dos módulos oficiais já existentes. Conteúdo legado de addons que ainda não possui ownership não é apagado automaticamente; ele precisa ser registrado novamente pelo addon para passar a ser gerenciado.
+
 ## Dependências entre addons
 
 Quando um addon declara outro addon em `dependencies`, o carregador garante a ordem topológica e disponibiliza classes e recursos dos addons declarados como dependências. Addons não declarados não são adicionados ao classpath do consumidor.

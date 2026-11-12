@@ -11,8 +11,7 @@
 - [x] Carregador de addons externos
 - [x] Bootstrap e configuração Bukkit
 - [x] Documentação e workflow de CI
-- [x] Execução Maven verify aprovada em revisão anterior
-- [x] CI aprovado para a revisão `7c5a599` (31 testes)
+- [x] CI Java 21 aprovado no commit `0535006` (33 testes)
 - [ ] Teste real em Paper 1.21.11
 - [ ] Teste real em Purpur 1.21.11
 
@@ -36,7 +35,9 @@
 - [x] Cofre privado inicial com proprietário, lista de acesso e proteções de bloco
 - [ ] Rede completa de armazéns, propriedade compartilhada e logística
 - [x] Drops agrícolas iniciais de subprodutos animais condicionados à pesquisa
-- [ ] Agricultura completa, geologia e processamento com gameplay funcional
+- [x] Ferramenta inicial de prospecção geológica com pesquisa, scanner local e testes
+- [ ] Depósitos minerais regionais, veios, amostras e integração com mineração
+- [ ] Agricultura completa e processamento com gameplay funcional
 - [ ] Persistência e recuperação de máquinas após reinício
 
 ## Marco 3 — Portabilidade

@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /** Progression and content registry. All content access is validated against research and era state. */
 public final class DefaultMechaniumApi implements MechaniumApi {
+    private static final Set<String> SUPPORTED_MACHINE_BLOCKS = Set.of("DISPENSER");
     private final MechaniumDataStore dataStore;
     private final MechaniumContentStore contentStore;
     private final Map<String, EraDefinition> eras = new ConcurrentHashMap<>();
@@ -210,6 +211,10 @@ public final class DefaultMechaniumApi implements MechaniumApi {
 
     @Override public synchronized boolean registerMachine(MachineDefinition value) {
         Objects.requireNonNull(value, "machine");
+        if (!SUPPORTED_MACHINE_BLOCKS.contains(value.blockMaterial())) {
+            throw new IllegalArgumentException("Unsupported machine block material: " + value.blockMaterial()
+                    + ". The current runtime supports DISPENSER only.");
+        }
         ItemDefinition machineItem = items.get(value.machineItemId());
         if (machineItem == null) throw new IllegalArgumentException(
                 "Machine references unregistered machine item: " + value.machineItemId());
@@ -264,6 +269,9 @@ public final class DefaultMechaniumApi implements MechaniumApi {
                 errors.add("Item " + item.id() + " references missing technology " + item.requiredTechnologyId());
         }
         for (MachineDefinition machine : machines.values()) {
+            if (!SUPPORTED_MACHINE_BLOCKS.contains(machine.blockMaterial())) {
+                errors.add("Machine " + machine.id() + " uses unsupported runtime block " + machine.blockMaterial());
+            }
             ItemDefinition machineItem = items.get(machine.machineItemId());
             if (machineItem == null) errors.add("Machine " + machine.id() + " references missing machine item " + machine.machineItemId());
             else if (!machineItem.material().equals(machine.blockMaterial()) || machineItem.maxStackSize() != 1)

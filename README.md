@@ -56,7 +56,7 @@ A fundação ainda está em desenvolvimento e não substitui todas as funcionali
 
 ## CI e estado
 
-- [Build Java 21 / Maven verify](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43226262717) — **BUILD SUCCESS**, 27 testes aprovados na revisão do commit `da7b06e`.
+- [Build Java 21 / Maven verify](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43227659543) — **BUILD SUCCESS**, 31 testes aprovados na revisão do commit `14bdecf`.
 - O JAR é empacotado pelo Maven Shade, mas o upload de artefatos do GitHub Actions não está disponível enquanto a quota de armazenamento permanecer esgotada.
 - A base ainda não foi validada em servidor real e não é uma versão de produção.
 

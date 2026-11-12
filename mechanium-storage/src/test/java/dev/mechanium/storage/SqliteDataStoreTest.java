@@ -52,6 +52,16 @@ class SqliteDataStoreTest {
         }
     }
     @Test
+    void rejectsResearchPointBalanceOverflow() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("overflow.db"), Logger.getLogger("test"))) {
+            UUID player = UUID.randomUUID();
+            store.addResearchPoints(player, Long.MAX_VALUE);
+            assertThrows(IllegalArgumentException.class, () -> store.addResearchPoints(player, 1));
+            assertEquals(Long.MAX_VALUE, store.getResearchPoints(player));
+        }
+    }
+
+    @Test
     void contentDefinitionsPersistAcrossStoreInstances() throws Exception {
         Path database = directory.resolve("content.db");
         try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {

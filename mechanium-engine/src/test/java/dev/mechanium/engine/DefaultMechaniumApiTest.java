@@ -109,6 +109,8 @@ class DefaultMechaniumApiTest {
                     List.of(), 0, 1, "industry", "basic_mechanics"));
             api.registerItem(new dev.mechanium.api.model.ItemDefinition("mechanical_parts", "Peças", "IRON_INGOT",
                     List.of(), 0, 64, "industry", "basic_mechanics"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("chest_machine", "Máquina de baú", "CHEST",
+                    List.of(), 0, 1, "industry", "basic_mechanics"));
 
             var machine = new dev.mechanium.api.model.MachineDefinition(
                     "mechanical_press", "Prensa", "mechanical_press", "DISPENSER",
@@ -127,6 +129,11 @@ class DefaultMechaniumApiTest {
                     new dev.mechanium.api.model.MachineDefinition(
                             "missing_input", "Invalid", "mechanical_press", "DISPENSER",
                             "mechanium:unknown_input", 1, "mechanical_parts", 1, 100, "basic_mechanics")));
+            assertThrows(IllegalArgumentException.class, () -> api.registerMachine(
+                    new dev.mechanium.api.model.MachineDefinition(
+                            "unsupported_chest_machine", "Baú industrial", "chest_machine", "CHEST",
+                            "IRON_INGOT", 1, "mechanical_parts", 1, 100, "basic_mechanics")),
+                    "The API must reject machine block types the current runtime cannot process");
         }
     }
 

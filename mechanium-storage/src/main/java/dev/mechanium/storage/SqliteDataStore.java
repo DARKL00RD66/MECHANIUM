@@ -72,7 +72,7 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
             statement.execute("CREATE TABLE IF NOT EXISTS mechanium_recipes(id TEXT PRIMARY KEY,type TEXT NOT NULL,result_item_id TEXT NOT NULL,result_amount INTEGER NOT NULL,shape TEXT NOT NULL,ingredients TEXT NOT NULL,required_technology_id TEXT)");
             statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (2)");
         }
-        logger.info("MECHANIUM SQLite schema v1 pronta.");
+        logger.info("MECHANIUM SQLite schema até a versão 2 pronta.");
     }
 
     private void ensurePlayer(UUID playerId) throws SQLException {

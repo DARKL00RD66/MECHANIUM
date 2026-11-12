@@ -21,9 +21,11 @@
 - [x] Itens com PDC, lore, modelo customizado e limite de pilha
 - [x] Receitas shaped/shapeless e ingredientes personalizados
 - [x] Integração do crafting com o motor central de progressão
+- [x] Registro dinâmico de receitas novas e limpeza das receitas no desligamento
 - [x] Eventos públicos de registro e progressão para addons
 - [x] Testes de persistência e validação do formato de receitas
-- [ ] Livro/guia e interfaces de pesquisa
+- [x] Menu paginado de pesquisas com desbloqueio pela API central
+- [ ] Livro/guia de tecnologias e interfaces visuais complementares
 - [ ] Catálogo pesquisável de itens e tecnologias dentro do jogo
 
 ## Marco 2 — Sistemas econômicos e industriais

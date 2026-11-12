@@ -215,7 +215,14 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     }
 
     private void shutdownServices() {
-        recipeBridge = null;
+        if (recipeBridge != null) {
+            try {
+                recipeBridge.unregisterAll();
+            } catch (RuntimeException exception) {
+                getLogger().warning("Falha ao remover receitas MECHANIUM: " + exception.getMessage());
+            }
+            recipeBridge = null;
+        }
         if (addonLoader != null) {
             addonLoader.close();
             addonLoader = null;

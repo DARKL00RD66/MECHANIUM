@@ -4,14 +4,17 @@
 - [x] Repositório próprio e branch de fundação
 - [x] Maven multi-módulo e alvo Java 21
 - [x] API pública versionada
-- [x] Persistência SQLite
+- [x] Persistência SQLite com ownership transacional de conteúdo (schema v4)
 - [x] Motor inicial de eras e pesquisas
 - [x] Módulos oficiais e módulos opcionais
 - [x] Dependências declaradas entre módulos internos
+- [x] Ordenação topológica automática, rejeição de ciclos e rollback de módulos parcialmente iniciados
 - [x] Carregador de addons externos
+- [x] Isolamento de JARs inválidos/falhas de linkage e reconciliação de conteúdo por addon
 - [x] Bootstrap e configuração Bukkit
 - [x] Documentação e workflow de CI
-- [x] CI Java 21 aprovado no commit `7028e79` (37 testes)
+- [x] CI Java 21 aprovado no commit `3616923` (47 testes)
+- [x] Testes de ownership, rollback, conflitos e migração de banco legado v3→v4
 - [ ] Teste real em Paper 1.21.11
 - [ ] Teste real em Purpur 1.21.11
 
@@ -24,6 +27,7 @@
 - [x] Registro dinâmico de receitas novas e limpeza das receitas no desligamento
 - [x] Eventos públicos de registro e progressão para addons
 - [x] Testes de persistência e validação do formato de receitas
+- [x] Reconciliação de conteúdo persistido por proprietário e remoção de conteúdo de módulos/addons inativos
 - [x] Menu paginado de pesquisas com desbloqueio pela API central
 - [ ] Livro/guia de tecnologias e interfaces visuais complementares
 - [ ] Catálogo pesquisável de itens e tecnologias dentro do jogo
@@ -53,8 +57,9 @@
 - [x] Exemplo de addon Maven independente e compilável (CI compila separadamente)
 - [x] API de eventos e registro de conteúdos
 - [x] Validação de descriptor, dependências e ciclo de vida
+- [x] Escopos transacionais automáticos durante onEnable e rollback em falha
 - [ ] Ferramenta independente para validar o descriptor de um JAR
-- [ ] Testes de dependências, ciclos, isolamento de classloader e falha de carregamento
+- [ ] Testes de integração abrangentes de addons reais e falhas de carregamento em servidor
 - [ ] Documentação de migração entre versões da API
 - [ ] Publicação da API em registry Maven
 

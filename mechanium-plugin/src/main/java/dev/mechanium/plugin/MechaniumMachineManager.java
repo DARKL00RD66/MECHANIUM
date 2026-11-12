@@ -279,11 +279,12 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
         if (!api.canUseTechnology(owner, definition.requiredTechnologyId())
-                || !api.canUseItem(owner, definition.machineItemId())) return;
+                || !api.canUseItem(owner, definition.machineItemId())
+                || !api.canUseItem(owner, definition.outputItemId())) return;
 
         Inventory inventory = dispenser.getInventory();
         ItemStack input = inventory.getItem(INPUT_SLOT);
-        if (!matchesInput(input, definition.inputId())) {
+        if (!matchesInput(input, definition.inputId()) || input.getAmount() < definition.inputAmount()) {
             setProgress(dispenser, 0);
             return;
         }

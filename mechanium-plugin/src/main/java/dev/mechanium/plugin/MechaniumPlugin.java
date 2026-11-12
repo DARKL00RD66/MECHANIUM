@@ -59,6 +59,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
+            Bukkit.getPluginManager().registerEvents(new PrivateStorageListener(this, api), this);
             researchMenu = new MechaniumResearchMenu(this, api);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
             PluginCommand command = Objects.requireNonNull(getCommand("mechanium"), "mechanium command missing");

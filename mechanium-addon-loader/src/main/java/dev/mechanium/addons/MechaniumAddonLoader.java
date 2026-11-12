@@ -84,8 +84,8 @@ public final class MechaniumAddonLoader implements AutoCloseable {
                     if (candidates.putIfAbsent(candidate.id(), candidate) != null) {
                         logger.warning("ID de addon duplicado; mantendo o primeiro: " + candidate.id());
                     }
-                } catch (IllegalArgumentException exception) {
-                    logger.warning("Metadados inválidos em " + path.getFileName() + ": " + exception.getMessage());
+                } catch (IOException | IllegalArgumentException exception) {
+                    logger.warning("Addon inválido em " + path.getFileName() + ": " + exception.getMessage());
                 }
             }
         }
@@ -121,7 +121,7 @@ public final class MechaniumAddonLoader implements AutoCloseable {
             loadedById.put(candidate.id(), loadedAddon);
             logger.info("Addon externo carregado: " + candidate.id() + " v" + candidate.version());
             return true;
-        } catch (Exception exception) {
+        } catch (Exception | LinkageError exception) {
             if (instance != null) {
                 try { instance.onDisable(); } catch (RuntimeException ignored) { }
             }

@@ -7,10 +7,11 @@
 - Persistência SQLite e motor inicial de eras/pesquisas.
 - Registro persistente de categorias, itens e receitas.
 - Eventos públicos de conteúdo e progressão.
-- Módulos industriais, agricultura, armazenamento, ambiente e energia.
+- Módulos industriais, agricultura, geologia, armazenamento, ambiente e energia.
 - Primeira prensa mecânica funcional e drops agrícolas condicionados a pesquisa.
+- Ferramenta de prospecção geológica com scanner local e cooldown.
 - Armazenamento privado com permissões por UUID.
 - Carregador de addons externos com dependências e ciclo de vida.
 - Exemplo de addon Maven.
 - Bootstrap Bukkit, menu de pesquisas, comandos básicos e workflow de build.
-- CI Java 21 aprovado no commit `6104cae`: 31 testes automatizados sem falhas.
+- CI Java 21 aprovado no commit `0535006`: 33 testes automatizados sem falhas.

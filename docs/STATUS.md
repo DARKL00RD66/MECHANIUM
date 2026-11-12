@@ -48,12 +48,12 @@
 ## Validação
 
 - Workflow: Java 21 / Maven `clean verify`.
-- [GitHub Actions — run 43326632777](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43326632777): **BUILD SUCCESS** no commit `7a791bb9eadb7d0ca72e7049e6b52c369bf59821`.
-- Testes automatizados: **46 executados, 0 falhas, 0 erros** (16 API/modelos, 9 SQLite, 8 motor de progressão/ownership, 4 módulos, 2 classloaders de addons, 7 testes do plugin).
+- [GitHub Actions — run 43327115991](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43327115991): **BUILD SUCCESS** no commit `36169239279c0a7a5b5fef05cd4a9190ed08175d`.
+- Testes automatizados: **47 executados, 0 falhas, 0 erros** (16 API/modelos, 10 SQLite, 8 motor de progressão/ownership, 4 módulos, 2 classloaders de addons, 7 testes do plugin).
 - O workflow executou `mvn clean verify`, instalou a API no repositório Maven local e compilou/empacotou o addon de exemplo. As três etapas Maven terminaram com `BUILD SUCCESS`.
 - O endpoint de artefatos deste run não retornou um JAR disponível para download; portanto, não há link de binário confirmado.
 - Ainda não realizado: inicialização em Paper/Purpur real, testes funcionais de gameplay, integração de addons externos reais e validação em servidores de produção.
 
 ## Classificação
 
-**Fundação em desenvolvimento; build e 46 testes automatizados aprovados no commit `7a791bb`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.
+**Fundação em desenvolvimento; build e 47 testes automatizados aprovados no commit `3616923`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.

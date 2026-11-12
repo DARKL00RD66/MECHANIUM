@@ -21,4 +21,5 @@
 - Módulos ordenados automaticamente por dependências; ciclos, referências desconhecidas e IDs duplicados são rejeitados.
 - Falhas de leitura/linkage de JARs de addons são isoladas.
 - Drops de inventários de armazéns e máquinas passam a ocorrer após confirmação da quebra, evitando duplicação quando outro plugin cancela o evento.
-- CI Java 21 aprovado no run `43326632777`: 46 testes automatizados sem falhas ou erros.
+- CI Java 21 aprovado no run `43327115991`: 47 testes automatizados sem falhas ou erros.
+- Migração SQLite v3→v4 limitada a uma única passagem e adoção de ownership apenas para definições legadas existentes.

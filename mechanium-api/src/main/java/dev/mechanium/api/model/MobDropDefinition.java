@@ -2,6 +2,7 @@ package dev.mechanium.api.model;
 
 import java.util.Locale;
 import java.util.Objects;
+import org.bukkit.entity.EntityType;
 
 /** A progression-aware mob drop rule registered by a built-in module or addon. */
 public record MobDropDefinition(String id, String entityType, String resultItemId,
@@ -12,6 +13,11 @@ public record MobDropDefinition(String id, String entityType, String resultItemI
         entityType = Objects.requireNonNull(entityType, "entityType").trim().toUpperCase(Locale.ROOT);
         if (!entityType.matches("[A-Z][A-Z0-9_]{1,63}")) {
             throw new IllegalArgumentException("Invalid entityType: " + entityType);
+        }
+        try {
+            EntityType.valueOf(entityType);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Unknown Bukkit entity type: " + entityType, exception);
         }
         resultItemId = normalize(resultItemId, "resultItemId");
         if (minAmount < 1 || maxAmount < minAmount || maxAmount > 99) {

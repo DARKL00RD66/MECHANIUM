@@ -26,25 +26,33 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 /**
- * Owner-protected barrel storage. Ownership is stored on the placed block entity,
- * not in memory, so it survives restarts and chunk unloads.
+ * Owner-protected barrel storage. Ownership and trusted users are stored on the block entity,
+ * so access rules survive restarts and chunk unloads.
  */
 final class PrivateStorageListener implements Listener {
     private static final String STORAGE_ITEM_ID = "private_storage_crate";
+    private static final int MAX_TRUSTED_PLAYERS = 32;
 
     private final JavaPlugin plugin;
     private final MechaniumApi api;
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
+    private final NamespacedKey trustedKey;
 
     PrivateStorageListener(JavaPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
         this.api = api;
         this.itemIdKey = new NamespacedKey("mechanium", "item_id");
         this.ownerKey = new NamespacedKey(plugin, "private_storage_owner");
+        this.trustedKey = new NamespacedKey(plugin, "private_storage_trusted");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -60,12 +68,13 @@ final class PrivateStorageListener implements Listener {
 
         tile.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,
                 event.getPlayer().getUniqueId().toString());
+        tile.getPersistentDataContainer().set(trustedKey, PersistentDataType.STRING, "");
         if (!tile.update(true, false)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage(ChatColor.RED + "Não foi possível gravar o proprietário do armazém.");
             return;
         }
-        event.getPlayer().sendMessage(ChatColor.GREEN + "Armazém privado instalado. Apenas você e administradores podem acessá-lo.");
+        event.getPlayer().sendMessage(ChatColor.GREEN + "Armazém privado instalado. Apenas você e jogadores autorizados podem acessá-lo.");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -73,7 +82,7 @@ final class PrivateStorageListener implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
         Optional<String> owner = ownerOf(event.getClickedBlock());
         if (owner.isEmpty()) return;
-        if (canAccess(event.getPlayer(), owner.get())) return;
+        if (canAccess(event.getPlayer(), event.getClickedBlock(), owner.get())) return;
 
         event.setCancelled(true);
         event.getPlayer().sendMessage(ChatColor.RED + "Este armazém pertence a outro jogador.");
@@ -85,9 +94,9 @@ final class PrivateStorageListener implements Listener {
         if (owner.isEmpty()) return;
 
         Player player = event.getPlayer();
-        if (!canAccess(player, owner.get())) {
+        if (!canManage(player, owner.get())) {
             event.setCancelled(true);
-            player.sendMessage(ChatColor.RED + "Você não pode destruir o armazém de outro jogador.");
+            player.sendMessage(ChatColor.RED + "Somente o proprietário ou um administrador pode destruir este armazém.");
             return;
         }
 
@@ -135,6 +144,41 @@ final class PrivateStorageListener implements Listener {
         }
     }
 
+    boolean canManageStorage(Player player, Block block) {
+        Optional<String> owner = ownerOf(block);
+        return owner.isPresent() && canManage(player, owner.get());
+    }
+
+    boolean changeTrustedPlayer(Player actor, Block block, UUID targetId, boolean trust) {
+        if (!canManageStorage(actor, block) || targetId == null) return false;
+        BlockState state = block.getState();
+        if (!(state instanceof TileState tile)) return false;
+
+        Set<String> trusted = trustedIds(tile);
+        String target = targetId.toString();
+        boolean changed = trust ? trusted.add(target) : trusted.remove(target);
+        if (!changed || trusted.size() > MAX_TRUSTED_PLAYERS) return false;
+
+        tile.getPersistentDataContainer().set(trustedKey, PersistentDataType.STRING,
+                String.join(",", trusted));
+        return tile.update(true, false);
+    }
+
+    List<UUID> trustedPlayers(Player actor, Block block) {
+        if (!canManageStorage(actor, block)) return List.of();
+        BlockState state = block.getState();
+        if (!(state instanceof TileState tile)) return List.of();
+        List<UUID> result = new ArrayList<>();
+        for (String raw : trustedIds(tile)) {
+            try {
+                result.add(UUID.fromString(raw));
+            } catch (IllegalArgumentException ignored) {
+                plugin.getLogger().warning("UUID inválido na lista de acesso de um armazém privado.");
+            }
+        }
+        return List.copyOf(result);
+    }
+
     private boolean isStorageItem(ItemStack item) {
         if (item == null || !item.hasItemMeta()) return false;
         String id = item.getItemMeta().getPersistentDataContainer()
@@ -158,7 +202,22 @@ final class PrivateStorageListener implements Listener {
         return Optional.ofNullable(tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING));
     }
 
-    private boolean canAccess(Player player, String owner) {
+    private Set<String> trustedIds(TileState tile) {
+        String raw = tile.getPersistentDataContainer().get(trustedKey, PersistentDataType.STRING);
+        Set<String> trusted = new LinkedHashSet<>();
+        if (raw == null || raw.isBlank()) return trusted;
+        for (String value : raw.split(",")) {
+            if (!value.isBlank()) trusted.add(value.trim());
+        }
+        return trusted;
+    }
+
+    private boolean canAccess(Player player, Block block, String owner) {
+        return canManage(player, owner) || trustedIds((TileState) block.getState())
+                .contains(player.getUniqueId().toString());
+    }
+
+    private boolean canManage(Player player, String owner) {
         return player.getUniqueId().toString().equals(owner) || player.hasPermission("mechanium.admin");
     }
 }

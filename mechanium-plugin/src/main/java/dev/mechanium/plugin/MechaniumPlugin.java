@@ -50,6 +50,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     getDataFolder().toPath().resolve(getConfig().getString("addons.directory", "addons")), getLogger());
             addonLoader.loadAll(new MechaniumAddonContext(api, this,
                     getDataFolder().toPath().resolve("addons"), getLogger()));
+            List<String> contentErrors = api.validateContent();
+            if (!contentErrors.isEmpty()) throw new IllegalStateException("Conteúdo MECHANIUM inválido: " + String.join("; ", contentErrors));
             recipeBridge = new MechaniumRecipeBridge(this, api);
             recipeBridge.registerAll();
 

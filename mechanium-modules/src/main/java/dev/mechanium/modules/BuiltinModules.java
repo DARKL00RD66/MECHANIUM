@@ -7,7 +7,7 @@ import java.util.List;
 public final class BuiltinModules {
     private BuiltinModules() { }
     public static List<MechaniumModule> create() {
-        return List.of(new IndustryModule(), new AgricultureModule(), new EnergyModule(),
+        return List.of(new IndustryModule(), new GeologyModule(), new AgricultureModule(), new EnergyModule(),
                 new StorageModule(), new EnvironmentModule(),
                 new OptionalFantasyModule(), new OptionalFuturisticModule());
     }

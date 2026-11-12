@@ -27,7 +27,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Owner-protected barrel storage. Ownership is stored on the placed block entity,
@@ -72,7 +71,7 @@ final class PrivateStorageListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
-        Optional<UUID> owner = ownerOf(event.getClickedBlock());
+        Optional<String> owner = ownerOf(event.getClickedBlock());
         if (owner.isEmpty()) return;
         if (canAccess(event.getPlayer(), owner.get())) return;
 
@@ -82,7 +81,7 @@ final class PrivateStorageListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
-        Optional<UUID> owner = ownerOf(event.getBlock());
+        Optional<String> owner = ownerOf(event.getBlock());
         if (owner.isEmpty()) return;
 
         Player player = event.getPlayer();
@@ -151,22 +150,15 @@ final class PrivateStorageListener implements Listener {
         return location != null && isPrivateStorage(location.getBlock());
     }
 
-    private Optional<UUID> ownerOf(Block block) {
+    private Optional<String> ownerOf(Block block) {
         if (block == null || block.getType() != Material.BARREL) return Optional.empty();
         BlockState state = block.getState();
         if (!(state instanceof TileState tile)) return Optional.empty();
-        String raw = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
-        if (raw == null) return Optional.empty();
-        try {
-            return Optional.of(UUID.fromString(raw));
-        } catch (IllegalArgumentException exception) {
-            plugin.getLogger().warning("Armazém privado possui proprietário UUID inválido em "
-                    + block.getWorld().getName() + " " + block.getX() + " " + block.getY() + " " + block.getZ());
-            return Optional.empty();
-        }
+        // A malformed owner value must remain protected; it must never turn into an unclaimed barrel.
+        return Optional.ofNullable(tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING));
     }
 
-    private boolean canAccess(Player player, UUID owner) {
-        return player.getUniqueId().equals(owner) || player.hasPermission("mechanium.admin");
+    private boolean canAccess(Player player, String owner) {
+        return player.getUniqueId().toString().equals(owner) || player.hasPermission("mechanium.admin");
     }
 }

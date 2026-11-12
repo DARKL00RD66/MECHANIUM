@@ -2,6 +2,7 @@ package dev.mechanium.addons;
 
 import dev.mechanium.api.MechaniumAddon;
 import dev.mechanium.api.MechaniumAddonContext;
+import dev.mechanium.api.MechaniumContentRegistrationScope;
 import dev.mechanium.api.MechaniumApi;
 
 import java.io.IOException;
@@ -115,7 +116,10 @@ public final class MechaniumAddonLoader implements AutoCloseable {
                     baseContext.api(), baseContext.hostPlugin(), dataDirectory,
                     Logger.getLogger("MECHANIUM.Addon." + candidate.id()));
             instance = addon;
-            addon.onEnable(context);
+            try (MechaniumContentRegistrationScope scope = api.openContentScope("addon:" + candidate.id())) {
+                addon.onEnable(context);
+                scope.commit();
+            }
             LoadedAddon loadedAddon = new LoadedAddon(candidate.id(), addon, classLoader);
             loaded.add(loadedAddon);
             loadedById.put(candidate.id(), loadedAddon);

@@ -84,7 +84,7 @@ class DefaultMechaniumApiTest {
             var drop = new dev.mechanium.api.model.MobDropDefinition(
                     "cow_animal_fat", "COW", "animal_fat", 1, 2, 0.35, "crop_rotation");
             assertTrue(api.registerMobDrop(drop));
-            assertFalse(api.registerMobDrop(drop) == false);
+            assertTrue(api.registerMobDrop(drop), "Identical registration must be idempotent");
             assertEquals(drop, api.getMobDrop("COW_ANIMAL_FAT").orElseThrow());
             assertEquals(List.of(drop), api.getMobDrops());
             assertTrue(api.validateContent().isEmpty());

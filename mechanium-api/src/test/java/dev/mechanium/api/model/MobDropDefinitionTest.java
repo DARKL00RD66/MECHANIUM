@@ -39,6 +39,8 @@ class MobDropDefinitionTest {
         assertThrows(IllegalArgumentException.class, () -> new MobDropDefinition(
                 "bad_entity", "minecraft:cow", "animal_fat", 1, 1, 0.5, null));
         assertThrows(IllegalArgumentException.class, () -> new MobDropDefinition(
+                "unknown_entity", "NOT_A_REAL_MOB", "animal_fat", 1, 1, 0.5, null));
+        assertThrows(IllegalArgumentException.class, () -> new MobDropDefinition(
                 "bad id", "COW", "animal_fat", 1, 1, 0.5, null));
     }
 }

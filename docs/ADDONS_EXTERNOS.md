@@ -28,15 +28,28 @@ public final class IndustriaAddon implements MechaniumAddon {
     @Override
     public void onEnable(MechaniumAddonContext context) {
         context.logger().info("Addon conectado ao MECHANIUM");
-        // Registrar conteúdos e listeners usando a API pública.
+        // Registrar conteúdos, tecnologias e listeners usando a API pública.
     }
 
     @Override
     public void onDisable() {
-        // Cancelar tarefas, remover listeners e fechar recursos.
+        // Cancelar tarefas e fechar recursos criados pelo addon.
     }
 }
 ```
+
+## Eventos públicos de progressão
+
+Addons podem registrar listeners Bukkit para acompanhar mudanças do motor:
+
+- `MechaniumPlayerEraChangeEvent`: jogador, era anterior e nova era.
+- `MechaniumResearchPointsChangeEvent`: saldo científico anterior e novo.
+- `MechaniumTechnologyUnlockedEvent`: jogador, definição da tecnologia e saldo após o desbloqueio.
+- `MechaniumCategoryRegisterEvent`, `MechaniumItemRegisterEvent` e `MechaniumRecipeRegisterEvent`: novos conteúdos registrados.
+
+O método `api.hasUnlockedTechnology(playerId, technologyId)` consulta se a pesquisa foi concluída. `api.canUseTechnology(playerId, technologyId)` também verifica se a era atual autoriza seu uso; os dois estados não são equivalentes.
+
+Os eventos são síncronos e devem ser consumidos no contexto da thread principal do servidor. Registre listeners com o plugin hospedeiro e remova-os no desligamento do addon para evitar referências residuais.
 
 ## Dependência Maven
 
@@ -63,16 +76,13 @@ Coloque o JAR em `plugins/MECHANIUM/addons/` e reinicie. O carregador valida des
 - Registrar toda tecnologia com era e pré-requisitos.
 - Revalidar autorização ao fabricar, usar, operar máquinas ou transferir tecnologia.
 - Persistir proprietários por UUID.
-- Limpar tarefas e recursos em `onDisable`.
+- Limpar tarefas, listeners e recursos em `onDisable`.
 - Documentar licenças e bibliotecas incluídas.
 
-Addons executam código Java no servidor. Instale apenas extensões de fontes confiáveis.
-
+Addons executam código Java no servidor. O carregador não é uma sandbox e não consegue impedir que um addon malicioso acesse recursos do processo. Instale somente JARs de fontes confiáveis e faça backup do servidor.
 
 ## Dependências entre addons
 
-Quando um addon declara outro addon em `dependencies`, o carregador garante a ordem topológica e disponibiliza as classes e recursos dos addons declarados como dependências. Addons não declarados não são adicionados ao classpath do consumidor.
+Quando um addon declara outro addon em `dependencies`, o carregador garante a ordem topológica e disponibiliza classes e recursos dos addons declarados como dependências. Addons não declarados não são adicionados ao classpath do consumidor.
 
 A compatibilidade de API é verificada pelo campo `api-version`. O campo `version` identifica a versão do addon e deve seguir versionamento semântico.
-
-**Limite de segurança:** addons são código Java executado dentro do processo do servidor. O carregador não é uma sandbox e não consegue impedir que um addon malicioso acesse recursos do processo. Use somente JARs confiáveis e faça backup do servidor.

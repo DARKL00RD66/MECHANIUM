@@ -7,7 +7,8 @@
 ## Implementado na fundação
 
 - API pública para eras, tecnologias, progressão, módulos e addons.
-- Registro persistente de categorias, itens e receitas.
+- Registro persistente de categorias, itens, receitas, máquinas e regras de drops.
+- Persistência SQLite com schema versionado até a versão 3; máquinas e drops também são restaurados no carregamento da API.
 - Criação de `ItemStack` com identificador PDC, lore, modelo customizado e limite de pilha configurável.
 - Validação de materiais de itens customizados sem exigir inicialização de servidor Bukkit; materiais de ar são rejeitados.
 - Receitas Bukkit nativas (shaped e shapeless), incluindo ingredientes MECHANIUM exatos.
@@ -35,21 +36,21 @@
 - Redes de energia, fluidos, logística e transferência entre blocos.
 - Livro/guia e interfaces visuais complementares de pesquisa.
 - Economia de recursos e balanceamento completo.
-- Persistência de configurações avançadas e migrações de conteúdo entre versões.
-- Auditoria individual e portabilidade funcional dos 31 projetos de referência.
+- Sincronização e remoção de conteúdo órfão quando módulos ou addons deixam de ser carregados.
 - Publicação da API em registry Maven remoto e SDK de exemplo.
 - Testes de integração com addons de terceiros.
 - Testes de inicialização e gameplay em servidor real Paper/Purpur 1.21.11.
+- Auditoria individual e portabilidade funcional dos 31 projetos de referência.
 
 ## Validação
 
 - Workflow: Java 21 / Maven `clean verify`.
-- [GitHub Actions — run 43323554006](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323554006): **BUILD SUCCESS** no commit `4c8013e2f79ff3d7ccfbcb8fe0d4f628fc706d39`.
-- Testes automatizados: **36 executados, 0 falhas, 0 erros** (16 API/modelos, 5 SQLite, 6 motor de progressão/conteúdo/máquinas/drops, 2 classloader de addons, 7 testes do plugin).
+- [GitHub Actions — run 43323981115](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323981115): **BUILD SUCCESS** no commit `7028e794c81a02af5e0b3e2acaa6af3b213e7b47`.
+- Testes automatizados: **37 executados, 0 falhas, 0 erros** (16 API/modelos, 6 SQLite, 6 motor de progressão/conteúdo/máquinas/drops, 2 classloader de addons, 7 testes do plugin).
 - O projeto principal passou por `mvn clean verify`; a API foi instalada no repositório Maven local e o addon de exemplo compilou e empacotou.
 - O JAR sombreado foi gerado. O upload do artefato falhou por limite de armazenamento do GitHub Actions e está configurado como não bloqueante; não há download do JAR disponível neste run.
 - Ainda não realizado: inicialização em Paper/Purpur real, testes funcionais de gameplay, integração de addons externos reais e validação em servidores de produção.
 
 ## Classificação
 
-**Fundação em desenvolvimento; build e 36 testes automatizados aprovados no commit `4c8013e`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.
+**Fundação em desenvolvimento; build e 37 testes automatizados aprovados no commit `7028e79`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.

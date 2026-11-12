@@ -8,6 +8,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -121,6 +123,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         if (definition == null || amount < 1 || amount > definition.maxStackSize()) return Optional.empty();
         ItemStack stack = new ItemStack(Material.valueOf(definition.material()), amount);
         ItemMeta meta = stack.getItemMeta();
+        meta.getPersistentDataContainer().set(new NamespacedKey("mechanium", "item_id"), PersistentDataType.STRING, definition.id());
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', definition.displayName()));
         if (!definition.lore().isEmpty()) meta.setLore(definition.lore().stream().map(line -> ChatColor.translateAlternateColorCodes('&', line)).toList());
         if (definition.customModelData() > 0) meta.setCustomModelData(definition.customModelData());

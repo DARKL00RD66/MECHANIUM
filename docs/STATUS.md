@@ -23,5 +23,11 @@
 - Publicação da API em registry Maven remoto.
 - Testes em servidor Paper/Purpur e gameplay real.
 
+## Validação atual
+- GitHub Actions: [run 43152407542](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43152407542) — **BUILD SUCCESS**.
+- Testes unitários: **8 executados, 0 falhas, 0 erros** (3 API, 3 SQLite, 2 motor de progressão).
+- O workflow tentou anexar o JAR, mas a cota de armazenamento de artefatos do GitHub Actions estava esgotada. O upload é não bloqueante; portanto, o build passou, mas este run não disponibilizou artefato para download.
+- Ainda **não realizado**: inicialização em Paper/Purpur 1.21.11, validação de addons reais e testes de gameplay.
+
 ## Classificação
-**Em desenvolvimento / não pronto para produção** até que CI e smoke tests de servidor sejam aprovados.
+**Fundação compilável; não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.

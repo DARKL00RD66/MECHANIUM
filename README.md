@@ -54,6 +54,12 @@ mechanium-plugin/target/MECHANIUM-0.1.0-SNAPSHOT.jar
 
 A fundação ainda está em desenvolvimento e não substitui todas as funcionalidades do Slimefun ou dos addons neste estágio. Consulte [STATUS](docs/STATUS.md) e [ROADMAP](docs/ROADMAP.md).
 
+## CI e estado
+
+- [Build Java 21 / Maven verify](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43152407542) — **BUILD SUCCESS**, 8 testes aprovados.
+- O JAR final ainda não foi publicado como artefato, pois a cota de armazenamento do GitHub Actions está esgotada.
+- A base não foi validada em servidor real e ainda não é uma versão de produção.
+
 ## Documentação
 
 - [Arquitetura](docs/ARQUITETURA.md)

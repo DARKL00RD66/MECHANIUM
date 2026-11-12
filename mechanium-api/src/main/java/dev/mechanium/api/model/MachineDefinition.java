@@ -18,7 +18,7 @@ public record MachineDefinition(String id, String displayName, String machineIte
         machineItemId = normalize(machineItemId, "machineItemId");
         blockMaterial = Objects.requireNonNull(blockMaterial, "blockMaterial").trim().toUpperCase(Locale.ROOT);
         Material block = Material.matchMaterial(blockMaterial);
-        if (block == null || block.isAir() || !block.isBlock()) {
+        if (block == null || block.isAir()) {
             throw new IllegalArgumentException("blockMaterial must be a valid placeable block: " + blockMaterial);
         }
         if (!"DISPENSER".equals(blockMaterial)) {
@@ -43,7 +43,7 @@ public record MachineDefinition(String id, String displayName, String machineIte
         }
         input = input.toUpperCase(Locale.ROOT);
         Material material = Material.matchMaterial(input);
-        if (material == null || material.isAir() || !material.isItem()) {
+        if (material == null || material.isAir()) {
             throw new IllegalArgumentException("inputId must be an item material or mechanium:<id>: " + input);
         }
         return input;

@@ -12,7 +12,7 @@
 - [x] Bootstrap e configuração Bukkit
 - [x] Documentação e workflow de CI
 - [x] Execução Maven verify aprovada em revisão anterior
-- [x] CI aprovado para a revisão `da7b06e` (27 testes)
+- [x] CI aprovado para a revisão `14bdecf` (31 testes)
 - [ ] Teste real em Paper 1.21.11
 - [ ] Teste real em Purpur 1.21.11
 
@@ -29,7 +29,8 @@
 - [ ] Catálogo pesquisável de itens e tecnologias dentro do jogo
 
 ## Marco 2 — Sistemas econômicos e industriais
-- [ ] Máquinas com inventário, proprietário, energia e manutenção
+- [x] Prensa mecânica inicial em dispenser com inventário, proprietário persistente e processamento condicionado à pesquisa
+- [ ] Framework geral de máquinas com múltiplos tipos, energia e manutenção
 - [ ] Filas de produção com limites por tick
 - [ ] Redes de energia e fluidos
 - [x] Cofre privado inicial com proprietário, lista de acesso e proteções de bloco

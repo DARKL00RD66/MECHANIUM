@@ -73,6 +73,7 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
             statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (2)");
             statement.execute("CREATE TABLE IF NOT EXISTS mechanium_mob_drops(id TEXT PRIMARY KEY,entity_type TEXT NOT NULL,result_item_id TEXT NOT NULL,min_amount INTEGER NOT NULL,max_amount INTEGER NOT NULL,chance REAL NOT NULL,required_technology_id TEXT)");
             statement.execute("CREATE TABLE IF NOT EXISTS mechanium_machines(id TEXT PRIMARY KEY,display_name TEXT NOT NULL,machine_item_id TEXT NOT NULL,block_material TEXT NOT NULL,input_id TEXT NOT NULL,input_amount INTEGER NOT NULL,output_item_id TEXT NOT NULL,output_amount INTEGER NOT NULL,processing_ticks INTEGER NOT NULL,required_technology_id TEXT NOT NULL)");
+            statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (3)");
             statement.execute("""
                 CREATE TABLE IF NOT EXISTS mechanium_content_owners (
                     content_type TEXT NOT NULL CHECK (content_type IN ('category','item','recipe','mob_drop','machine')),
@@ -81,51 +82,60 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                     PRIMARY KEY (content_type, content_id)
                 )
                 """);
-            seedLegacyContentOwnership();
-            statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (4)");
+            int currentVersion = 0;
+            try (ResultSet versionRows = statement.executeQuery(
+                    "SELECT COALESCE(MAX(version), 0) FROM mechanium_schema_version")) {
+                if (versionRows.next()) currentVersion = versionRows.getInt(1);
+            }
+            if (currentVersion < 4) {
+                seedLegacyContentOwnership();
+                statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (4)");
+            }
         }
-        logger.info("MECHANIUM SQLite schema até a versão 3 pronta.");
+        logger.info("MECHANIUM SQLite schema até a versão 4 pronta.");
     }
 
 
     /** Adopts content created by the original built-in modules before ownership tracking existed. */
     private void seedLegacyContentOwnership() throws SQLException {
         String[][] legacy = {
-                {"category", "industrial_components", "module:industry"},
-                {"category", "agricultural_goods", "module:agriculture"},
-                {"category", "geology", "module:geology"},
-                {"category", "private_storage", "module:storage"},
-                {"item", "mechanical_parts", "module:industry"},
-                {"item", "copper_coil", "module:industry"},
-                {"item", "mechanical_press", "module:industry"},
-                {"item", "animal_fat", "module:agriculture"},
-                {"item", "compost", "module:agriculture"},
-                {"item", "industrial_fertilizer", "module:agriculture"},
-                {"item", "tallow_torch", "module:agriculture"},
-                {"item", "geological_survey_kit", "module:geology"},
-                {"item", "private_storage_crate", "module:storage"},
-                {"recipe", "mechanical_parts_recipe", "module:industry"},
-                {"recipe", "copper_coil_recipe", "module:industry"},
-                {"recipe", "mechanical_press_recipe", "module:industry"},
-                {"recipe", "compost_recipe", "module:agriculture"},
-                {"recipe", "industrial_fertilizer_recipe", "module:agriculture"},
-                {"recipe", "tallow_torch_recipe", "module:agriculture"},
-                {"recipe", "geological_survey_kit_recipe", "module:geology"},
-                {"recipe", "private_storage_crate_recipe", "module:storage"},
-                {"mob_drop", "cow_animal_fat", "module:agriculture"},
-                {"mob_drop", "pig_animal_fat", "module:agriculture"},
-                {"mob_drop", "sheep_animal_fat", "module:agriculture"},
-                {"machine", "mechanical_press", "module:industry"}
+                {"category", "industrial_components", "module:industry", "mechanium_categories"},
+                {"category", "agricultural_goods", "module:agriculture", "mechanium_categories"},
+                {"category", "geology", "module:geology", "mechanium_categories"},
+                {"category", "private_storage", "module:storage", "mechanium_categories"},
+                {"item", "mechanical_parts", "module:industry", "mechanium_items"},
+                {"item", "copper_coil", "module:industry", "mechanium_items"},
+                {"item", "mechanical_press", "module:industry", "mechanium_items"},
+                {"item", "animal_fat", "module:agriculture", "mechanium_items"},
+                {"item", "compost", "module:agriculture", "mechanium_items"},
+                {"item", "industrial_fertilizer", "module:agriculture", "mechanium_items"},
+                {"item", "tallow_torch", "module:agriculture", "mechanium_items"},
+                {"item", "geological_survey_kit", "module:geology", "mechanium_items"},
+                {"item", "private_storage_crate", "module:storage", "mechanium_items"},
+                {"recipe", "mechanical_parts_recipe", "module:industry", "mechanium_recipes"},
+                {"recipe", "copper_coil_recipe", "module:industry", "mechanium_recipes"},
+                {"recipe", "mechanical_press_recipe", "module:industry", "mechanium_recipes"},
+                {"recipe", "compost_recipe", "module:agriculture", "mechanium_recipes"},
+                {"recipe", "industrial_fertilizer_recipe", "module:agriculture", "mechanium_recipes"},
+                {"recipe", "tallow_torch_recipe", "module:agriculture", "mechanium_recipes"},
+                {"recipe", "geological_survey_kit_recipe", "module:geology", "mechanium_recipes"},
+                {"recipe", "private_storage_crate_recipe", "module:storage", "mechanium_recipes"},
+                {"mob_drop", "cow_animal_fat", "module:agriculture", "mechanium_mob_drops"},
+                {"mob_drop", "pig_animal_fat", "module:agriculture", "mechanium_mob_drops"},
+                {"mob_drop", "sheep_animal_fat", "module:agriculture", "mechanium_mob_drops"},
+                {"machine", "mechanical_press", "module:industry", "mechanium_machines"}
         };
-        try (PreparedStatement insert = connection.prepareStatement(
-                "INSERT OR IGNORE INTO mechanium_content_owners(content_type,content_id,owner_id) VALUES(?,?,?)")) {
-            for (String[] row : legacy) {
+        for (String[] row : legacy) {
+            // The table name is selected exclusively from the hard-coded migration map above.
+            String sql = "INSERT OR IGNORE INTO mechanium_content_owners(content_type,content_id,owner_id) "
+                    + "SELECT ?, ?, ? WHERE EXISTS (SELECT 1 FROM " + row[3] + " WHERE id = ?)";
+            try (PreparedStatement insert = connection.prepareStatement(sql)) {
                 insert.setString(1, row[0]);
                 insert.setString(2, row[1]);
                 insert.setString(3, row[2]);
-                insert.addBatch();
+                insert.setString(4, row[1]);
+                insert.executeUpdate();
             }
-            insert.executeBatch();
         }
     }
 

@@ -40,11 +40,11 @@
 ## Validação
 
 - Há um workflow Java 21/Maven `clean verify` no GitHub Actions.
-- A execução previamente inspecionada concluiu o Maven com `BUILD SUCCESS` e empacotou o JAR sombreado.
-- O passo de upload de artefatos falhou por limite de armazenamento do GitHub Actions, mas está marcado como não bloqueante; por isso o job pode aparecer como sucesso sem disponibilizar o JAR.
-- Alterações posteriores incluem novos eventos, testes de receitas, proteção contra overflow e dependências entre módulos; aguardam confirmação do CI da revisão mais recente.
-- Ainda não realizado: inicialização em Paper/Purpur real, testes funcionais de gameplay e validação de addons externos.
+- [GitHub Actions — run 43226262717](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43226262717): **BUILD SUCCESS** no commit de código `da7b06e`.
+- Testes automatizados nessa revisão: **27 executados, 0 falhas, 0 erros** (10 API/modelos, 5 SQLite, 5 motor de progressão/conteúdo/drops, 2 classloader de addons, 5 política de acesso ao armazenamento privado).
+- Maven empacotou o JAR sombreado. O upload do artefato falhou por limite de armazenamento do GitHub Actions e está configurado como não bloqueante; não há download do JAR disponível neste run.
+- Ainda não realizado: inicialização em Paper/Purpur real, testes funcionais de gameplay, integração de addons externos reais e validação em servidores de produção.
 
 ## Classificação
 
-**Fundação em desenvolvimento, compilável em execução anterior do CI; não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.
+**Fundação em desenvolvimento; build e testes unitários aprovados no commit de código `da7b06e`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.

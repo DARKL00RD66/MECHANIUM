@@ -81,4 +81,24 @@ class SqliteDataStoreTest {
         }
     }
 
+    @Test
+    void machineAndMobDropDefinitionsPersistAcrossStoreInstances() throws Exception {
+        Path database = directory.resolve("machine-content.db");
+        MachineDefinition machine = new MachineDefinition(
+                "mechanical_press", "Prensa mecânica", "mechanical_press", "DISPENSER",
+                "IRON_INGOT", 2, "mechanical_parts", 1, 100, "basic_mechanics");
+        MobDropDefinition drop = new MobDropDefinition(
+                "cow_animal_fat", "COW", "animal_fat", 1, 2, 0.35, "crop_rotation");
+
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            store.saveMachine(machine);
+            store.saveMobDrop(drop);
+        }
+
+        try (SqliteDataStore reopened = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            assertEquals(List.of(machine), List.copyOf(reopened.loadMachines()));
+            assertEquals(List.of(drop), List.copyOf(reopened.loadMobDrops()));
+        }
+    }
+
 }

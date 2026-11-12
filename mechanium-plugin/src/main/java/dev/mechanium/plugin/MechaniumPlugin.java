@@ -33,6 +33,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumRecipeBridge recipeBridge;
     private MechaniumResearchMenu researchMenu;
     private PrivateStorageListener privateStorageListener;
+    private MechaniumMachineManager machineManager;
 
     @Override
     public void onEnable() {
@@ -62,6 +63,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
             Bukkit.getPluginManager().registerEvents(new MechaniumMobDropListener(api), this);
+            machineManager = new MechaniumMachineManager(this, api);
+            Bukkit.getPluginManager().registerEvents(machineManager, this);
+            machineManager.start();
             privateStorageListener = new PrivateStorageListener(this, api);
             Bukkit.getPluginManager().registerEvents(privateStorageListener, this);
             researchMenu = new MechaniumResearchMenu(this, api);
@@ -323,6 +327,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         }
         researchMenu = null;
         privateStorageListener = null;
+        if (machineManager != null) {
+            machineManager.stop();
+            machineManager = null;
+        }
         if (addonLoader != null) {
             addonLoader.close();
             addonLoader = null;

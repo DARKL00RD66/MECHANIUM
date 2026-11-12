@@ -70,6 +70,13 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         }
     }
 
+
+    private void publishContentEvent(Runnable action) {
+        if (Bukkit.getServer() == null) return;
+        if (activeContentScope != null) activeContentScope.pendingEvents.add(action);
+        else action.run();
+    }
+
     private void trackContent(String type, String id) {
         if (activeContentScope != null) activeContentScope.track(type, id);
     }
@@ -177,7 +184,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         persist(() -> contentStore.saveCategory(value));
         categories.put(value.id(), value);
         trackContent(MechaniumContentStore.CATEGORY, value.id());
-        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumCategoryRegisterEvent(value));
+        publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumCategoryRegisterEvent(value)));
         return true;
     }
     @Override public Optional<ContentCategory> getCategory(String id) { return Optional.ofNullable(categories.get(normalize(id))); }
@@ -196,7 +203,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         persist(() -> contentStore.saveItem(value));
         items.put(value.id(), value);
         trackContent(MechaniumContentStore.ITEM, value.id());
-        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumItemRegisterEvent(value));
+        publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumItemRegisterEvent(value)));
         return true;
     }
     @Override public Optional<ItemDefinition> getItem(String id) { return Optional.ofNullable(items.get(normalize(id))); }
@@ -238,7 +245,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         persist(() -> contentStore.saveRecipe(value));
         recipes.put(value.id(), value);
         trackContent(MechaniumContentStore.RECIPE, value.id());
-        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumRecipeRegisterEvent(value));
+        publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumRecipeRegisterEvent(value)));
         return true;
     }
     @Override public Optional<RecipeDefinition> getRecipe(String id) { return Optional.ofNullable(recipes.get(normalize(id))); }
@@ -261,7 +268,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         persist(() -> contentStore.saveMobDrop(value));
         mobDrops.put(value.id(), value);
         trackContent(MechaniumContentStore.MOB_DROP, value.id());
-        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumMobDropRegisterEvent(value));
+        publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumMobDropRegisterEvent(value)));
         return true;
     }
 
@@ -310,7 +317,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         persist(() -> contentStore.saveMachine(value));
         machines.put(value.id(), value);
         trackContent(MechaniumContentStore.MACHINE, value.id());
-        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumMachineRegisterEvent(value));
+        publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumMachineRegisterEvent(value)));
         return true;
     }
 
@@ -384,6 +391,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     private final class ContentScope implements MechaniumContentRegistrationScope {
         private final String ownerId;
         private final Map<String, Set<String>> activeContent = new HashMap<>();
+        private final List<Runnable> pendingEvents = new ArrayList<>();
         private final Map<String, EraDefinition> eraSnapshot = new HashMap<>(eras);
         private final Map<String, TechnologyDefinition> technologySnapshot = new HashMap<>(technologies);
         private final Map<String, ContentCategory> categorySnapshot = new HashMap<>(categories);
@@ -423,6 +431,16 @@ public final class DefaultMechaniumApi implements MechaniumApi {
                 removeContent(removed);
                 completed = true;
                 activeContentScope = null;
+                // Publish registration events only after the database and in-memory registry commit.
+                for (Runnable event : pendingEvents) {
+                    try {
+                        event.run();
+                    } catch (RuntimeException exception) {
+                        Bukkit.getLogger().warning("Falha ao publicar evento de conteúdo MECHANIUM: "
+                                + exception.getMessage());
+                    }
+                }
+                pendingEvents.clear();
             }
         }
 

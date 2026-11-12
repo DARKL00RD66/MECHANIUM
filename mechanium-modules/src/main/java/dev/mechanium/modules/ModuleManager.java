@@ -49,11 +49,11 @@ public final class ModuleManager {
                 module.onEnable(context);
                 scope.commit();
                 available.add(module.id());
-            } catch (Exception exception) {
+            } catch (Exception | LinkageError exception) {
                 enabled.remove(module);
                 try {
                     module.onDisable();
-                } catch (RuntimeException cleanupException) {
+                } catch (RuntimeException | LinkageError cleanupException) {
                     exception.addSuppressed(cleanupException);
                 }
                 if (!module.optional()) {
@@ -130,7 +130,7 @@ public final class ModuleManager {
         for (int index = enabled.size() - 1; index >= 0; index--) {
             try {
                 enabled.get(index).onDisable();
-            } catch (RuntimeException ignored) {
+            } catch (RuntimeException | LinkageError ignored) {
                 // Continue shutting down remaining modules.
             }
         }

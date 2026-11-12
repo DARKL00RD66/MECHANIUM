@@ -127,7 +127,7 @@ public final class MechaniumAddonLoader implements AutoCloseable {
             return true;
         } catch (Exception | LinkageError exception) {
             if (instance != null) {
-                try { instance.onDisable(); } catch (RuntimeException ignored) { }
+                try { instance.onDisable(); } catch (RuntimeException | LinkageError ignored) { }
             }
             if (classLoader != null) {
                 try { classLoader.close(); } catch (IOException ignored) { }
@@ -147,7 +147,7 @@ public final class MechaniumAddonLoader implements AutoCloseable {
             LoadedAddon addon = loaded.get(index);
             try {
                 addon.instance().onDisable();
-            } catch (RuntimeException exception) {
+            } catch (RuntimeException | LinkageError exception) {
                 logger.warning("Falha ao desligar addon " + addon.id() + ": " + exception.getMessage());
             }
             try {

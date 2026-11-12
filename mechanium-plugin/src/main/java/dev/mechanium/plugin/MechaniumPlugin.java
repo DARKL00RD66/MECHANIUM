@@ -54,6 +54,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             recipeBridge.registerAll();
 
             Bukkit.getPluginManager().registerEvents(this, this);
+            Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
             PluginCommand command = Objects.requireNonNull(getCommand("mechanium"), "mechanium command missing");
             command.setExecutor(this);
             command.setTabCompleter(this);

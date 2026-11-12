@@ -2,12 +2,12 @@
 
 ## Build automatizado
 
-Execução: [GitHub Actions 43323097264](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323097264)
+Execução: [GitHub Actions 43323554006](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323554006)
 
 - Java: Temurin 21
 - Build principal: Maven `clean verify`
 - Resultado: **BUILD SUCCESS**
-- Testes automatizados: **33 executados, 0 falhas, 0 erros**
+- Testes automatizados: **36 executados, 0 falhas, 0 erros**
 - API pública instalada no repositório Maven local para compilar o exemplo de addon.
 - Projeto-exemplo de addon compilado e empacotado com sucesso.
 
@@ -15,7 +15,7 @@ Execução: [GitHub Actions 43323097264](https://github.com/davitremea1-ops/MECH
 
 | Módulo | Testes | Escopo |
 |---|---:|---|
-| `mechanium-api` | 13 | Validação de receitas, máquinas, drops e tecnologias |
+| `mechanium-api` | 16 | Validação de itens, receitas, máquinas, drops e tecnologias |
 | `mechanium-storage` | 5 | Persistência após reabertura, débito atômico, saldo insuficiente e grants negativos |
 | `mechanium-engine` | 6 | Progressão, desbloqueios, validação de conteúdo, máquinas e drops |
 | `mechanium-addon-loader` | 2 | Classloader e visibilidade de dependências entre addons |

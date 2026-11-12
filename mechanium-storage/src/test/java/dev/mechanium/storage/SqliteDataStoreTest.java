@@ -1,6 +1,9 @@
 package dev.mechanium.storage;
 
 import org.junit.jupiter.api.Test;
+import dev.mechanium.api.model.*;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
@@ -48,4 +51,24 @@ class SqliteDataStoreTest {
             assertThrows(IllegalArgumentException.class, () -> store.addResearchPoints(UUID.randomUUID(), -1));
         }
     }
+    @Test
+    void contentDefinitionsPersistAcrossStoreInstances() throws Exception {
+        Path database = directory.resolve("content.db");
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            store.saveCategory(new ContentCategory("industrial", "Industrial", "Industrial components"));
+            store.saveItem(new ItemDefinition("gear", "Gear", "IRON_INGOT",
+                    List.of("A mechanical part"), 0, 64, "industrial", null));
+            store.saveRecipe(new RecipeDefinition("gear_recipe", RecipeDefinition.Type.SHAPED,
+                    "gear", 1, List.of("II", " I"), Map.of('I', "IRON_INGOT"), null));
+        }
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            assertEquals("industrial", store.loadCategories().iterator().next().id());
+            assertEquals("gear", store.loadItems().iterator().next().id());
+            RecipeDefinition recipe = store.loadRecipes().iterator().next();
+            assertEquals("gear_recipe", recipe.id());
+            assertEquals(List.of("II", " I"), recipe.shape());
+            assertEquals("IRON_INGOT", recipe.ingredients().get('I'));
+        }
+    }
+
 }

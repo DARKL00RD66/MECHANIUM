@@ -36,6 +36,13 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 | SensibleToolbox | Ferramentas | Ferramentas utilitárias não redundantes |
 | GeyserHeads | Cosméticos Bedrock/Geyser | Compatibilidade visual opcional |
 
+## Implementação de drops de criaturas (base para SFMobDrops)
+
+- **SFMobDrops (parcial / clean-room):** API pública `MobDropDefinition` aceita entidade Bukkit, item MECHANIUM, quantidade mínima/máxima, chance e tecnologia necessária. `MechaniumMobDropRegisterEvent` informa addons quando uma regra é registrada.
+- O listener preserva drops vanilla e acrescenta apenas os subprodutos personalizados cujo jogador responsável pelo abate atende à tecnologia exigida. Definições com chance e quantidades são registradas por módulos/addons durante o bootstrap; não são salvas como conteúdo arbitrário no SQLite.
+- O módulo de agricultura registra gordura animal como subproduto de vacas, porcos e ovelhas após `crop_rotation`, além de receitas iniciais de composto, fertilizante e tochas de sebo.
+- Ainda não há configuração por bioma, Looting, dificuldade, multiplicadores administrativos ou painel de edição de tabelas.
+
 ## Implementação inicial registrada
 
 - **PrivateStorage (parcial):** o módulo `storage` já registra `private_storage_crate` e uma receita condicionada a `warehouse_accounting`. O plugin protege o barril por UUID do proprietário, permite até 32 UUIDs confiáveis e bloqueia abertura/retirada por funil, quebra por terceiros, pistões e explosões. O acesso pode ser gerenciado com `/mechanium storage trust|untrust|list`.

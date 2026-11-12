@@ -12,7 +12,7 @@
 - [x] Bootstrap e configuração Bukkit
 - [x] Documentação e workflow de CI
 - [x] Execução Maven verify aprovada em revisão anterior
-- [ ] CI aprovado para a revisão atual
+- [x] CI aprovado para a revisão de código `ce908e5` (17 testes)
 - [ ] Teste real em Paper 1.21.11
 - [ ] Teste real em Purpur 1.21.11
 

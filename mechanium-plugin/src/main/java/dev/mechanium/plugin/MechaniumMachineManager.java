@@ -152,6 +152,7 @@ final class MechaniumMachineManager implements Listener {
         event.setDropItems(false);
         api.getMachine(details.machineId())
                 .flatMap(definition -> api.createItemStack(definition.machineItemId(), 1))
+                .or(() -> Optional.of(new ItemStack(Material.DISPENSER)))
                 .ifPresent(item -> event.getBlock().getWorld().dropItemNaturally(
                         event.getBlock().getLocation().add(0.5, 0.5, 0.5), item));
         loadedMachines.remove(key(event.getBlock().getLocation()));

@@ -18,10 +18,10 @@ public record MachineDefinition(String id, String displayName, String machineIte
         machineItemId = normalize(machineItemId, "machineItemId");
         blockMaterial = Objects.requireNonNull(blockMaterial, "blockMaterial").trim().toUpperCase(Locale.ROOT);
         Material block = Material.matchMaterial(blockMaterial);
-        if (block == null || block.isAir()) {
+        if (block == null) {
             throw new IllegalArgumentException("blockMaterial must be a valid placeable block: " + blockMaterial);
         }
-        if (!"DISPENSER".equals(blockMaterial)) {
+        if (!"DISPENSER".equals(block.name())) {
             throw new IllegalArgumentException("Current machine runtime supports DISPENSER blocks only");
         }
 
@@ -43,7 +43,7 @@ public record MachineDefinition(String id, String displayName, String machineIte
         }
         input = input.toUpperCase(Locale.ROOT);
         Material material = Material.matchMaterial(input);
-        if (material == null || material.isAir()) {
+        if (material == null || java.util.Set.of("AIR", "CAVE_AIR", "VOID_AIR").contains(material.name())) {
             throw new IllegalArgumentException("inputId must be an item material or mechanium:<id>: " + input);
         }
         return input;

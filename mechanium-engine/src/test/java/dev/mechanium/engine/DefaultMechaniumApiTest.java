@@ -72,6 +72,33 @@ class DefaultMechaniumApiTest {
     }
 
     @Test
+    void registersMobDropsWithValidatedItemsAndResearchGates() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("mob-drops.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("medieval", "Idade Média", 1));
+            api.registerTechnology(new TechnologyDefinition("crop_rotation", "Rotação de culturas", "medieval", 8, List.of()));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory("agricultural_goods", "Produtos agrícolas", "Rural"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("animal_fat", "Gordura animal", "SLIME_BALL",
+                    List.of(), 0, 64, "agricultural_goods", "crop_rotation"));
+
+            var drop = new dev.mechanium.api.model.MobDropDefinition(
+                    "cow_animal_fat", "COW", "animal_fat", 1, 2, 0.35, "crop_rotation");
+            assertTrue(api.registerMobDrop(drop));
+            assertFalse(api.registerMobDrop(drop) == false);
+            assertEquals(drop, api.getMobDrop("COW_ANIMAL_FAT").orElseThrow());
+            assertEquals(List.of(drop), api.getMobDrops());
+            assertTrue(api.validateContent().isEmpty());
+
+            assertThrows(IllegalArgumentException.class, () -> api.registerMobDrop(
+                    new dev.mechanium.api.model.MobDropDefinition(
+                            "oversized_drop", "PIG", "animal_fat", 1, 65, 0.5, "crop_rotation")));
+            assertThrows(IllegalArgumentException.class, () -> api.registerMobDrop(
+                    new dev.mechanium.api.model.MobDropDefinition(
+                            "unknown_tech_drop", "SHEEP", "animal_fat", 1, 1, 0.5, "unknown_technology")));
+        }
+    }
+
+    @Test
     void refusesTechnologyWithUnknownEra() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(directory.resolve("unknown-era.db"), Logger.getLogger("test"))) {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);

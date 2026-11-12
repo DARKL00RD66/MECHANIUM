@@ -34,6 +34,7 @@ class DefaultMechaniumApiTest {
 
             assertEquals(UnlockResult.Status.WRONG_ERA,
                     api.unlockTechnology(player, "steam_power").status());
+            assertFalse(api.hasUnlockedTechnology(player, "steam_power"));
             assertFalse(api.canUseTechnology(player, "steam_power"));
 
             assertEquals(UnlockResult.Status.UNLOCKED,
@@ -43,8 +44,14 @@ class DefaultMechaniumApiTest {
             api.setPlayerEra(player, "industrial_revolution");
             assertEquals(UnlockResult.Status.UNLOCKED,
                     api.unlockTechnology(player, "steam_power").status());
+            assertTrue(api.hasUnlockedTechnology(player, "steam_power"));
             assertTrue(api.canUseTechnology(player, "steam_power"));
             assertEquals(60, api.getResearchPoints(player));
+
+            api.setPlayerEra(player, "ancient");
+            assertTrue(api.hasUnlockedTechnology(player, "steam_power"),
+                    "Unlocked state must be distinct from current-era authorization");
+            assertFalse(api.canUseTechnology(player, "steam_power"));
         }
     }
 

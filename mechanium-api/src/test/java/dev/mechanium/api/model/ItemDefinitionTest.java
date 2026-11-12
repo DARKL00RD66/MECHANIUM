@@ -19,9 +19,11 @@ class ItemDefinitionTest {
     }
 
     @Test
-    void rejectsAirAsAnItemMaterial() {
-        assertThrows(IllegalArgumentException.class, () -> new ItemDefinition(
-                "empty_item", "Item vazio", "AIR", List.of(), 0, 64, "general", null));
+    void rejectsAirMaterialsAsCustomItems() {
+        for (String material : List.of("AIR", "CAVE_AIR", "VOID_AIR")) {
+            assertThrows(IllegalArgumentException.class, () -> new ItemDefinition(
+                    "empty_item", "Item vazio", material, List.of(), 0, 64, "general", null));
+        }
     }
 
     @Test

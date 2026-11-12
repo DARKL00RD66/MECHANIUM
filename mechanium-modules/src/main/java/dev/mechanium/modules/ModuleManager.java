@@ -2,6 +2,7 @@ package dev.mechanium.modules;
 
 import dev.mechanium.api.MechaniumModule;
 import dev.mechanium.api.MechaniumModuleContext;
+import dev.mechanium.api.MechaniumContentRegistrationScope;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
@@ -43,8 +44,10 @@ public final class ModuleManager {
 
             // Track before onEnable so partially initialized modules receive onDisable.
             enabled.add(module);
-            try {
+            try (MechaniumContentRegistrationScope scope =
+                         context.api().openContentScope("module:" + module.id())) {
                 module.onEnable(context);
+                scope.commit();
                 available.add(module.id());
             } catch (Exception exception) {
                 enabled.remove(module);

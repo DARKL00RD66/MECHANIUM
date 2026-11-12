@@ -29,6 +29,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumApi api;
     private ModuleManager moduleManager;
     private MechaniumAddonLoader addonLoader;
+    private MechaniumRecipeBridge recipeBridge;
 
     @Override
     public void onEnable() {
@@ -49,6 +50,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     getDataFolder().toPath().resolve(getConfig().getString("addons.directory", "addons")), getLogger());
             addonLoader.loadAll(new MechaniumAddonContext(api, this,
                     getDataFolder().toPath().resolve("addons"), getLogger()));
+            recipeBridge = new MechaniumRecipeBridge(this, api);
+            recipeBridge.registerAll();
 
             Bukkit.getPluginManager().registerEvents(this, this);
             PluginCommand command = Objects.requireNonNull(getCommand("mechanium"), "mechanium command missing");
@@ -209,6 +212,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     }
 
     private void shutdownServices() {
+        recipeBridge = null;
         if (addonLoader != null) {
             addonLoader.close();
             addonLoader = null;

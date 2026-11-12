@@ -11,13 +11,13 @@ abstract class AbstractBuiltinModule implements MechaniumModule {
 
     @Override
     public final void onEnable(MechaniumModuleContext context) {
-        // Optional eras must exist before their technologies are validated.
-        registerExtra(context);
+        // Register technologies before items/recipes so their progression requirements can be validated.
         for (TechnologyDefinition technology : technologies()) {
             if (!context.api().registerTechnology(technology)) {
                 throw new IllegalStateException("Technology ID conflict: " + technology.id());
             }
         }
+        registerExtra(context);
         context.api().registerModule(id());
         context.logger().info("Módulo MECHANIUM ativado: " + id());
     }

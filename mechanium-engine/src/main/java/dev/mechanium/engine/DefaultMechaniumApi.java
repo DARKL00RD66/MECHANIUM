@@ -154,6 +154,25 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         return result != null && canUseItem(player, result.id())
                 && (recipe.requiredTechnologyId() == null || canUseTechnology(player, recipe.requiredTechnologyId()));
     }
+    @Override public List<String> validateContent() {
+        List<String> errors = new ArrayList<>();
+        for (ItemDefinition item : items.values()) {
+            if (!categories.containsKey(item.categoryId())) errors.add("Item " + item.id() + " references missing category " + item.categoryId());
+            if (item.requiredTechnologyId() != null && !technologies.containsKey(item.requiredTechnologyId()))
+                errors.add("Item " + item.id() + " references missing technology " + item.requiredTechnologyId());
+        }
+        for (RecipeDefinition recipe : recipes.values()) {
+            if (!items.containsKey(recipe.resultItemId())) errors.add("Recipe " + recipe.id() + " has missing result item " + recipe.resultItemId());
+            if (recipe.requiredTechnologyId() != null && !technologies.containsKey(recipe.requiredTechnologyId()))
+                errors.add("Recipe " + recipe.id() + " references missing technology " + recipe.requiredTechnologyId());
+            for (String ingredient : recipe.ingredients().values()) {
+                if (ingredient.startsWith("mechanium:") && !items.containsKey(ingredient.substring(10)))
+                    errors.add("Recipe " + recipe.id() + " references missing custom ingredient " + ingredient);
+            }
+        }
+        return List.copyOf(errors);
+    }
+
     private void validateTechnology(String id) {
         if (id != null && !technologies.containsKey(id)) throw new IllegalArgumentException("Unknown required technology: " + id);
     }

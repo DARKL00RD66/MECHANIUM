@@ -2,9 +2,17 @@ package dev.mechanium.api;
 
 import dev.mechanium.api.model.*;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 /** Persistence contract for content definitions registered by modules and addons. */
 public interface MechaniumContentStore {
+    String CATEGORY = "category";
+    String ITEM = "item";
+    String RECIPE = "recipe";
+    String MOB_DROP = "mob_drop";
+    String MACHINE = "machine";
+
     void saveCategory(ContentCategory category);
     Collection<ContentCategory> loadCategories();
     void saveItem(ItemDefinition item);
@@ -15,4 +23,17 @@ public interface MechaniumContentStore {
     Collection<MobDropDefinition> loadMobDrops();
     void saveMachine(MachineDefinition machine);
     Collection<MachineDefinition> loadMachines();
+
+    /** Begins a synchronous transaction for one module/addon registration callback. */
+    void beginContentTransaction();
+    /**
+     * Claims the supplied content IDs for ownerId and removes IDs formerly owned by it
+     * but not registered in this callback. Must run inside a content transaction.
+     * Returns the removed IDs grouped by content type.
+     */
+    Map<String, Set<String>> reconcileContentOwner(String ownerId, Map<String, Set<String>> activeContent);
+    /** Removes all owned content whose owner is not in activeOwnerIds. Must run in a transaction. */
+    Map<String, Set<String>> pruneInactiveContentOwners(Set<String> activeOwnerIds);
+    void commitContentTransaction();
+    void rollbackContentTransaction();
 }

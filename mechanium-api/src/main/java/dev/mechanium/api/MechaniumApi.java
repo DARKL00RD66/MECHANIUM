@@ -11,6 +11,12 @@ import org.bukkit.inventory.ItemStack;
 public interface MechaniumApi {
     String API_VERSION = "1";
     String getApiVersion();
+    /** Opens an atomic content-registration scope owned by a module or addon. */
+    default MechaniumContentRegistrationScope openContentScope(String ownerId) {
+        return MechaniumContentRegistrationScope.noop();
+    }
+    /** Removes persisted content owned by modules/addons that did not load this startup. */
+    default void pruneInactiveContentOwners(Set<String> activeOwnerIds) { }
     boolean registerEra(EraDefinition era);
     Optional<EraDefinition> getEra(String eraId);
     Collection<EraDefinition> getEras();

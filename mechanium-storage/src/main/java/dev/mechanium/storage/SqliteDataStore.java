@@ -73,9 +73,60 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
             statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (2)");
             statement.execute("CREATE TABLE IF NOT EXISTS mechanium_mob_drops(id TEXT PRIMARY KEY,entity_type TEXT NOT NULL,result_item_id TEXT NOT NULL,min_amount INTEGER NOT NULL,max_amount INTEGER NOT NULL,chance REAL NOT NULL,required_technology_id TEXT)");
             statement.execute("CREATE TABLE IF NOT EXISTS mechanium_machines(id TEXT PRIMARY KEY,display_name TEXT NOT NULL,machine_item_id TEXT NOT NULL,block_material TEXT NOT NULL,input_id TEXT NOT NULL,input_amount INTEGER NOT NULL,output_item_id TEXT NOT NULL,output_amount INTEGER NOT NULL,processing_ticks INTEGER NOT NULL,required_technology_id TEXT NOT NULL)");
-            statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (3)");
+            statement.execute("""
+                CREATE TABLE IF NOT EXISTS mechanium_content_owners (
+                    content_type TEXT NOT NULL CHECK (content_type IN ('category','item','recipe','mob_drop','machine')),
+                    content_id TEXT NOT NULL,
+                    owner_id TEXT NOT NULL,
+                    PRIMARY KEY (content_type, content_id)
+                )
+                """);
+            seedLegacyContentOwnership();
+            statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (4)");
         }
         logger.info("MECHANIUM SQLite schema até a versão 3 pronta.");
+    }
+
+
+    /** Adopts content created by the original built-in modules before ownership tracking existed. */
+    private void seedLegacyContentOwnership() throws SQLException {
+        String[][] legacy = {
+                {"category", "industrial_components", "module:industry"},
+                {"category", "agricultural_goods", "module:agriculture"},
+                {"category", "geology", "module:geology"},
+                {"category", "private_storage", "module:storage"},
+                {"item", "mechanical_parts", "module:industry"},
+                {"item", "copper_coil", "module:industry"},
+                {"item", "mechanical_press", "module:industry"},
+                {"item", "animal_fat", "module:agriculture"},
+                {"item", "compost", "module:agriculture"},
+                {"item", "industrial_fertilizer", "module:agriculture"},
+                {"item", "tallow_torch", "module:agriculture"},
+                {"item", "geological_survey_kit", "module:geology"},
+                {"item", "private_storage_crate", "module:storage"},
+                {"recipe", "mechanical_parts_recipe", "module:industry"},
+                {"recipe", "copper_coil_recipe", "module:industry"},
+                {"recipe", "mechanical_press_recipe", "module:industry"},
+                {"recipe", "compost_recipe", "module:agriculture"},
+                {"recipe", "industrial_fertilizer_recipe", "module:agriculture"},
+                {"recipe", "tallow_torch_recipe", "module:agriculture"},
+                {"recipe", "geological_survey_kit_recipe", "module:geology"},
+                {"recipe", "private_storage_crate_recipe", "module:storage"},
+                {"mob_drop", "cow_animal_fat", "module:agriculture"},
+                {"mob_drop", "pig_animal_fat", "module:agriculture"},
+                {"mob_drop", "sheep_animal_fat", "module:agriculture"},
+                {"machine", "mechanical_press", "module:industry"}
+        };
+        try (PreparedStatement insert = connection.prepareStatement(
+                "INSERT OR IGNORE INTO mechanium_content_owners(content_type,content_id,owner_id) VALUES(?,?,?)")) {
+            for (String[] row : legacy) {
+                insert.setString(1, row[0]);
+                insert.setString(2, row[1]);
+                insert.setString(3, row[2]);
+                insert.addBatch();
+            }
+            insert.executeBatch();
+        }
     }
 
     private void ensurePlayer(UUID playerId) throws SQLException {
@@ -331,6 +382,149 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
         } catch (SQLException e) {
             throw failure("load machines", e);
         }
+    }
+
+
+    @Override public synchronized void beginContentTransaction() {
+        try {
+            if (!connection.getAutoCommit()) throw new IllegalStateException("A MECHANIUM content transaction is already active.");
+            connection.setAutoCommit(false);
+        } catch (SQLException exception) {
+            throw failure("begin content transaction", exception);
+        }
+    }
+
+    @Override public synchronized Map<String, Set<String>> reconcileContentOwner(
+            String ownerId, Map<String, Set<String>> activeContent) {
+        if (connectionAutoCommit()) throw new IllegalStateException("No active MECHANIUM content transaction.");
+        if (ownerId == null || ownerId.isBlank()) throw new IllegalArgumentException("Content owner cannot be blank.");
+        Map<String, Set<String>> current = activeContent == null ? Map.of() : activeContent;
+        Map<String, Set<String>> stale = new LinkedHashMap<>();
+        String[][] orderedTypes = {
+                {RECIPE, "mechanium_recipes"},
+                {MACHINE, "mechanium_machines"},
+                {MOB_DROP, "mechanium_mob_drops"},
+                {ITEM, "mechanium_items"},
+                {CATEGORY, "mechanium_categories"}
+        };
+        try {
+            List<String[]> previous = new ArrayList<>();
+            try (PreparedStatement query = connection.prepareStatement(
+                    "SELECT content_type,content_id FROM mechanium_content_owners WHERE owner_id=?")) {
+                query.setString(1, ownerId);
+                try (ResultSet rows = query.executeQuery()) {
+                    while (rows.next()) previous.add(new String[]{rows.getString(1), rows.getString(2)});
+                }
+            }
+            for (String[] row : previous) {
+                String type = row[0], id = row[1];
+                if (current.getOrDefault(type, Set.of()).contains(id)) continue;
+                String table = tableForContentType(type);
+                try (PreparedStatement deleteContent = connection.prepareStatement("DELETE FROM " + table + " WHERE id=?");
+                     PreparedStatement deleteOwner = connection.prepareStatement(
+                             "DELETE FROM mechanium_content_owners WHERE content_type=? AND content_id=? AND owner_id=?")) {
+                    deleteContent.setString(1, id);
+                    deleteContent.executeUpdate();
+                    deleteOwner.setString(1, type);
+                    deleteOwner.setString(2, id);
+                    deleteOwner.setString(3, ownerId);
+                    deleteOwner.executeUpdate();
+                }
+                stale.computeIfAbsent(type, ignored -> new LinkedHashSet<>()).add(id);
+            }
+
+            for (String[] typeRow : orderedTypes) {
+                String type = typeRow[0];
+                for (String id : current.getOrDefault(type, Set.of())) {
+                    if (id == null || id.isBlank()) throw new IllegalArgumentException("Content ID cannot be blank.");
+                    String existingOwner = null;
+                    try (PreparedStatement query = connection.prepareStatement(
+                            "SELECT owner_id FROM mechanium_content_owners WHERE content_type=? AND content_id=?")) {
+                        query.setString(1, type);
+                        query.setString(2, id);
+                        try (ResultSet row = query.executeQuery()) {
+                            if (row.next()) existingOwner = row.getString(1);
+                        }
+                    }
+                    if (existingOwner != null && !existingOwner.equals(ownerId)) {
+                        throw new IllegalStateException("Content " + type + ":" + id
+                                + " already belongs to " + existingOwner + " and cannot be claimed by " + ownerId);
+                    }
+                    try (PreparedStatement insert = connection.prepareStatement(
+                            "INSERT OR IGNORE INTO mechanium_content_owners(content_type,content_id,owner_id) VALUES(?,?,?)")) {
+                        insert.setString(1, type);
+                        insert.setString(2, id);
+                        insert.setString(3, ownerId);
+                        insert.executeUpdate();
+                    }
+                }
+            }
+            Map<String, Set<String>> result = new LinkedHashMap<>();
+            stale.forEach((type, ids) -> result.put(type, Set.copyOf(ids)));
+            return Map.copyOf(result);
+        } catch (SQLException exception) {
+            throw failure("reconcile content owner " + ownerId, exception);
+        }
+    }
+
+    @Override public synchronized Map<String, Set<String>> pruneInactiveContentOwners(Set<String> activeOwnerIds) {
+        if (connectionAutoCommit()) throw new IllegalStateException("No active MECHANIUM content transaction.");
+        Set<String> active = activeOwnerIds == null ? Set.of() : Set.copyOf(activeOwnerIds);
+        Set<String> owners = new TreeSet<>();
+        try (Statement statement = connection.createStatement();
+             ResultSet rows = statement.executeQuery("SELECT DISTINCT owner_id FROM mechanium_content_owners")) {
+            while (rows.next()) owners.add(rows.getString(1));
+        } catch (SQLException exception) {
+            throw failure("list content owners", exception);
+        }
+        Map<String, Set<String>> removed = new LinkedHashMap<>();
+        for (String owner : owners) {
+            if (active.contains(owner)) continue;
+            Map<String, Set<String>> stale = reconcileContentOwner(owner, Map.of());
+            stale.forEach((type, ids) -> removed.computeIfAbsent(type, ignored -> new LinkedHashSet<>()).addAll(ids));
+        }
+        Map<String, Set<String>> result = new LinkedHashMap<>();
+        removed.forEach((type, ids) -> result.put(type, Set.copyOf(ids)));
+        return Map.copyOf(result);
+    }
+
+    @Override public synchronized void commitContentTransaction() {
+        try {
+            if (connection.getAutoCommit()) throw new IllegalStateException("No active MECHANIUM content transaction.");
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (SQLException exception) {
+            try { connection.rollback(); } catch (SQLException rollback) { exception.addSuppressed(rollback); }
+            try { connection.setAutoCommit(true); } catch (SQLException reset) { exception.addSuppressed(reset); }
+            throw failure("commit content transaction", exception);
+        }
+    }
+
+    @Override public synchronized void rollbackContentTransaction() {
+        try {
+            if (!connection.getAutoCommit()) {
+                connection.rollback();
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException exception) {
+            throw failure("rollback content transaction", exception);
+        }
+    }
+
+    private boolean connectionAutoCommit() {
+        try { return connection.getAutoCommit(); }
+        catch (SQLException exception) { throw failure("inspect transaction state", exception); }
+    }
+
+    private String tableForContentType(String contentType) {
+        return switch (contentType) {
+            case CATEGORY -> "mechanium_categories";
+            case ITEM -> "mechanium_items";
+            case RECIPE -> "mechanium_recipes";
+            case MOB_DROP -> "mechanium_mob_drops";
+            case MACHINE -> "mechanium_machines";
+            default -> throw new IllegalArgumentException("Unknown content type: " + contentType);
+        };
     }
 
     private IllegalStateException failure(String action, SQLException exception) {

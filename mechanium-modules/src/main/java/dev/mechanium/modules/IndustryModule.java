@@ -2,6 +2,7 @@ package dev.mechanium.modules;
 
 import dev.mechanium.api.model.*;
 import java.util.List;
+import java.util.Map;
 
 final class IndustryModule extends AbstractBuiltinModule {
     @Override public String id() { return "industry"; }

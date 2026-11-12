@@ -1,0 +1,15 @@
+name: MECHANIUM
+version: ${project.version}
+main: dev.mechanium.plugin.MechaniumPlugin
+api-version: '1.21'
+load: POSTWORLD
+authors: [davitremea1-ops]
+description: Motor independente de progressão histórica, tecnologia, indústria e addons.
+commands:
+  mechanium:
+    description: Comandos do MECHANIUM
+    usage: /mechanium help
+permissions:
+  mechanium.admin:
+    description: Administração dos sistemas MECHANIUM
+    default: op

@@ -1,0 +1,44 @@
+storage:
+  database: mechanium.db
+
+progression:
+  default-era: ancient
+  eras:
+    - id: ancient
+      name: Antiguidade
+      order: 0
+    - id: medieval
+      name: Idade Média
+      order: 1
+    - id: renaissance
+      name: Renascimento
+      order: 2
+    - id: industrial_revolution
+      name: Revolução Industrial
+      order: 3
+    - id: electrification
+      name: Eletrificação
+      order: 4
+    - id: modern
+      name: Era Moderna
+      order: 5
+
+modules:
+  industry:
+    enabled: true
+  agriculture:
+    enabled: true
+  energy:
+    enabled: true
+  storage:
+    enabled: true
+  environment:
+    enabled: true
+  optional-fantasy:
+    enabled: false
+  optional-futuristic:
+    enabled: false
+
+addons:
+  directory: addons
+  api-version: '1'

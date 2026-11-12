@@ -34,7 +34,8 @@
 - [ ] Redes de energia e fluidos
 - [x] Cofre privado inicial com proprietário, lista de acesso e proteções de bloco
 - [ ] Rede completa de armazéns, propriedade compartilhada e logística
-- [ ] Agricultura, geologia e processamento com gameplay funcional
+- [x] Drops agrícolas iniciais de subprodutos animais condicionados à pesquisa
+- [ ] Agricultura completa, geologia e processamento com gameplay funcional
 - [ ] Persistência e recuperação de máquinas após reinício
 
 ## Marco 3 — Portabilidade

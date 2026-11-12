@@ -56,8 +56,8 @@ A fundação ainda está em desenvolvimento e não substitui todas as funcionali
 
 ## CI e estado
 
-- [Build Java 21 / Maven verify — run 43228562070](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43228562070) — **BUILD SUCCESS** no commit `6104cae`.
-- Foram executados **31 testes automatizados**, sem falhas ou erros; o projeto principal e o addon de exemplo também compilaram.
+- [Build Java 21 / Maven verify — run 43323097264](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323097264) — **BUILD SUCCESS** no commit `0535006`.
+- Foram executados **33 testes automatizados**, sem falhas ou erros; o projeto principal e o addon de exemplo também compilaram.
 - O JAR foi gerado pelo Maven Shade, mas o upload do artefato falhou porque a quota de armazenamento do GitHub Actions está esgotada. O passo é não bloqueante; este run não oferece download do JAR.
 - A base ainda não foi validada em servidor real e não é uma versão de produção.
 

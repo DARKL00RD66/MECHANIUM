@@ -23,6 +23,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     private final Map<String, ContentCategory> categories = new ConcurrentHashMap<>();
     private final Map<String, ItemDefinition> items = new ConcurrentHashMap<>();
     private final Map<String, RecipeDefinition> recipes = new ConcurrentHashMap<>();
+    private final Map<String, MobDropDefinition> mobDrops = new ConcurrentHashMap<>();
     private final Set<String> modules = ConcurrentHashMap.newKeySet();
 
     public DefaultMechaniumApi(MechaniumDataStore dataStore) {
@@ -183,6 +184,28 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     }
     @Override public Optional<RecipeDefinition> getRecipe(String id) { return Optional.ofNullable(recipes.get(normalize(id))); }
     @Override public Collection<RecipeDefinition> getRecipes() { return recipes.values().stream().sorted(Comparator.comparing(RecipeDefinition::id)).toList(); }
+
+    @Override public synchronized boolean registerMobDrop(MobDropDefinition value) {
+        Objects.requireNonNull(value, "drop");
+        ItemDefinition resultItem = items.get(value.resultItemId());
+        if (resultItem == null) throw new IllegalArgumentException(
+                "Mob drop references unregistered result item: " + value.resultItemId());
+        if (value.maxAmount() > resultItem.maxStackSize()) throw new IllegalArgumentException(
+                "Mob drop maximum amount exceeds item max stack size for " + resultItem.id());
+        if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
+        MobDropDefinition old = mobDrops.putIfAbsent(value.id(), value);
+        if (old != null) return old.equals(value);
+        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumMobDropRegisterEvent(value));
+        return true;
+    }
+
+    @Override public Optional<MobDropDefinition> getMobDrop(String id) {
+        return Optional.ofNullable(mobDrops.get(normalize(id)));
+    }
+
+    @Override public Collection<MobDropDefinition> getMobDrops() {
+        return mobDrops.values().stream().sorted(Comparator.comparing(MobDropDefinition::id)).toList();
+    }
     @Override public boolean canCraft(UUID player, String id) {
         RecipeDefinition recipe = recipes.get(normalize(id));
         if (recipe == null) return false;
@@ -200,6 +223,13 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             if (!categories.containsKey(item.categoryId())) errors.add("Item " + item.id() + " references missing category " + item.categoryId());
             if (item.requiredTechnologyId() != null && !technologies.containsKey(item.requiredTechnologyId()))
                 errors.add("Item " + item.id() + " references missing technology " + item.requiredTechnologyId());
+        }
+        for (MobDropDefinition drop : mobDrops.values()) {
+            ItemDefinition result = items.get(drop.resultItemId());
+            if (result == null) errors.add("Mob drop " + drop.id() + " references missing result item " + drop.resultItemId());
+            else if (drop.maxAmount() > result.maxStackSize()) errors.add("Mob drop " + drop.id() + " exceeds item max stack size");
+            if (drop.requiredTechnologyId() != null && !technologies.containsKey(drop.requiredTechnologyId()))
+                errors.add("Mob drop " + drop.id() + " references missing technology " + drop.requiredTechnologyId());
         }
         for (RecipeDefinition recipe : recipes.values()) {
             if (!items.containsKey(recipe.resultItemId())) errors.add("Recipe " + recipe.id() + " has missing result item " + recipe.resultItemId());

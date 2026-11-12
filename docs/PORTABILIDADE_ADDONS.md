@@ -36,6 +36,11 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 | SensibleToolbox | Ferramentas | Ferramentas utilitárias não redundantes |
 | GeyserHeads | Cosméticos Bedrock/Geyser | Compatibilidade visual opcional |
 
+## Implementação inicial registrada
+
+- **PrivateStorage (parcial):** o módulo `storage` já registra `private_storage_crate` e uma receita condicionada a `warehouse_accounting`. O plugin protege o barril por UUID do proprietário, permite até 32 UUIDs confiáveis e bloqueia abertura/retirada por funil, quebra por terceiros, pistões e explosões. O acesso pode ser gerenciado com `/mechanium storage trust|untrust|list`.
+- Ainda não foram portados recursos de rede, armazenamento em massa, filtros, pesquisa global, transferência automática ou permissões por grupos.
+
 ## Regras de portabilidade
 
 1. Auditar repositório, commit, licença, dependências e funcionalidades antes de copiar código.

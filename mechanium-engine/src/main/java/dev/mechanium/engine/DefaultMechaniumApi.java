@@ -27,6 +27,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     private final Map<String, MobDropDefinition> mobDrops = new ConcurrentHashMap<>();
     private final Map<String, MachineDefinition> machines = new ConcurrentHashMap<>();
     private final Set<String> modules = ConcurrentHashMap.newKeySet();
+    private ContentScope activeContentScope;
 
     public DefaultMechaniumApi(MechaniumDataStore dataStore) {
         this.dataStore = Objects.requireNonNull(dataStore, "dataStore");
@@ -42,6 +43,45 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     }
 
     @Override public String getApiVersion() { return API_VERSION; }
+
+    @Override
+    public synchronized MechaniumContentRegistrationScope openContentScope(String ownerId) {
+        String normalizedOwner = normalize(ownerId);
+        if (normalizedOwner.isBlank()) throw new IllegalArgumentException("Content owner cannot be blank.");
+        if (activeContentScope != null) throw new IllegalStateException("Nested MECHANIUM content scopes are not supported.");
+        activeContentScope = new ContentScope(normalizedOwner);
+        return activeContentScope;
+    }
+
+    @Override
+    public synchronized void pruneInactiveContentOwners(Set<String> activeOwnerIds) {
+        if (activeContentScope != null) throw new IllegalStateException("Cannot prune content while a registration scope is active.");
+        if (contentStore == null) return;
+        contentStore.beginContentTransaction();
+        try {
+            Map<String, Set<String>> removed = contentStore.pruneInactiveContentOwners(
+                    activeOwnerIds == null ? Set.of() : Set.copyOf(activeOwnerIds));
+            contentStore.commitContentTransaction();
+            removeContent(removed);
+        } catch (RuntimeException exception) {
+            try { contentStore.rollbackContentTransaction(); }
+            catch (RuntimeException rollbackException) { exception.addSuppressed(rollbackException); }
+            throw exception;
+        }
+    }
+
+    private void trackContent(String type, String id) {
+        if (activeContentScope != null) activeContentScope.track(type, id);
+    }
+
+    private void removeContent(Map<String, Set<String>> removed) {
+        if (removed == null || removed.isEmpty()) return;
+        removed.getOrDefault(MechaniumContentStore.CATEGORY, Set.of()).forEach(categories::remove);
+        removed.getOrDefault(MechaniumContentStore.ITEM, Set.of()).forEach(items::remove);
+        removed.getOrDefault(MechaniumContentStore.RECIPE, Set.of()).forEach(recipes::remove);
+        removed.getOrDefault(MechaniumContentStore.MOB_DROP, Set.of()).forEach(mobDrops::remove);
+        removed.getOrDefault(MechaniumContentStore.MACHINE, Set.of()).forEach(machines::remove);
+    }
     @Override public boolean registerEra(EraDefinition era) {
         Objects.requireNonNull(era, "era");
         EraDefinition old = eras.putIfAbsent(era.id(), era);
@@ -129,9 +169,14 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public synchronized boolean registerCategory(ContentCategory value) {
         Objects.requireNonNull(value);
         ContentCategory old = categories.get(value.id());
-        if (old != null) return old.equals(value);
+        if (old != null) {
+            if (!old.equals(value)) return false;
+            trackContent(MechaniumContentStore.CATEGORY, value.id());
+            return true;
+        }
         persist(() -> contentStore.saveCategory(value));
         categories.put(value.id(), value);
+        trackContent(MechaniumContentStore.CATEGORY, value.id());
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumCategoryRegisterEvent(value));
         return true;
     }
@@ -143,9 +188,14 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         if (!categories.containsKey(value.categoryId())) throw new IllegalArgumentException("Unknown item category: " + value.categoryId());
         validateTechnology(value.requiredTechnologyId());
         ItemDefinition old = items.get(value.id());
-        if (old != null) return old.equals(value);
+        if (old != null) {
+            if (!old.equals(value)) return false;
+            trackContent(MechaniumContentStore.ITEM, value.id());
+            return true;
+        }
         persist(() -> contentStore.saveItem(value));
         items.put(value.id(), value);
+        trackContent(MechaniumContentStore.ITEM, value.id());
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumItemRegisterEvent(value));
         return true;
     }
@@ -180,9 +230,14 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         }
         if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
         RecipeDefinition old = recipes.get(value.id());
-        if (old != null) return old.equals(value);
+        if (old != null) {
+            if (!old.equals(value)) return false;
+            trackContent(MechaniumContentStore.RECIPE, value.id());
+            return true;
+        }
         persist(() -> contentStore.saveRecipe(value));
         recipes.put(value.id(), value);
+        trackContent(MechaniumContentStore.RECIPE, value.id());
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumRecipeRegisterEvent(value));
         return true;
     }
@@ -198,9 +253,14 @@ public final class DefaultMechaniumApi implements MechaniumApi {
                 "Mob drop maximum amount exceeds item max stack size for " + resultItem.id());
         if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
         MobDropDefinition old = mobDrops.get(value.id());
-        if (old != null) return old.equals(value);
+        if (old != null) {
+            if (!old.equals(value)) return false;
+            trackContent(MechaniumContentStore.MOB_DROP, value.id());
+            return true;
+        }
         persist(() -> contentStore.saveMobDrop(value));
         mobDrops.put(value.id(), value);
+        trackContent(MechaniumContentStore.MOB_DROP, value.id());
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumMobDropRegisterEvent(value));
         return true;
     }
@@ -242,9 +302,14 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         }
         validateTechnology(value.requiredTechnologyId());
         MachineDefinition old = machines.get(value.id());
-        if (old != null) return old.equals(value);
+        if (old != null) {
+            if (!old.equals(value)) return false;
+            trackContent(MechaniumContentStore.MACHINE, value.id());
+            return true;
+        }
         persist(() -> contentStore.saveMachine(value));
         machines.put(value.id(), value);
+        trackContent(MechaniumContentStore.MACHINE, value.id());
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumMachineRegisterEvent(value));
         return true;
     }
@@ -313,6 +378,88 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             }
         }
         return List.copyOf(errors);
+    }
+
+
+    private final class ContentScope implements MechaniumContentRegistrationScope {
+        private final String ownerId;
+        private final Map<String, Set<String>> activeContent = new HashMap<>();
+        private final Map<String, EraDefinition> eraSnapshot = new HashMap<>(eras);
+        private final Map<String, TechnologyDefinition> technologySnapshot = new HashMap<>(technologies);
+        private final Map<String, ContentCategory> categorySnapshot = new HashMap<>(categories);
+        private final Map<String, ItemDefinition> itemSnapshot = new HashMap<>(items);
+        private final Map<String, RecipeDefinition> recipeSnapshot = new HashMap<>(recipes);
+        private final Map<String, MobDropDefinition> mobDropSnapshot = new HashMap<>(mobDrops);
+        private final Map<String, MachineDefinition> machineSnapshot = new HashMap<>(machines);
+        private final Set<String> moduleSnapshot = new HashSet<>(modules);
+        private boolean transactionOpen;
+        private boolean completed;
+
+        private ContentScope(String ownerId) {
+            this.ownerId = ownerId;
+            if (contentStore != null) {
+                contentStore.beginContentTransaction();
+                transactionOpen = true;
+            }
+        }
+
+        private void track(String type, String id) {
+            if (completed) throw new IllegalStateException("Content registration scope is already closed.");
+            activeContent.computeIfAbsent(type, ignored -> new LinkedHashSet<>()).add(id);
+        }
+
+        @Override
+        public void commit() {
+            synchronized (DefaultMechaniumApi.this) {
+                ensureActive();
+                Map<String, Set<String>> removed = Map.of();
+                if (contentStore != null) {
+                    Map<String, Set<String>> snapshot = new HashMap<>();
+                    activeContent.forEach((type, ids) -> snapshot.put(type, Set.copyOf(ids)));
+                    removed = contentStore.reconcileContentOwner(ownerId, Map.copyOf(snapshot));
+                    contentStore.commitContentTransaction();
+                    transactionOpen = false;
+                }
+                removeContent(removed);
+                completed = true;
+                activeContentScope = null;
+            }
+        }
+
+        @Override
+        public void close() {
+            synchronized (DefaultMechaniumApi.this) {
+                if (completed) return;
+                RuntimeException rollbackFailure = null;
+                if (contentStore != null && transactionOpen) {
+                    try { contentStore.rollbackContentTransaction(); }
+                    catch (RuntimeException exception) { rollbackFailure = exception; }
+                }
+                restore(eras, eraSnapshot);
+                restore(technologies, technologySnapshot);
+                restore(categories, categorySnapshot);
+                restore(items, itemSnapshot);
+                restore(recipes, recipeSnapshot);
+                restore(mobDrops, mobDropSnapshot);
+                restore(machines, machineSnapshot);
+                modules.clear();
+                modules.addAll(moduleSnapshot);
+                completed = true;
+                activeContentScope = null;
+                if (rollbackFailure != null) throw rollbackFailure;
+            }
+        }
+
+        private void ensureActive() {
+            if (completed || activeContentScope != this) {
+                throw new IllegalStateException("Content registration scope is not active.");
+            }
+        }
+    }
+
+    private static <T> void restore(Map<String, T> target, Map<String, T> snapshot) {
+        target.clear();
+        target.putAll(snapshot);
     }
 
     private void validateTechnology(String id) {

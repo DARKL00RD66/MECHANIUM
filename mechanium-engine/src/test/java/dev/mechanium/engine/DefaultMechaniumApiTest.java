@@ -56,6 +56,22 @@ class DefaultMechaniumApiTest {
     }
 
     @Test
+    void refusesRecipeOutputAboveCustomItemStackLimit() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("recipe-stack-limit.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            api.registerTechnology(new TechnologyDefinition("smithing", "Metalurgia", "ancient", 0, List.of()));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory("industry", "Indústria", "Industrial"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("small_gear", "Engrenagem", "IRON_INGOT",
+                    List.of(), 0, 4, "industry", "smithing"));
+            assertThrows(IllegalArgumentException.class, () -> api.registerRecipe(
+                    new dev.mechanium.api.model.RecipeDefinition("too_many_gears",
+                            dev.mechanium.api.model.RecipeDefinition.Type.SHAPELESS, "small_gear", 5,
+                            List.of(), java.util.Map.of('I', "IRON_INGOT"), "smithing")));
+        }
+    }
+
+    @Test
     void refusesTechnologyWithUnknownEra() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(directory.resolve("unknown-era.db"), Logger.getLogger("test"))) {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);

@@ -2,33 +2,37 @@
 
 ## Build automatizado
 
-Execução: [GitHub Actions 43152407542](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43152407542)
+Execução: [GitHub Actions 43228562070](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43228562070)
 
 - Java: Temurin 21
-- Build: Maven `clean verify`
-- Resultado: `BUILD SUCCESS`
-- Testes: 8 executados, 0 falhas, 0 erros.
+- Build principal: Maven `clean verify`
+- Resultado: **BUILD SUCCESS**
+- Testes automatizados: **31 executados, 0 falhas, 0 erros**
+- API pública instalada no repositório Maven local para compilar o exemplo de addon.
+- Projeto-exemplo de addon compilado e empacotado com sucesso.
 
 ### Detalhamento
 
 | Módulo | Testes | Escopo |
 |---|---:|---|
-| `mechanium-api` | 3 | Normalização de IDs, custo inválido e dependência circular |
-| `mechanium-storage` | 3 | Persistência após reabertura, débito atômico, saldo insuficiente e grants negativos |
-| `mechanium-engine` | 2 | Bloqueio por era, pré-requisitos, pontos e rejeição de era desconhecida |
+| `mechanium-api` | 13 | Validação de receitas, máquinas, drops e tecnologias |
+| `mechanium-storage` | 5 | Persistência após reabertura, débito atômico, saldo insuficiente e grants negativos |
+| `mechanium-engine` | 6 | Progressão, desbloqueios, validação de conteúdo, máquinas e drops |
+| `mechanium-addon-loader` | 2 | Classloader e visibilidade de dependências entre addons |
+| `mechanium-plugin` | 5 | Política de acesso ao armazenamento privado |
 
 ## Artefato
 
-O build gerou o JAR em `mechanium-plugin/target/MECHANIUM-0.1.0-SNAPSHOT.jar`. O passo de upload do workflow não conseguiu armazená-lo porque a cota de artefatos do GitHub Actions estava esgotada. Isso não alterou o resultado de Maven; significa apenas que o run não oferece download do JAR.
+O Maven Shade gerou o JAR em `mechanium-plugin/target/MECHANIUM-0.1.0-SNAPSHOT.jar`. O passo de upload do GitHub Actions falhou porque a quota de artefatos do repositório estava esgotada. Como esse passo usa `continue-on-error`, o problema de armazenamento não altera o resultado de `mvn clean verify`; significa apenas que o run não oferece download do JAR.
 
 ## Ainda não testado
 
 - Inicialização em Paper 1.21.11.
 - Inicialização em Purpur 1.21.11.
 - Registro de itens e receitas no jogo.
-- Operação de máquinas e redes.
-- Carregamento de addon externo real.
+- Operação de máquinas e redes em servidor real.
+- Carregamento de addon externo real no servidor.
 - Persistência após reinício de servidor real.
-- Compatibilidade funcional dos projetos listados em PORTABILIDADE_ADDONS.md.
+- Compatibilidade funcional dos projetos listados em `PORTABILIDADE_ADDONS.md`.
 
 Não marcar esses itens como compatíveis até a execução dos testes correspondentes.

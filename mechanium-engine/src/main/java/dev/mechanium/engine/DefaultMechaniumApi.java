@@ -66,7 +66,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             Bukkit.getPluginManager().callEvent(new MechaniumResearchPointsChangeEvent(playerId, previousPoints, newPoints));
         }
     }
-    @Override public boolean registerTechnology(TechnologyDefinition value) {
+    @Override public synchronized boolean registerTechnology(TechnologyDefinition value) {
         Objects.requireNonNull(value);
         if (!eras.containsKey(value.requiredEraId())) throw new IllegalArgumentException("Technology references unregistered era: " + value.requiredEraId());
         for (String prerequisite : value.prerequisites()) if (!technologies.containsKey(prerequisite))
@@ -119,24 +119,26 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public void registerModule(String id) { modules.add(normalize(id)); }
     @Override public Set<String> getRegisteredModules() { return Collections.unmodifiableSet(new TreeSet<>(modules)); }
 
-    @Override public boolean registerCategory(ContentCategory value) {
+    @Override public synchronized boolean registerCategory(ContentCategory value) {
         Objects.requireNonNull(value);
-        ContentCategory old = categories.putIfAbsent(value.id(), value);
+        ContentCategory old = categories.get(value.id());
         if (old != null) return old.equals(value);
         persist(() -> contentStore.saveCategory(value));
+        categories.put(value.id(), value);
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumCategoryRegisterEvent(value));
         return true;
     }
     @Override public Optional<ContentCategory> getCategory(String id) { return Optional.ofNullable(categories.get(normalize(id))); }
     @Override public Collection<ContentCategory> getCategories() { return categories.values().stream().sorted(Comparator.comparing(ContentCategory::id)).toList(); }
 
-    @Override public boolean registerItem(ItemDefinition value) {
+    @Override public synchronized boolean registerItem(ItemDefinition value) {
         Objects.requireNonNull(value);
         if (!categories.containsKey(value.categoryId())) throw new IllegalArgumentException("Unknown item category: " + value.categoryId());
         validateTechnology(value.requiredTechnologyId());
-        ItemDefinition old = items.putIfAbsent(value.id(), value);
+        ItemDefinition old = items.get(value.id());
         if (old != null) return old.equals(value);
         persist(() -> contentStore.saveItem(value));
+        items.put(value.id(), value);
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumItemRegisterEvent(value));
         return true;
     }
@@ -160,13 +162,14 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         return item != null && (item.requiredTechnologyId() == null || canUseTechnology(player, item.requiredTechnologyId()));
     }
 
-    @Override public boolean registerRecipe(RecipeDefinition value) {
+    @Override public synchronized boolean registerRecipe(RecipeDefinition value) {
         Objects.requireNonNull(value);
         if (!items.containsKey(value.resultItemId())) throw new IllegalArgumentException("Recipe result item is not registered: " + value.resultItemId());
         if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
-        RecipeDefinition old = recipes.putIfAbsent(value.id(), value);
+        RecipeDefinition old = recipes.get(value.id());
         if (old != null) return old.equals(value);
         persist(() -> contentStore.saveRecipe(value));
+        recipes.put(value.id(), value);
         if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumRecipeRegisterEvent(value));
         return true;
     }

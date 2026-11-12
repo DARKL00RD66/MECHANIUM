@@ -21,7 +21,7 @@ final class MechaniumMobDropListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onEntityDeath(EntityDeathEvent event) {
-        String entityType = event.getEntityType().name();
+        String entityType = event.getEntity().getType().name();
         Player killer = event.getEntity().getKiller();
 
         for (MobDropDefinition drop : api.getMobDrops()) {

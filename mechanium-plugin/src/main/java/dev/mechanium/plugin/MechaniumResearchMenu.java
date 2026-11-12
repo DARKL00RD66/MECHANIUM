@@ -178,7 +178,7 @@ final class MechaniumResearchMenu implements Listener {
 
         List<DialogBody> body = new ArrayList<>();
         body.add(DialogBody.item(new ItemStack(Material.matchMaterial(item.material()) == null
-                ? Material.BARRIER : Material.matchMaterial(item.material()))));
+                ? Material.BARRIER : Material.matchMaterial(item.material()))).build());
         body.add(DialogBody.plainMessage(Component.text()
                 .append(Component.text("Categoria: ", NamedTextColor.DARK_GRAY))
                 .append(Component.text(category + "\n", NamedTextColor.GRAY))
@@ -426,16 +426,16 @@ final class MechaniumResearchMenu implements Listener {
             openResearch(player, 0);
         } else if (action.startsWith("ui_item_detail_")) {
             String[] parts = splitDetailAction(action, "ui_item_detail_");
-            if (parts != null) openItemDetail(player, parts[0], parts[1]);
+            if (parts != null) openItemDetail(player, parts[0], Integer.parseInt(parts[1]));
         } else if (action.startsWith("ui_recipe_detail_")) {
             String[] parts = splitDetailAction(action, "ui_recipe_detail_");
-            if (parts != null) openRecipeDetail(player, parts[0], parts[1]);
+            if (parts != null) openRecipeDetail(player, parts[0], Integer.parseInt(parts[1]));
         } else if (action.startsWith("ui_machine_detail_")) {
             String[] parts = splitDetailAction(action, "ui_machine_detail_");
-            if (parts != null) openMachineDetail(player, parts[0], parts[1]);
+            if (parts != null) openMachineDetail(player, parts[0], Integer.parseInt(parts[1]));
         } else if (action.startsWith("ui_era_detail_")) {
             String[] parts = splitDetailAction(action, "ui_era_detail_");
-            if (parts != null) openEraDetail(player, parts[0], parts[1]);
+            if (parts != null) openEraDetail(player, parts[0], Integer.parseInt(parts[1]));
         }
     }
 

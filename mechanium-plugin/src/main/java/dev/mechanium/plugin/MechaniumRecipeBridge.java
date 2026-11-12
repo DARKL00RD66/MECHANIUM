@@ -1,18 +1,21 @@
 package dev.mechanium.plugin;
 
 import dev.mechanium.api.MechaniumApi;
+import dev.mechanium.api.event.MechaniumRecipeRegisterEvent;
 import dev.mechanium.api.model.RecipeDefinition;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 /** Converts validated MECHANIUM recipes to native Bukkit crafting recipes. */
-final class MechaniumRecipeBridge {
+final class MechaniumRecipeBridge implements Listener {
     private final JavaPlugin plugin;
     private final MechaniumApi api;
     private final Set<NamespacedKey> registered = new LinkedHashSet<>();
@@ -24,6 +27,11 @@ final class MechaniumRecipeBridge {
 
     void registerAll() {
         for (RecipeDefinition recipe : api.getRecipes()) register(recipe);
+    }
+
+    @EventHandler
+    public void onRecipeRegistered(MechaniumRecipeRegisterEvent event) {
+        register(event.recipe());
     }
 
     void register(RecipeDefinition definition) {

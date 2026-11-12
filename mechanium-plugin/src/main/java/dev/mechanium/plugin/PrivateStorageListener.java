@@ -115,7 +115,7 @@ final class PrivateStorageListener implements Listener {
         Location dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
         // Defer world drops until Bukkit has finalized the break event. Another plugin may cancel it later.
         plugin.getServer().getScheduler().runTask(plugin, () -> {
-            if (!block.getType().isAir()) return;
+            if (event.isCancelled() || !block.getType().isAir()) return;
             for (ItemStack content : contents) {
                 block.getWorld().dropItemNaturally(dropLocation, content);
             }

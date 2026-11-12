@@ -157,7 +157,7 @@ final class MechaniumMachineManager implements Listener {
         event.setDropItems(false);
         // Defer drops until all other BlockBreakEvent handlers have had a chance to cancel.
         plugin.getServer().getScheduler().runTask(plugin, () -> {
-            if (!block.getType().isAir()) {
+            if (event.isCancelled() || !block.getType().isAir()) {
                 if (machineState(block).isPresent()) loadedMachines.put(blockKey, block.getLocation());
                 else loadedMachines.remove(blockKey);
                 return;

@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,6 +32,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumAddonLoader addonLoader;
     private MechaniumRecipeBridge recipeBridge;
     private MechaniumResearchMenu researchMenu;
+    private PrivateStorageListener privateStorageListener;
 
     @Override
     public void onEnable() {
@@ -59,7 +61,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
-            Bukkit.getPluginManager().registerEvents(new PrivateStorageListener(this, api), this);
+            privateStorageListener = new PrivateStorageListener(this, api);
+            Bukkit.getPluginManager().registerEvents(privateStorageListener, this);
             researchMenu = new MechaniumResearchMenu(this, api);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
             PluginCommand command = Objects.requireNonNull(getCommand("mechanium"), "mechanium command missing");
@@ -145,6 +148,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                 researchMenu.open(player);
                 return true;
             }
+            case "storage" -> {
+                return handleStorage(sender, args);
+            }
             case "unlock" -> {
                 if (!(sender instanceof Player player)) {
                     sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
@@ -166,6 +172,69 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                 return true;
             }
         }
+    }
+
+    private boolean handleStorage(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
+            return true;
+        }
+        if (privateStorageListener == null || args.length < 2) {
+            player.sendMessage(ChatColor.YELLOW + "Uso: /mechanium storage <trust|untrust|list> [jogador]");
+            return true;
+        }
+
+        Block targetBlock = player.getTargetBlockExact(6);
+        if (targetBlock == null || !privateStorageListener.canManageStorage(player, targetBlock)) {
+            player.sendMessage(ChatColor.RED + "Olhe para um dos seus armazéns privados para gerenciar o acesso.");
+            return true;
+        }
+
+        String action = args[1].toLowerCase(Locale.ROOT);
+        if (action.equals("list")) {
+            List<UUID> trusted = privateStorageListener.trustedPlayers(player, targetBlock);
+            if (trusted.isEmpty()) {
+                player.sendMessage(ChatColor.GRAY + "Nenhum jogador autorizado neste armazém.");
+            } else {
+                player.sendMessage(ChatColor.GOLD + "Jogadores autorizados:");
+                for (UUID id : trusted) {
+                    String name = Optional.ofNullable(Bukkit.getOfflinePlayer(id).getName()).orElse(id.toString());
+                    player.sendMessage(ChatColor.GRAY + "• " + name);
+                }
+            }
+            return true;
+        }
+
+        if (!action.equals("trust") && !action.equals("untrust")) {
+            player.sendMessage(ChatColor.YELLOW + "Uso: /mechanium storage <trust|untrust|list> [jogador]");
+            return true;
+        }
+        if (args.length != 3) {
+            player.sendMessage(ChatColor.YELLOW + "Uso: /mechanium storage " + action + " <jogador>");
+            return true;
+        }
+
+        OfflinePlayer target = Bukkit.getOfflinePlayer(args[2]);
+        if (target.getUniqueId().equals(player.getUniqueId())) {
+            player.sendMessage(ChatColor.RED + "Você já é o proprietário deste armazém.");
+            return true;
+        }
+        if (!target.isOnline() && !target.hasPlayedBefore()) {
+            player.sendMessage(ChatColor.RED + "Esse jogador ainda não entrou neste servidor.");
+            return true;
+        }
+
+        boolean trust = action.equals("trust");
+        boolean changed = privateStorageListener.changeTrustedPlayer(
+                player, targetBlock, target.getUniqueId(), trust);
+        if (changed) {
+            String targetName = Optional.ofNullable(target.getName()).orElse(args[2]);
+            player.sendMessage(ChatColor.GREEN + (trust ? "Acesso concedido a " : "Acesso removido de ")
+                    + targetName + ".");
+        } else {
+            player.sendMessage(ChatColor.RED + "Não foi possível alterar o acesso. Ele pode já estar nesse estado ou o limite de 32 jogadores foi atingido.");
+        }
+        return true;
     }
 
     private boolean handleAdmin(CommandSender sender, String[] args) {
@@ -205,6 +274,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium research" + ChatColor.GRAY + " — abrir o catálogo de pesquisas");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium research info" + ChatColor.GRAY + " — resumo da sua progressão");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium book" + ChatColor.GRAY + " — abrir o catálogo");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium storage trust <jogador>" + ChatColor.GRAY + " — autorizar acesso ao barril observado");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium storage untrust <jogador>" + ChatColor.GRAY + " — remover acesso");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium storage list" + ChatColor.GRAY + " — listar acessos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
         if (sender.hasPermission("mechanium.admin")) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin points <jogador> <quantidade>");
@@ -214,7 +286,12 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("help", "status", "research", "book", "unlock", "admin");
+        if (args.length == 1) return List.of("help", "status", "research", "book", "storage", "unlock", "admin");
+        if (args.length == 2 && args[0].equalsIgnoreCase("storage")) return List.of("trust", "untrust", "list");
+        if (args.length == 3 && args[0].equalsIgnoreCase("storage")
+                && (args[1].equalsIgnoreCase("trust") || args[1].equalsIgnoreCase("untrust"))) {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+        }
         if (args.length == 2 && args[0].equalsIgnoreCase("research")) return List.of("info");
         if (args.length == 2 && args[0].equalsIgnoreCase("unlock")) {
             return api.getTechnologies().stream().map(technology -> technology.id())
@@ -244,6 +321,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             recipeBridge = null;
         }
         researchMenu = null;
+        privateStorageListener = null;
         if (addonLoader != null) {
             addonLoader.close();
             addonLoader = null;

@@ -24,6 +24,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     private final Map<String, ItemDefinition> items = new ConcurrentHashMap<>();
     private final Map<String, RecipeDefinition> recipes = new ConcurrentHashMap<>();
     private final Map<String, MobDropDefinition> mobDrops = new ConcurrentHashMap<>();
+    private final Map<String, MachineDefinition> machines = new ConcurrentHashMap<>();
     private final Set<String> modules = ConcurrentHashMap.newKeySet();
 
     public DefaultMechaniumApi(MechaniumDataStore dataStore) {
@@ -206,6 +207,44 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public Collection<MobDropDefinition> getMobDrops() {
         return mobDrops.values().stream().sorted(Comparator.comparing(MobDropDefinition::id)).toList();
     }
+
+    @Override public synchronized boolean registerMachine(MachineDefinition value) {
+        Objects.requireNonNull(value, "machine");
+        ItemDefinition machineItem = items.get(value.machineItemId());
+        if (machineItem == null) throw new IllegalArgumentException(
+                "Machine references unregistered machine item: " + value.machineItemId());
+        if (!machineItem.material().equals(value.blockMaterial()) || machineItem.maxStackSize() != 1) {
+            throw new IllegalArgumentException("Machine item must use block material " + value.blockMaterial()
+                    + " and maxStackSize 1: " + machineItem.id());
+        }
+        ItemDefinition resultItem = items.get(value.outputItemId());
+        if (resultItem == null) throw new IllegalArgumentException(
+                "Machine references unregistered output item: " + value.outputItemId());
+        if (value.outputAmount() > resultItem.maxStackSize()) {
+            throw new IllegalArgumentException("Machine output exceeds max stack size for " + resultItem.id());
+        }
+        if (value.inputId().startsWith("mechanium:")) {
+            ItemDefinition inputItem = items.get(value.inputId().substring(10));
+            if (inputItem == null) throw new IllegalArgumentException(
+                    "Machine references unregistered input item: " + value.inputId());
+            if (value.inputAmount() > inputItem.maxStackSize()) {
+                throw new IllegalArgumentException("Machine input amount exceeds max stack size for " + inputItem.id());
+            }
+        }
+        validateTechnology(value.requiredTechnologyId());
+        MachineDefinition old = machines.putIfAbsent(value.id(), value);
+        if (old != null) return old.equals(value);
+        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumMachineRegisterEvent(value));
+        return true;
+    }
+
+    @Override public Optional<MachineDefinition> getMachine(String id) {
+        return Optional.ofNullable(machines.get(normalize(id)));
+    }
+
+    @Override public Collection<MachineDefinition> getMachines() {
+        return machines.values().stream().sorted(Comparator.comparing(MachineDefinition::id)).toList();
+    }
     @Override public boolean canCraft(UUID player, String id) {
         RecipeDefinition recipe = recipes.get(normalize(id));
         if (recipe == null) return false;
@@ -223,6 +262,22 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             if (!categories.containsKey(item.categoryId())) errors.add("Item " + item.id() + " references missing category " + item.categoryId());
             if (item.requiredTechnologyId() != null && !technologies.containsKey(item.requiredTechnologyId()))
                 errors.add("Item " + item.id() + " references missing technology " + item.requiredTechnologyId());
+        }
+        for (MachineDefinition machine : machines.values()) {
+            ItemDefinition machineItem = items.get(machine.machineItemId());
+            if (machineItem == null) errors.add("Machine " + machine.id() + " references missing machine item " + machine.machineItemId());
+            else if (!machineItem.material().equals(machine.blockMaterial()) || machineItem.maxStackSize() != 1)
+                errors.add("Machine " + machine.id() + " has an invalid machine item definition");
+            ItemDefinition output = items.get(machine.outputItemId());
+            if (output == null) errors.add("Machine " + machine.id() + " references missing output item " + machine.outputItemId());
+            else if (machine.outputAmount() > output.maxStackSize()) errors.add("Machine " + machine.id() + " output exceeds item max stack size");
+            if (machine.inputId().startsWith("mechanium:")) {
+                ItemDefinition input = items.get(machine.inputId().substring(10));
+                if (input == null) errors.add("Machine " + machine.id() + " references missing custom input " + machine.inputId());
+                else if (machine.inputAmount() > input.maxStackSize()) errors.add("Machine " + machine.id() + " input exceeds item max stack size");
+            }
+            if (!technologies.containsKey(machine.requiredTechnologyId()))
+                errors.add("Machine " + machine.id() + " references missing technology " + machine.requiredTechnologyId());
         }
         for (MobDropDefinition drop : mobDrops.values()) {
             ItemDefinition result = items.get(drop.resultItemId());

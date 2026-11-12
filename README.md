@@ -64,6 +64,7 @@ A fundação ainda está em desenvolvimento e não substitui todas as funcionali
 
 - [Arquitetura](docs/ARQUITETURA.md)
 - [Desenvolvimento de addons externos](docs/ADDONS_EXTERNOS.md)
+- [Projeto-exemplo de addon Maven](examples/mechanium-addon-example/README.md)
 - [Módulos oficiais e opcionais](docs/MODULOS.md)
 - [Matriz de portabilidade](docs/PORTABILIDADE_ADDONS.md)
 - [Licenças e atribuição](docs/LICENCAS_E_ORIGENS.md)

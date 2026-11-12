@@ -24,7 +24,10 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Build and test
-        run: mvn --batch-mode --no-transfer-progress clean verify
+        run: |
+          mvn --batch-mode --no-transfer-progress clean verify
+          mvn --batch-mode --no-transfer-progress -DskipTests -pl mechanium-api -am install
+          mvn --batch-mode --no-transfer-progress -f examples/mechanium-addon-example/pom.xml clean package
       - name: Upload MECHANIUM JAR (optional; GitHub artifact quota may be full)
         continue-on-error: true
         uses: actions/upload-artifact@v4

@@ -2,12 +2,12 @@
 
 ## Build automatizado
 
-Execução: [GitHub Actions 43323554006](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323554006)
+Execução: [GitHub Actions 43323981115](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323981115)
 
 - Java: Temurin 21
 - Build principal: Maven `clean verify`
 - Resultado: **BUILD SUCCESS**
-- Testes automatizados: **36 executados, 0 falhas, 0 erros**
+- Testes automatizados: **37 executados, 0 falhas, 0 erros**
 - API pública instalada no repositório Maven local para compilar o exemplo de addon.
 - Projeto-exemplo de addon compilado e empacotado com sucesso.
 
@@ -16,7 +16,7 @@ Execução: [GitHub Actions 43323554006](https://github.com/davitremea1-ops/MECH
 | Módulo | Testes | Escopo |
 |---|---:|---|
 | `mechanium-api` | 16 | Validação de itens, receitas, máquinas, drops e tecnologias |
-| `mechanium-storage` | 5 | Persistência após reabertura, débito atômico, saldo insuficiente e grants negativos |
+| `mechanium-storage` | 6 | Persistência de jogadores, conteúdo, máquinas e drops após reabertura; débito atômico e limites de saldo |
 | `mechanium-engine` | 6 | Progressão, desbloqueios, validação de conteúdo, máquinas e drops |
 | `mechanium-addon-loader` | 2 | Classloader e visibilidade de dependências entre addons |
 | `mechanium-plugin` | 7 | Política de acesso ao armazenamento privado e agregação de minérios |

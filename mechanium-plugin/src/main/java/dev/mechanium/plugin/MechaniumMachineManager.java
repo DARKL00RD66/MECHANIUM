@@ -141,21 +141,33 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
 
-        BlockState state = event.getBlock().getState();
+        Block block = event.getBlock();
+        List<ItemStack> contents = new ArrayList<>();
+        BlockState state = block.getState();
         if (state instanceof Dispenser dispenser) {
             for (ItemStack content : dispenser.getInventory().getContents()) {
-                if (content != null && !content.getType().isAir()) {
-                    event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), content.clone());
-                }
+                if (content != null && !content.getType().isAir()) contents.add(content.clone());
             }
         }
-        event.setDropItems(false);
-        api.getMachine(details.machineId())
+        ItemStack recovered = api.getMachine(details.machineId())
                 .flatMap(definition -> api.createItemStack(definition.machineItemId(), 1))
-                .or(() -> Optional.of(new ItemStack(Material.DISPENSER)))
-                .ifPresent(item -> event.getBlock().getWorld().dropItemNaturally(
-                        event.getBlock().getLocation().add(0.5, 0.5, 0.5), item));
-        loadedMachines.remove(key(event.getBlock().getLocation()));
+                .orElseGet(() -> new ItemStack(Material.DISPENSER));
+        Location dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
+        String blockKey = key(block.getLocation());
+        event.setDropItems(false);
+        // Defer drops until all other BlockBreakEvent handlers have had a chance to cancel.
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            if (!block.getType().isAir()) {
+                if (machineState(block).isPresent()) loadedMachines.put(blockKey, block.getLocation());
+                else loadedMachines.remove(blockKey);
+                return;
+            }
+            loadedMachines.remove(blockKey);
+            for (ItemStack content : contents) {
+                block.getWorld().dropItemNaturally(dropLocation, content);
+            }
+            block.getWorld().dropItemNaturally(dropLocation, recovered);
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

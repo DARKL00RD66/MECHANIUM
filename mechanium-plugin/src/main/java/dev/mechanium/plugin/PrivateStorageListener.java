@@ -100,20 +100,27 @@ final class PrivateStorageListener implements Listener {
             return;
         }
 
-        BlockState state = event.getBlock().getState();
+        Block block = event.getBlock();
+        List<ItemStack> contents = new ArrayList<>();
+        BlockState state = block.getState();
         if (state instanceof Container container) {
             for (ItemStack content : container.getInventory().getContents()) {
-                if (content != null && !content.getType().isAir()) {
-                    event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), content.clone());
-                }
+                if (content != null && !content.getType().isAir()) contents.add(content.clone());
             }
         }
 
         event.setDropItems(false);
         ItemStack recovered = api.createItemStack(STORAGE_ITEM_ID, 1)
                 .orElseGet(() -> new ItemStack(Material.BARREL));
-        Location dropLocation = event.getBlock().getLocation().add(0.5, 0.5, 0.5);
-        event.getBlock().getWorld().dropItemNaturally(dropLocation, recovered);
+        Location dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
+        // Defer world drops until Bukkit has finalized the break event. Another plugin may cancel it later.
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            if (!block.getType().isAir()) return;
+            for (ItemStack content : contents) {
+                block.getWorld().dropItemNaturally(dropLocation, content);
+            }
+            block.getWorld().dropItemNaturally(dropLocation, recovered);
+        });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

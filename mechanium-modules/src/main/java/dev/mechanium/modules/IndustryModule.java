@@ -13,10 +13,19 @@ final class IndustryModule extends AbstractBuiltinModule {
                 List.of("&8Componente industrial básico"), 0, 64, "industrial_components", "basic_mechanics"));
         api.registerItem(new ItemDefinition("copper_coil", "&6Bobina de cobre", "COPPER_INGOT",
                 List.of("&8Componente para sistemas elétricos"), 0, 64, "industrial_components", "steam_power"));
+        api.registerItem(new ItemDefinition("mechanical_press", "&6Prensa mecânica", "DISPENSER",
+                List.of("&8Máquina industrial básica", "&7Entrada: primeiro espaço", "&7Saída: último espaço"),
+                0, 1, "industrial_components", "basic_mechanics"));
         api.registerRecipe(new RecipeDefinition("mechanical_parts_recipe", RecipeDefinition.Type.SHAPED,
                 "mechanical_parts", 4, List.of(" I ", "III"), Map.of('I', "IRON_INGOT"), "basic_mechanics"));
         api.registerRecipe(new RecipeDefinition("copper_coil_recipe", RecipeDefinition.Type.SHAPELESS,
                 "copper_coil", 1, List.of(), Map.of('C', "COPPER_INGOT"), "steam_power"));
+        api.registerRecipe(new RecipeDefinition("mechanical_press_recipe", RecipeDefinition.Type.SHAPED,
+                "mechanical_press", 1, List.of("III", "IPI", "III"),
+                Map.of('I', "IRON_INGOT", 'P', "PISTON"), "basic_mechanics"));
+        api.registerMachine(new MachineDefinition("mechanical_press", "Prensa mecânica",
+                "mechanical_press", "DISPENSER", "IRON_INGOT", 2,
+                "mechanical_parts", 1, 100, "basic_mechanics"));
     }
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(

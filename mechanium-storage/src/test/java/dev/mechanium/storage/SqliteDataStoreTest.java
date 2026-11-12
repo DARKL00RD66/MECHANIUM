@@ -158,4 +158,29 @@ class SqliteDataStoreTest {
         }
     }
 
+
+    @Test
+    void migrationFromSchemaThreeAdoptsOnlyExistingLegacyDefinitions() throws Exception {
+        Path database = directory.resolve("legacy-v3.db");
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            store.saveCategory(new ContentCategory("industrial_components", "Industrial", "Legacy built-in category"));
+        }
+
+        try (var connection = java.sql.DriverManager.getConnection("jdbc:sqlite:" + database.toAbsolutePath());
+             var statement = connection.createStatement()) {
+            statement.execute("DROP TABLE mechanium_content_owners");
+            statement.execute("DELETE FROM mechanium_schema_version WHERE version >= 4");
+        }
+
+        try (SqliteDataStore migrated = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            migrated.beginContentTransaction();
+            Map<String, Set<String>> removed = migrated.reconcileContentOwner("module:industry", Map.of());
+            migrated.commitContentTransaction();
+
+            assertEquals(Set.of("industrial_components"), removed.get("category"));
+            assertFalse(removed.containsKey("item"),
+                    "Legacy ownership must not be seeded for item IDs that do not exist in the database");
+        }
+    }
+
 }

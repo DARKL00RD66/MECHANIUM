@@ -19,6 +19,8 @@
 - Módulos opcionais de fantasia e futuro, desativados por padrão.
 - Carregador de addons externos com descriptor, validação de versão de API, dependências, classloaders e ciclo de vida.
 - Bootstrap Bukkit/Paper, comandos iniciais e configuração.
+- Menu paginado de pesquisas dentro do jogo, com estados de era, pré-requisitos, saldo científico e desbloqueio via clique.
+- Receitas criadas por addons após a inicialização são encaminhadas automaticamente ao registro de crafting; receitas do MECHANIUM são removidas no desligamento.
 - Empacotamento Maven em um JAR com módulos e dependências de runtime.
 
 ## Limitações e trabalho pendente

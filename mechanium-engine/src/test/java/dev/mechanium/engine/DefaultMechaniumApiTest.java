@@ -87,6 +87,9 @@ class DefaultMechaniumApiTest {
             assertTrue(api.registerMobDrop(drop), "Identical registration must be idempotent");
             assertEquals(drop, api.getMobDrop("COW_ANIMAL_FAT").orElseThrow());
             assertEquals(List.of(drop), api.getMobDrops());
+            DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
+            assertEquals(drop, reloaded.getMobDrop("cow_animal_fat").orElseThrow(),
+                    "Mob drop definitions must be restored from persistent storage");
             assertTrue(api.validateContent().isEmpty());
 
             assertThrows(IllegalArgumentException.class, () -> api.registerMobDrop(
@@ -119,6 +122,9 @@ class DefaultMechaniumApiTest {
             assertTrue(api.registerMachine(machine), "Identical machine registration must be idempotent");
             assertEquals(machine, api.getMachine("MECHANICAL_PRESS").orElseThrow());
             assertEquals(List.of(machine), api.getMachines());
+            DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
+            assertEquals(machine, reloaded.getMachine("mechanical_press").orElseThrow(),
+                    "Machine definitions must be restored from persistent storage");
             assertTrue(api.validateContent().isEmpty());
 
             assertThrows(IllegalArgumentException.class, () -> api.registerMachine(

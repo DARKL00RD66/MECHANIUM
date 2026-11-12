@@ -136,10 +136,13 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
         try {
             ensurePlayer(playerId);
             try (PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE mechanium_players SET research_points = research_points + ? WHERE uuid = ?")) {
+                    "UPDATE mechanium_players SET research_points = research_points + ? WHERE uuid = ? AND research_points <= ?")) {
                 statement.setLong(1, amount);
                 statement.setString(2, playerId.toString());
-                statement.executeUpdate();
+                statement.setLong(3, Long.MAX_VALUE - amount);
+                if (statement.executeUpdate() != 1) {
+                    throw new IllegalArgumentException("Research point balance would exceed the maximum supported value");
+                }
             }
         } catch (SQLException exception) {
             throw failure("add research points", exception);

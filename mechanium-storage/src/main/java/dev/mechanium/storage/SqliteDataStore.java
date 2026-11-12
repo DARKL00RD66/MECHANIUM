@@ -71,8 +71,11 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
             statement.execute("CREATE TABLE IF NOT EXISTS mechanium_items(id TEXT PRIMARY KEY,display_name TEXT NOT NULL,material TEXT NOT NULL,lore TEXT NOT NULL,custom_model_data INTEGER NOT NULL,max_stack_size INTEGER NOT NULL,category_id TEXT NOT NULL,required_technology_id TEXT)");
             statement.execute("CREATE TABLE IF NOT EXISTS mechanium_recipes(id TEXT PRIMARY KEY,type TEXT NOT NULL,result_item_id TEXT NOT NULL,result_amount INTEGER NOT NULL,shape TEXT NOT NULL,ingredients TEXT NOT NULL,required_technology_id TEXT)");
             statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (2)");
+            statement.execute("CREATE TABLE IF NOT EXISTS mechanium_mob_drops(id TEXT PRIMARY KEY,entity_type TEXT NOT NULL,result_item_id TEXT NOT NULL,min_amount INTEGER NOT NULL,max_amount INTEGER NOT NULL,chance REAL NOT NULL,required_technology_id TEXT)");
+            statement.execute("CREATE TABLE IF NOT EXISTS mechanium_machines(id TEXT PRIMARY KEY,display_name TEXT NOT NULL,machine_item_id TEXT NOT NULL,block_material TEXT NOT NULL,input_id TEXT NOT NULL,input_amount INTEGER NOT NULL,output_item_id TEXT NOT NULL,output_amount INTEGER NOT NULL,processing_ticks INTEGER NOT NULL,required_technology_id TEXT NOT NULL)");
+            statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (3)");
         }
-        logger.info("MECHANIUM SQLite schema até a versão 2 pronta.");
+        logger.info("MECHANIUM SQLite schema até a versão 3 pronta.");
     }
 
     private void ensurePlayer(UUID playerId) throws SQLException {
@@ -252,6 +255,82 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
         try(Statement s=connection.createStatement();ResultSet r=s.executeQuery("SELECT id,type,result_item_id,result_amount,shape,ingredients,required_technology_id FROM mechanium_recipes ORDER BY id")){
             while(r.next())out.add(new RecipeDefinition(r.getString(1),RecipeDefinition.Type.valueOf(r.getString(2)),r.getString(3),r.getInt(4),decList(r.getString(5)),decIngredients(r.getString(6)),r.getString(7)));return List.copyOf(out);
         }catch(SQLException e){throw failure("load recipes",e);}
+    }
+
+    @Override public synchronized void saveMobDrop(MobDropDefinition v) {
+        try (PreparedStatement p = connection.prepareStatement("""
+                INSERT INTO mechanium_mob_drops VALUES(?,?,?,?,?,?,?)
+                ON CONFLICT(id) DO UPDATE SET entity_type=excluded.entity_type,
+                result_item_id=excluded.result_item_id,min_amount=excluded.min_amount,
+                max_amount=excluded.max_amount,chance=excluded.chance,
+                required_technology_id=excluded.required_technology_id
+                """)) {
+            p.setString(1, v.id());
+            p.setString(2, v.entityType());
+            p.setString(3, v.resultItemId());
+            p.setInt(4, v.minAmount());
+            p.setInt(5, v.maxAmount());
+            p.setDouble(6, v.chance());
+            p.setString(7, v.requiredTechnologyId());
+            p.executeUpdate();
+        } catch (SQLException e) {
+            throw failure("save mob drop", e);
+        }
+    }
+
+    @Override public synchronized Collection<MobDropDefinition> loadMobDrops() {
+        List<MobDropDefinition> out = new ArrayList<>();
+        try (Statement s = connection.createStatement();
+             ResultSet r = s.executeQuery("SELECT id,entity_type,result_item_id,min_amount,max_amount,chance,required_technology_id FROM mechanium_mob_drops ORDER BY id")) {
+            while (r.next()) {
+                out.add(new MobDropDefinition(r.getString(1), r.getString(2), r.getString(3),
+                        r.getInt(4), r.getInt(5), r.getDouble(6), r.getString(7)));
+            }
+            return List.copyOf(out);
+        } catch (SQLException e) {
+            throw failure("load mob drops", e);
+        }
+    }
+
+    @Override public synchronized void saveMachine(MachineDefinition v) {
+        try (PreparedStatement p = connection.prepareStatement("""
+                INSERT INTO mechanium_machines VALUES(?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(id) DO UPDATE SET display_name=excluded.display_name,
+                machine_item_id=excluded.machine_item_id,block_material=excluded.block_material,
+                input_id=excluded.input_id,input_amount=excluded.input_amount,
+                output_item_id=excluded.output_item_id,output_amount=excluded.output_amount,
+                processing_ticks=excluded.processing_ticks,
+                required_technology_id=excluded.required_technology_id
+                """)) {
+            p.setString(1, v.id());
+            p.setString(2, v.displayName());
+            p.setString(3, v.machineItemId());
+            p.setString(4, v.blockMaterial());
+            p.setString(5, v.inputId());
+            p.setInt(6, v.inputAmount());
+            p.setString(7, v.outputItemId());
+            p.setInt(8, v.outputAmount());
+            p.setInt(9, v.processingTicks());
+            p.setString(10, v.requiredTechnologyId());
+            p.executeUpdate();
+        } catch (SQLException e) {
+            throw failure("save machine", e);
+        }
+    }
+
+    @Override public synchronized Collection<MachineDefinition> loadMachines() {
+        List<MachineDefinition> out = new ArrayList<>();
+        try (Statement s = connection.createStatement();
+             ResultSet r = s.executeQuery("SELECT id,display_name,machine_item_id,block_material,input_id,input_amount,output_item_id,output_amount,processing_ticks,required_technology_id FROM mechanium_machines ORDER BY id")) {
+            while (r.next()) {
+                out.add(new MachineDefinition(r.getString(1), r.getString(2), r.getString(3),
+                        r.getString(4), r.getString(5), r.getInt(6), r.getString(7),
+                        r.getInt(8), r.getInt(9), r.getString(10)));
+            }
+            return List.copyOf(out);
+        } catch (SQLException e) {
+            throw failure("load machines", e);
+        }
     }
 
     private IllegalStateException failure(String action, SQLException exception) {

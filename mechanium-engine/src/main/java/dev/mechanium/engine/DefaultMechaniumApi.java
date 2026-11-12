@@ -150,7 +150,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         ItemDefinition definition = items.get(normalize(id));
         if (definition == null || amount < 1 || amount > definition.maxStackSize()) return Optional.empty();
         Material material = Material.valueOf(definition.material());
-        if (material.isAir() || !material.isItem()) return Optional.empty();
+        if (material.isAir() || (Bukkit.getServer() != null && !material.isItem())) return Optional.empty();
         ItemStack stack = new ItemStack(material, amount);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(new NamespacedKey("mechanium", "item_id"), PersistentDataType.STRING, definition.id());

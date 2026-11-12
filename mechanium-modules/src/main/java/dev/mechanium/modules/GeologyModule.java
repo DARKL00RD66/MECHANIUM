@@ -23,16 +23,16 @@ final class GeologyModule extends AbstractBuiltinModule {
 
     @Override protected void registerExtra(dev.mechanium.api.MechaniumModuleContext context) {
         var api = context.api();
-        api.registerCategory(new ContentCategory(
+        registerCategory(api, new ContentCategory(
                 "geology", "Geologia e mineração", "Ferramentas de prospecção e conhecimento mineral"));
 
-        api.registerItem(new ItemDefinition(
+        registerItem(api, new ItemDefinition(
                 "geological_survey_kit", "&6Kit de prospecção geológica", "COMPASS",
                 List.of("&8Instrumento de levantamento mineral",
                         "&7Use em um bloco para analisar a região próxima"),
                 0, 1, "geology", "geological_surveying"));
 
-        api.registerRecipe(new RecipeDefinition(
+        registerRecipe(api, new RecipeDefinition(
                 "geological_survey_kit_recipe", RecipeDefinition.Type.SHAPED,
                 "geological_survey_kit", 1,
                 List.of(" P ", "ICI", " P "),

@@ -19,6 +19,21 @@ public final class ModuleManager {
             }
         }
 
+        for (MechaniumModule module : modules) {
+            for (String dependency : module.dependencies()) {
+                if (dependency == null || dependency.isBlank()) {
+                    throw new IllegalArgumentException("Dependência vazia no módulo: " + module.id());
+                }
+                if (!knownIds.contains(dependency)) {
+                    throw new IllegalArgumentException("Módulo " + module.id()
+                            + " declara dependência interna inexistente: " + dependency);
+                }
+                if (dependency.equals(module.id())) {
+                    throw new IllegalArgumentException("Módulo não pode depender de si mesmo: " + module.id());
+                }
+            }
+        }
+
         java.util.Set<String> available = new java.util.HashSet<>();
         for (MechaniumModule module : modules) {
             boolean requested = config.getBoolean("modules." + module.id() + ".enabled", !module.optional());
@@ -39,16 +54,24 @@ public final class ModuleManager {
                 throw new IllegalStateException("Módulo obrigatório " + module.id() + " não pode iniciar; " + reason);
             }
 
+            // Track before onEnable so partially initialized modules receive onDisable.
+            enabled.add(module);
             try {
                 module.onEnable(context);
-                enabled.add(module);
                 available.add(module.id());
             } catch (Exception exception) {
+                enabled.remove(module);
+                try {
+                    module.onDisable();
+                } catch (RuntimeException cleanupException) {
+                    exception.addSuppressed(cleanupException);
+                }
                 if (!module.optional()) {
                     disable();
                     throw new IllegalStateException("Falha ao iniciar módulo obrigatório: " + module.id(), exception);
                 }
-                context.logger().severe("Módulo opcional " + module.id() + " foi desativado: " + exception.getMessage());
+                context.logger().severe("Módulo opcional " + module.id()
+                        + " foi desativado: " + exception.getMessage());
             }
         }
     }

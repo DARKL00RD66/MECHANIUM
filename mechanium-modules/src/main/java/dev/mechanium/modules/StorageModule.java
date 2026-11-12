@@ -8,13 +8,13 @@ final class StorageModule extends AbstractBuiltinModule {
 
     @Override protected void registerExtra(dev.mechanium.api.MechaniumModuleContext context) {
         var api = context.api();
-        api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+        registerCategory(api, new dev.mechanium.api.model.ContentCategory(
                 "private_storage", "Armazenamento privado", "Armazéns protegidos por proprietário"));
-        api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+        registerItem(api, new dev.mechanium.api.model.ItemDefinition(
                 "private_storage_crate", "&6Caixa de armazenamento privada", "BARREL",
                 java.util.List.of("&8Armazém pessoal protegido", "&7Apenas o proprietário e administradores podem acessar."),
                 0, 1, "private_storage", "warehouse_accounting"));
-        api.registerRecipe(new dev.mechanium.api.model.RecipeDefinition(
+        registerRecipe(api, new dev.mechanium.api.model.RecipeDefinition(
                 "private_storage_crate_recipe", dev.mechanium.api.model.RecipeDefinition.Type.SHAPED,
                 "private_storage_crate", 1,
                 java.util.List.of("III", "IBI", "III"),

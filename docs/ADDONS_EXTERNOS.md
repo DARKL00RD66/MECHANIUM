@@ -2,6 +2,20 @@
 
 Addons são JARs independentes que usam `mechanium-api`. Eles não são plugins Bukkit separados: MECHANIUM controla carregamento e ciclo de vida.
 
+## Projeto de exemplo
+
+Há um addon Maven independente em [`examples/mechanium-addon-example`](../examples/mechanium-addon-example/README.md). Ele demonstra descriptor, dependência de módulo, registro de conteúdo, listener Bukkit e limpeza no ciclo de vida.
+
+Na raiz do repositório MECHANIUM, execute:
+
+```bash
+mvn -pl mechanium-api -am install
+cd examples/mechanium-addon-example
+mvn clean package
+```
+
+O JAR resultante deve ser copiado para `plugins/MECHANIUM/addons/`.
+
 ## Descriptor obrigatório
 
 Adicionar `mechanium-addon.properties` na raiz do JAR:

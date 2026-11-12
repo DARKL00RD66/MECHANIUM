@@ -13,7 +13,7 @@ final class IndustryModule extends AbstractBuiltinModule {
         api.registerItem(new ItemDefinition("copper_coil", "&6Bobina de cobre", "COPPER_INGOT",
                 List.of("&8Componente para sistemas elétricos"), 0, 64, "industrial_components", "steam_power"));
         api.registerRecipe(new RecipeDefinition("mechanical_parts_recipe", RecipeDefinition.Type.SHAPED,
-                "mechanical_parts", 4, List.of("III", " I ", "   "), Map.of('I', "IRON_INGOT"), "basic_mechanics"));
+                "mechanical_parts", 4, List.of(" I ", "III"), Map.of('I', "IRON_INGOT"), "basic_mechanics"));
         api.registerRecipe(new RecipeDefinition("copper_coil_recipe", RecipeDefinition.Type.SHAPELESS,
                 "copper_coil", 1, List.of(), Map.of('C', "COPPER_INGOT"), "steam_power"));
     }

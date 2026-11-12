@@ -1,0 +1,14 @@
+package dev.mechanium.modules;
+
+import dev.mechanium.api.MechaniumModule;
+import java.util.List;
+
+/** Catalogue of official modules embedded in the single MECHANIUM JAR. */
+public final class BuiltinModules {
+    private BuiltinModules() { }
+    public static List<MechaniumModule> create() {
+        return List.of(new IndustryModule(), new GeologyModule(), new AgricultureModule(), new EnergyModule(),
+                new StorageModule(), new EnvironmentModule(),
+                new OptionalFantasyModule(), new OptionalFuturisticModule());
+    }
+}

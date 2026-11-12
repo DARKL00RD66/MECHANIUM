@@ -21,6 +21,7 @@
 - Bootstrap Bukkit/Paper, comandos iniciais e configuração.
 - Menu paginado de pesquisas dentro do jogo, com estados de era, pré-requisitos, saldo científico e desbloqueio via clique.
 - Receitas criadas por addons após a inicialização são encaminhadas automaticamente ao registro de crafting; receitas do MECHANIUM são removidas no desligamento.
+- Primeiro sistema funcional do domínio PrivateStorage: barril privado com proprietário UUID persistente, até 32 usuários autorizados, comandos de confiança, proteção contra quebra não autorizada, funis, pistões e explosões.
 - Empacotamento Maven em um JAR com módulos e dependências de runtime.
 
 ## Limitações e trabalho pendente

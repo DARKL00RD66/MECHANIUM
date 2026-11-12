@@ -56,4 +56,29 @@ class DefaultMechaniumApiTest {
                     new TechnologyDefinition("steam_power", "Energia a vapor", "unknown_age", 10, List.of())));
         }
     }
+    @Test
+    void itemAndRecipeRegistrationRespectTechnologyUnlocks() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(directory.resolve("content-gates.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            api.registerTechnology(new TechnologyDefinition("smithing", "Metalurgia", "ancient", 10, List.of()));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory("industry", "Indústria", "Industrial"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("gear", "Engrenagem", "IRON_INGOT",
+                    List.of(), 0, 64, "industry", "smithing"));
+            api.registerRecipe(new dev.mechanium.api.model.RecipeDefinition("gear_recipe",
+                    dev.mechanium.api.model.RecipeDefinition.Type.SHAPED, "gear", 1,
+                    List.of("I"), java.util.Map.of('I', "IRON_INGOT"), "smithing"));
+
+            UUID player = UUID.randomUUID();
+            api.setPlayerEra(player, "ancient");
+            api.addResearchPoints(player, 10);
+            assertFalse(api.canUseItem(player, "gear"));
+            assertFalse(api.canCraft(player, "gear_recipe"));
+            assertEquals(UnlockResult.Status.UNLOCKED, api.unlockTechnology(player, "smithing").status());
+            assertTrue(api.canUseItem(player, "gear"));
+            assertTrue(api.canCraft(player, "gear_recipe"));
+            assertTrue(api.validateContent().isEmpty());
+        }
+    }
+
 }

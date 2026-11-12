@@ -11,12 +11,13 @@
 - [x] Carregador de addons externos
 - [x] Bootstrap e configuração Bukkit
 - [x] Documentação e workflow de CI
-- [x] CI Java 21 aprovado no commit `4c8013e` (36 testes)
+- [x] CI Java 21 aprovado no commit `7028e79` (37 testes)
 - [ ] Teste real em Paper 1.21.11
 - [ ] Teste real em Purpur 1.21.11
 
 ## Marco 1 — Core de conteúdo
 - [x] Registro persistente de categorias, itens e receitas
+- [x] Persistência de definições de máquinas e regras de drops em SQLite
 - [x] Itens com PDC, lore, modelo customizado e limite de pilha
 - [x] Receitas shaped/shapeless e ingredientes personalizados
 - [x] Integração do crafting com o motor central de progressão

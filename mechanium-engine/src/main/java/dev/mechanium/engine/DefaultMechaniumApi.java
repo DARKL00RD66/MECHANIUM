@@ -98,7 +98,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         ContentCategory old = categories.putIfAbsent(value.id(), value);
         if (old != null) return old.equals(value);
         persist(() -> contentStore.saveCategory(value));
-        Bukkit.getPluginManager().callEvent(new MechaniumCategoryRegisterEvent(value));
+        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumCategoryRegisterEvent(value));
         return true;
     }
     @Override public Optional<ContentCategory> getCategory(String id) { return Optional.ofNullable(categories.get(normalize(id))); }
@@ -111,7 +111,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         ItemDefinition old = items.putIfAbsent(value.id(), value);
         if (old != null) return old.equals(value);
         persist(() -> contentStore.saveItem(value));
-        Bukkit.getPluginManager().callEvent(new MechaniumItemRegisterEvent(value));
+        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumItemRegisterEvent(value));
         return true;
     }
     @Override public Optional<ItemDefinition> getItem(String id) { return Optional.ofNullable(items.get(normalize(id))); }
@@ -139,7 +139,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         RecipeDefinition old = recipes.putIfAbsent(value.id(), value);
         if (old != null) return old.equals(value);
         persist(() -> contentStore.saveRecipe(value));
-        Bukkit.getPluginManager().callEvent(new MechaniumRecipeRegisterEvent(value));
+        if (Bukkit.getServer() != null) Bukkit.getPluginManager().callEvent(new MechaniumRecipeRegisterEvent(value));
         return true;
     }
     @Override public Optional<RecipeDefinition> getRecipe(String id) { return Optional.ofNullable(recipes.get(normalize(id))); }

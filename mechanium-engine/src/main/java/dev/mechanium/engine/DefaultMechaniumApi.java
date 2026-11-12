@@ -97,8 +97,10 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         long remainingPoints = dataStore.getResearchPoints(playerId);
         if (Bukkit.getServer() != null) {
             Bukkit.getPluginManager().callEvent(new MechaniumTechnologyUnlockedEvent(playerId, technology, remainingPoints));
-            Bukkit.getPluginManager().callEvent(new MechaniumResearchPointsChangeEvent(
-                    playerId, previousPoints, remainingPoints));
+            if (previousPoints != remainingPoints) {
+                Bukkit.getPluginManager().callEvent(new MechaniumResearchPointsChangeEvent(
+                        playerId, previousPoints, remainingPoints));
+            }
         }
         return UnlockResult.of(UnlockResult.Status.UNLOCKED, "Tecnologia desbloqueada: " + technology.displayName());
     }

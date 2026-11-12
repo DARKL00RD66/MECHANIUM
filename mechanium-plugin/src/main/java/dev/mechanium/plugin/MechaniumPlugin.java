@@ -61,6 +61,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
+            Bukkit.getPluginManager().registerEvents(new MechaniumMobDropListener(api), this);
             privateStorageListener = new PrivateStorageListener(this, api);
             Bukkit.getPluginManager().registerEvents(privateStorageListener, this);
             researchMenu = new MechaniumResearchMenu(this, api);

@@ -26,6 +26,8 @@ progression:
 modules:
   industry:
     enabled: true
+  geology:
+    enabled: true
   agriculture:
     enabled: true
   energy:

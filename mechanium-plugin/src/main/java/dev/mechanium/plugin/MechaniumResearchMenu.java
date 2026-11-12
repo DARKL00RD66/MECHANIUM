@@ -458,15 +458,15 @@ final class MechaniumResearchMenu implements Listener {
 
     private void showWithBody(Player player, String title, List<DialogBody> body,
                               List<ActionButton> buttons, ActionButton exitAction) {
-        if (buttons.isEmpty()) {
-            buttons = List.of(button("Voltar ao início", "Retornar à central.", "ui_home"));
-        }
+        List<ActionButton> dialogButtons = buttons.isEmpty()
+                ? List.of(button("Voltar ao início", "Retornar à central.", "ui_home"))
+                : List.copyOf(buttons);
         Dialog dialog = Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(Component.text(title, NamedTextColor.GOLD))
                         .canCloseWithEscape(true)
                         .body(body)
                         .build())
-                .type(DialogType.multiAction(buttons, exitAction, 2)));
+                .type(DialogType.multiAction(dialogButtons, exitAction, 2)));
         player.showDialog(dialog);
     }
 

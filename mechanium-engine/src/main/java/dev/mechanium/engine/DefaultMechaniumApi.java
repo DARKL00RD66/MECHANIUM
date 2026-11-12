@@ -48,12 +48,23 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public void setPlayerEra(UUID player, String era) {
         String id = normalize(era);
         if (!eras.containsKey(id)) throw new IllegalArgumentException("Unknown era: " + era);
-        dataStore.setPlayerEra(Objects.requireNonNull(player), id);
+        UUID playerId = Objects.requireNonNull(player);
+        String previousEraId = dataStore.getPlayerEra(playerId).orElse(null);
+        dataStore.setPlayerEra(playerId, id);
+        if (!Objects.equals(previousEraId, id) && Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().callEvent(new MechaniumPlayerEraChangeEvent(playerId, previousEraId, id));
+        }
     }
     @Override public long getResearchPoints(UUID id) { return dataStore.getResearchPoints(Objects.requireNonNull(id)); }
     @Override public void addResearchPoints(UUID id, long amount) {
         if (amount < 0) throw new IllegalArgumentException("Research point grants must be non-negative");
-        dataStore.addResearchPoints(Objects.requireNonNull(id), amount);
+        UUID playerId = Objects.requireNonNull(id);
+        long previousPoints = dataStore.getResearchPoints(playerId);
+        dataStore.addResearchPoints(playerId, amount);
+        long newPoints = dataStore.getResearchPoints(playerId);
+        if (previousPoints != newPoints && Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().callEvent(new MechaniumResearchPointsChangeEvent(playerId, previousPoints, newPoints));
+        }
     }
     @Override public boolean registerTechnology(TechnologyDefinition value) {
         Objects.requireNonNull(value);
@@ -82,11 +93,23 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             if (dataStore.hasUnlocked(playerId, technology.id())) return UnlockResult.of(UnlockResult.Status.ALREADY_UNLOCKED, "Tecnologia já desbloqueada.");
             return UnlockResult.of(UnlockResult.Status.CONCURRENT_UPDATE, "O estado científico mudou simultaneamente. Tente novamente.");
         }
+        long remainingPoints = dataStore.getResearchPoints(playerId);
+        if (Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().callEvent(new MechaniumTechnologyUnlockedEvent(playerId, technology, remainingPoints));
+            Bukkit.getPluginManager().callEvent(new MechaniumResearchPointsChangeEvent(
+                    playerId, remainingPoints + technology.researchCost(), remainingPoints));
+        }
         return UnlockResult.of(UnlockResult.Status.UNLOCKED, "Tecnologia desbloqueada: " + technology.displayName());
     }
+    @Override public boolean hasUnlockedTechnology(UUID player, String id) {
+        Objects.requireNonNull(player, "player");
+        TechnologyDefinition technology = technologies.get(normalize(id));
+        return technology != null && dataStore.hasUnlocked(player, technology.id());
+    }
+
     @Override public boolean canUseTechnology(UUID player, String id) {
         TechnologyDefinition technology = technologies.get(normalize(id));
-        if (technology == null || !dataStore.hasUnlocked(player, technology.id())) return false;
+        if (technology == null || !hasUnlockedTechnology(player, technology.id())) return false;
         Optional<String> eraId = dataStore.getPlayerEra(player);
         if (eraId.isEmpty()) return false;
         EraDefinition current = eras.get(eraId.get()), required = eras.get(technology.requiredEraId());
@@ -127,6 +150,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', definition.displayName()));
         if (!definition.lore().isEmpty()) meta.setLore(definition.lore().stream().map(line -> ChatColor.translateAlternateColorCodes('&', line)).toList());
         if (definition.customModelData() > 0) meta.setCustomModelData(definition.customModelData());
+        meta.setMaxStackSize(definition.maxStackSize());
         stack.setItemMeta(meta);
         return Optional.of(stack);
     }
@@ -169,6 +193,9 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             if (!items.containsKey(recipe.resultItemId())) errors.add("Recipe " + recipe.id() + " has missing result item " + recipe.resultItemId());
             if (recipe.requiredTechnologyId() != null && !technologies.containsKey(recipe.requiredTechnologyId()))
                 errors.add("Recipe " + recipe.id() + " references missing technology " + recipe.requiredTechnologyId());
+            ItemDefinition result = items.get(recipe.resultItemId());
+            if (result != null && recipe.resultAmount() > result.maxStackSize())
+                errors.add("Recipe " + recipe.id() + " result amount exceeds item max stack size (" + result.maxStackSize() + ")");
             for (String ingredient : recipe.ingredients().values()) {
                 if (ingredient.startsWith("mechanium:") && !items.containsKey(ingredient.substring(10)))
                     errors.add("Recipe " + recipe.id() + " references missing custom ingredient " + ingredient);

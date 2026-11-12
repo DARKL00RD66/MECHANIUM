@@ -149,7 +149,9 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public Optional<ItemStack> createItemStack(String id, int amount) {
         ItemDefinition definition = items.get(normalize(id));
         if (definition == null || amount < 1 || amount > definition.maxStackSize()) return Optional.empty();
-        ItemStack stack = new ItemStack(Material.valueOf(definition.material()), amount);
+        Material material = Material.valueOf(definition.material());
+        if (material.isAir() || !material.isItem()) return Optional.empty();
+        ItemStack stack = new ItemStack(material, amount);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(new NamespacedKey("mechanium", "item_id"), PersistentDataType.STRING, definition.id());
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', definition.displayName()));
@@ -166,7 +168,11 @@ public final class DefaultMechaniumApi implements MechaniumApi {
 
     @Override public synchronized boolean registerRecipe(RecipeDefinition value) {
         Objects.requireNonNull(value);
-        if (!items.containsKey(value.resultItemId())) throw new IllegalArgumentException("Recipe result item is not registered: " + value.resultItemId());
+        ItemDefinition resultItem = items.get(value.resultItemId());
+        if (resultItem == null) throw new IllegalArgumentException("Recipe result item is not registered: " + value.resultItemId());
+        if (value.resultAmount() > resultItem.maxStackSize()) {
+            throw new IllegalArgumentException("Recipe result amount exceeds max stack size for " + resultItem.id());
+        }
         if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
         RecipeDefinition old = recipes.get(value.id());
         if (old != null) return old.equals(value);

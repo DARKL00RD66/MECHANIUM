@@ -213,11 +213,12 @@ final class PrivateStorageListener implements Listener {
     }
 
     private boolean canAccess(Player player, Block block, String owner) {
-        return canManage(player, owner) || trustedIds((TileState) block.getState())
-                .contains(player.getUniqueId().toString());
+        return PrivateStorageAccessPolicy.canAccess(player.getUniqueId(), owner,
+                trustedIds((TileState) block.getState()), player.hasPermission("mechanium.admin"));
     }
 
     private boolean canManage(Player player, String owner) {
-        return player.getUniqueId().toString().equals(owner) || player.hasPermission("mechanium.admin");
+        return PrivateStorageAccessPolicy.canManage(
+                player.getUniqueId(), owner, player.hasPermission("mechanium.admin"));
     }
 }

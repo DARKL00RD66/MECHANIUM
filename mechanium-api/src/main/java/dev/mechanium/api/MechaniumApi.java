@@ -44,5 +44,8 @@ public interface MechaniumApi {
     default boolean registerMobDrop(MobDropDefinition drop) { return false; }
     default Optional<MobDropDefinition> getMobDrop(String dropId) { return Optional.empty(); }
     default Collection<MobDropDefinition> getMobDrops() { return java.util.List.of(); }
+    default boolean registerMachine(MachineDefinition machine) { return false; }
+    default Optional<MachineDefinition> getMachine(String machineId) { return Optional.empty(); }
+    default Collection<MachineDefinition> getMachines() { return java.util.List.of(); }
     java.util.List<String> validateContent();
 }

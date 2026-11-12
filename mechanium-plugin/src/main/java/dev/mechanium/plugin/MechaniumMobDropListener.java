@@ -26,11 +26,13 @@ final class MechaniumMobDropListener implements Listener {
 
         for (MobDropDefinition drop : api.getMobDrops()) {
             if (!drop.entityType().equals(entityType)) continue;
-            if (drop.requiredTechnologyId() != null) {
-                if (killer == null || !api.canUseTechnology(killer.getUniqueId(), drop.requiredTechnologyId())) {
-                    continue;
-                }
+            if (drop.requiredTechnologyId() != null
+                    && (killer == null || !api.canUseTechnology(killer.getUniqueId(), drop.requiredTechnologyId()))) {
+                continue;
             }
+            if (killer != null && !api.canUseItem(killer.getUniqueId(), drop.resultItemId())) continue;
+            if (killer == null && api.getItem(drop.resultItemId())
+                    .map(item -> item.requiredTechnologyId() != null).orElse(true)) continue;
             if (ThreadLocalRandom.current().nextDouble() >= drop.chance()) continue;
 
             int amount = ThreadLocalRandom.current().nextInt(drop.minAmount(), drop.maxAmount() + 1);

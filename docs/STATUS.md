@@ -23,11 +23,12 @@
 - Receitas criadas por addons após a inicialização são encaminhadas automaticamente ao registro de crafting; receitas do MECHANIUM são removidas no desligamento.
 - Primeiro sistema funcional do domínio PrivateStorage: barril privado com proprietário UUID persistente, até 32 usuários autorizados, comandos de confiança, proteção contra quebra não autorizada, funis, pistões e explosões.
 - API extensível de drops de criaturas: definições públicas com entidade, item de saída, intervalo de quantidade, chance e tecnologia exigida; listener acrescenta subprodutos sem remover drops vanilla.
+- Primeira máquina funcional: prensa mecânica em dispenser com inventário de entrada/saída, proprietário e progresso persistentes em PDC, processamento a cada segundo e autorização central por pesquisa/era.
 - Empacotamento Maven em um JAR com módulos e dependências de runtime.
 
 ## Limitações e trabalho pendente
 
-- Máquinas funcionais, inventários de máquinas e ciclos de produção.
+- O runtime atual suporta somente a prensa em bloco dispenser, com uma entrada e uma saída; ainda faltam tipos de máquinas, receitas múltiplas, energia, manutenção e filas de produção.
 - Redes de energia, fluidos, logística e transferência entre blocos.
 - Livro/guia e interfaces gráficas de pesquisa.
 - Economia de recursos e balanceamento completo.
@@ -40,11 +41,11 @@
 ## Validação
 
 - Há um workflow Java 21/Maven `clean verify` no GitHub Actions.
-- [GitHub Actions — run 43226262717](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43226262717): **BUILD SUCCESS** no commit de código `da7b06e`.
-- Testes automatizados nessa revisão: **27 executados, 0 falhas, 0 erros** (10 API/modelos, 5 SQLite, 5 motor de progressão/conteúdo/drops, 2 classloader de addons, 5 política de acesso ao armazenamento privado).
+- [GitHub Actions — run 43227659543](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43226262717): **BUILD SUCCESS** no commit de código `14bdecf`.
+- Testes automatizados nessa revisão: **31 executados, 0 falhas, 0 erros** (13 API/modelos, 5 SQLite, 6 motor de progressão/conteúdo/máquinas/drops, 2 classloader de addons, 5 política de acesso ao armazenamento privado).
 - Maven empacotou o JAR sombreado. O upload do artefato falhou por limite de armazenamento do GitHub Actions e está configurado como não bloqueante; não há download do JAR disponível neste run.
 - Ainda não realizado: inicialização em Paper/Purpur real, testes funcionais de gameplay, integração de addons externos reais e validação em servidores de produção.
 
 ## Classificação
 
-**Fundação em desenvolvimento; build e testes unitários aprovados no commit de código `da7b06e`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.
+**Fundação em desenvolvimento; build e testes unitários aprovados no commit de código `14bdecf`, mas não pronta para produção.** A aprovação Maven não substitui smoke test nem validação funcional em servidor.

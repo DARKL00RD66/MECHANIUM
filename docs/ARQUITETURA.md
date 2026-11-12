@@ -17,6 +17,7 @@ Progression Engine ---- Persistence (SQLite)
         |
 Official Module Manager
   |-- Industry
+  |-- Geology
   |-- Agriculture
   |-- Energy
   |-- Storage
@@ -43,6 +44,7 @@ Cada subprojeto tem build e responsabilidade próprios. O módulo final depende 
 - Débito de pontos e registro de pesquisa são atômicos no SQLite.
 - Módulos opcionais não podem alterar nem desbloquear o caminho histórico padrão.
 - Addons externos declaram versão mínima da API e dependências; ciclos e dependências ausentes impedem seu carregamento.
+- Módulos internos declaram dependências e são ativados conforme `config.yml`; módulos que exigem outro módulo não iniciam se a dependência estiver desativada.
 
 ## Persistência e migrações
 

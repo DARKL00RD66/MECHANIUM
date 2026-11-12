@@ -30,6 +30,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private ModuleManager moduleManager;
     private MechaniumAddonLoader addonLoader;
     private MechaniumRecipeBridge recipeBridge;
+    private MechaniumResearchMenu researchMenu;
 
     @Override
     public void onEnable() {
@@ -57,6 +58,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
+            researchMenu = new MechaniumResearchMenu(this, api);
+            Bukkit.getPluginManager().registerEvents(researchMenu, this);
             PluginCommand command = Objects.requireNonNull(getCommand("mechanium"), "mechanium command missing");
             command.setExecutor(this);
             command.setTabCompleter(this);
@@ -120,12 +123,24 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
                     return true;
                 }
-                String eraId = api.getPlayerEra(player.getUniqueId()).orElse("não definida");
-                String eraName = api.getEra(eraId).map(EraDefinition::displayName).orElse(eraId);
-                player.sendMessage(ChatColor.GOLD + "Progressão MECHANIUM");
-                player.sendMessage(ChatColor.GRAY + "Era: " + ChatColor.WHITE + eraName);
-                player.sendMessage(ChatColor.GRAY + "Pontos científicos: " + ChatColor.WHITE
-                        + api.getResearchPoints(player.getUniqueId()));
+                if (args.length > 1 && args[1].equalsIgnoreCase("info")) {
+                    String eraId = api.getPlayerEra(player.getUniqueId()).orElse("não definida");
+                    String eraName = api.getEra(eraId).map(EraDefinition::displayName).orElse(eraId);
+                    player.sendMessage(ChatColor.GOLD + "Progressão MECHANIUM");
+                    player.sendMessage(ChatColor.GRAY + "Era: " + ChatColor.WHITE + eraName);
+                    player.sendMessage(ChatColor.GRAY + "Pontos científicos: " + ChatColor.WHITE
+                            + api.getResearchPoints(player.getUniqueId()));
+                } else {
+                    researchMenu.open(player);
+                }
+                return true;
+            }
+            case "book" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
+                    return true;
+                }
+                researchMenu.open(player);
                 return true;
             }
             case "unlock" -> {
@@ -185,7 +200,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.GOLD + "MECHANIUM — comandos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium status" + ChatColor.GRAY + " — estado do motor");
-        sender.sendMessage(ChatColor.YELLOW + "/mechanium research" + ChatColor.GRAY + " — sua progressão");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium research" + ChatColor.GRAY + " — abrir o catálogo de pesquisas");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium research info" + ChatColor.GRAY + " — resumo da sua progressão");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium book" + ChatColor.GRAY + " — abrir o catálogo");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
         if (sender.hasPermission("mechanium.admin")) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin points <jogador> <quantidade>");
@@ -195,7 +212,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("help", "status", "research", "unlock", "admin");
+        if (args.length == 1) return List.of("help", "status", "research", "book", "unlock", "admin");
+        if (args.length == 2 && args[0].equalsIgnoreCase("research")) return List.of("info");
         if (args.length == 2 && args[0].equalsIgnoreCase("unlock")) {
             return api.getTechnologies().stream().map(technology -> technology.id())
                     .filter(id -> id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
@@ -223,6 +241,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             }
             recipeBridge = null;
         }
+        researchMenu = null;
         if (addonLoader != null) {
             addonLoader.close();
             addonLoader = null;

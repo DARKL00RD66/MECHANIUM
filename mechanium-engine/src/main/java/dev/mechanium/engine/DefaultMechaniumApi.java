@@ -45,7 +45,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public Optional<EraDefinition> getEra(String id) { return Optional.ofNullable(eras.get(normalize(id))); }
     @Override public Collection<EraDefinition> getEras() { return eras.values().stream().sorted(Comparator.comparingInt(EraDefinition::order)).toList(); }
     @Override public Optional<String> getPlayerEra(UUID id) { return dataStore.getPlayerEra(Objects.requireNonNull(id)); }
-    @Override public void setPlayerEra(UUID player, String era) {
+    @Override public synchronized void setPlayerEra(UUID player, String era) {
         String id = normalize(era);
         if (!eras.containsKey(id)) throw new IllegalArgumentException("Unknown era: " + era);
         UUID playerId = Objects.requireNonNull(player);
@@ -56,7 +56,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         }
     }
     @Override public long getResearchPoints(UUID id) { return dataStore.getResearchPoints(Objects.requireNonNull(id)); }
-    @Override public void addResearchPoints(UUID id, long amount) {
+    @Override public synchronized void addResearchPoints(UUID id, long amount) {
         if (amount < 0) throw new IllegalArgumentException("Research point grants must be non-negative");
         UUID playerId = Objects.requireNonNull(id);
         long previousPoints = dataStore.getResearchPoints(playerId);
@@ -77,7 +77,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public Optional<TechnologyDefinition> getTechnology(String id) { return Optional.ofNullable(technologies.get(normalize(id))); }
     @Override public Collection<TechnologyDefinition> getTechnologies() { return technologies.values().stream().sorted(Comparator.comparing(TechnologyDefinition::id)).toList(); }
 
-    @Override public UnlockResult unlockTechnology(UUID playerId, String technologyId) {
+    @Override public synchronized UnlockResult unlockTechnology(UUID playerId, String technologyId) {
         Objects.requireNonNull(playerId);
         TechnologyDefinition technology = technologies.get(normalize(technologyId));
         if (technology == null) return UnlockResult.of(UnlockResult.Status.UNKNOWN_TECHNOLOGY, "Tecnologia desconhecida.");
@@ -88,7 +88,8 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             return UnlockResult.of(UnlockResult.Status.WRONG_ERA, "Esta tecnologia exige a era " + eras.get(technology.requiredEraId()).displayName() + ".");
         List<String> missing = technology.prerequisites().stream().filter(id -> !dataStore.hasUnlocked(playerId, id)).toList();
         if (!missing.isEmpty()) return UnlockResult.of(UnlockResult.Status.MISSING_PREREQUISITES, "Pesquisas necessárias: " + String.join(", ", missing));
-        if (dataStore.getResearchPoints(playerId) < technology.researchCost()) return UnlockResult.of(UnlockResult.Status.INSUFFICIENT_RESEARCH_POINTS, "Pontos científicos insuficientes. Custo: " + technology.researchCost() + ".");
+        long previousPoints = dataStore.getResearchPoints(playerId);
+        if (previousPoints < technology.researchCost()) return UnlockResult.of(UnlockResult.Status.INSUFFICIENT_RESEARCH_POINTS, "Pontos científicos insuficientes. Custo: " + technology.researchCost() + ".");
         if (!dataStore.spendAndUnlock(playerId, technology.id(), technology.researchCost())) {
             if (dataStore.hasUnlocked(playerId, technology.id())) return UnlockResult.of(UnlockResult.Status.ALREADY_UNLOCKED, "Tecnologia já desbloqueada.");
             return UnlockResult.of(UnlockResult.Status.CONCURRENT_UPDATE, "O estado científico mudou simultaneamente. Tente novamente.");
@@ -97,7 +98,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         if (Bukkit.getServer() != null) {
             Bukkit.getPluginManager().callEvent(new MechaniumTechnologyUnlockedEvent(playerId, technology, remainingPoints));
             Bukkit.getPluginManager().callEvent(new MechaniumResearchPointsChangeEvent(
-                    playerId, remainingPoints + technology.researchCost(), remainingPoints));
+                    playerId, previousPoints, remainingPoints));
         }
         return UnlockResult.of(UnlockResult.Status.UNLOCKED, "Tecnologia desbloqueada: " + technology.displayName());
     }

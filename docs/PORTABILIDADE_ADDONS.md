@@ -47,6 +47,13 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 - **SlimefunOreChunks (parcial / reimplementação independente):** o módulo `geology` adiciona a pesquisa `geological_surveying`, o item `geological_survey_kit` e uma receita. Ao usar o kit em um bloco, o scanner conta os tipos de minério em um cubo local de 9×9×9, ignora chunks descarregados e apresenta os cinco tipos mais frequentes. Há cooldown e testes unitários da agregação.
 - Esta primeira entrega não gera depósitos ou veios minerais, não altera a distribuição de minério do mundo e não implementa amostras, mapas geológicos ou integração com mineração. É uma ferramenta de prospecção inicial, não uma paridade completa com o addon de referência.
 
+## Implementações adicionais nesta etapa
+- **ExoticGarden/Gastronomicon (parcial):** expansão clean-room de agricultura e culinária com sementes, substrato, embalagens de colheita, queijo, ensopado, carne conservada e rações. Ainda não há plantas customizadas, estufas funcionais ou árvore completa de alimentos.
+- **FluffyMachines/LiteXpansion (parcial):** moinho industrial e conservadora de frutas usam o runtime de máquinas MECHANIUM e consomem energia; o runtime permanece limitado a um insumo e um produto por ciclo.
+- **Networks (parcial):** rede local de depósitos face a face existente, com limite de 64 nós e paginação.
+- **DankTech2 (parcial):** armazém portátil único com inventário de 27 espaços salvo no próprio item. Não há upgrades, filtros, compressão ou busca global.
+- **GlobalWarming (parcial):** contador persistente abstrato por mundo; ciclos industriais somam impacto, e a tecnologia emissions_control interrompe novas contagens para máquinas daquele proprietário. Não simula temperatura, clima ou eventos ambientais.
+- **HardcoreSlimefun/FastMachines (parcial):** novos processos industriais seguem os custos energéticos e tempos definidos; ainda não existem desgaste geral, manutenção, filas, paralelismo ou multiplicadores configuráveis.
 ## Regras de portabilidade
 
 1. Auditar repositório, commit, licença, dependências e funcionalidades antes de copiar código.

@@ -3,7 +3,8 @@ package dev.mechanium.plugin;
 import dev.mechanium.api.MechaniumApi;
 import dev.mechanium.api.model.MachineDefinition;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -62,7 +63,7 @@ final class MechaniumMachineManager implements Listener {
     MechaniumMachineManager(JavaPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
         this.api = api;
-        this.itemIdKey = new NamespacedKey("mechanium", "item_id");
+        this.itemIdKey = Objects.requireNonNull(NamespacedKey.fromString("mechanium:item_id"));
         this.machineIdKey = new NamespacedKey(plugin, "machine_id");
         this.ownerKey = new NamespacedKey(plugin, "machine_owner");
         this.progressKey = new NamespacedKey(plugin, "machine_progress");
@@ -94,13 +95,13 @@ final class MechaniumMachineManager implements Listener {
         Block block = event.getBlockPlaced();
         if (block.getType() != Material.valueOf(definition.blockMaterial())) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.RED + "Bloco incompatível com esta máquina.");
+            event.getPlayer().sendMessage(Component.text("Bloco incompatível com esta máquina.", NamedTextColor.RED));
             return;
         }
         BlockState state = block.getState();
         if (!(state instanceof Dispenser dispenser)) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.RED + "Não foi possível inicializar esta máquina.");
+            event.getPlayer().sendMessage(Component.text("Não foi possível inicializar esta máquina.", NamedTextColor.RED));
             return;
         }
 
@@ -110,7 +111,7 @@ final class MechaniumMachineManager implements Listener {
         dispenser.getPersistentDataContainer().set(progressKey, PersistentDataType.INTEGER, 0);
         if (!dispenser.update(true, false)) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage(ChatColor.RED + "Não foi possível salvar os dados da máquina.");
+            event.getPlayer().sendMessage(Component.text("Não foi possível salvar os dados da máquina.", NamedTextColor.RED));
             return;
         }
         loadedMachines.put(key(block.getLocation()), block.getLocation());
@@ -125,7 +126,7 @@ final class MechaniumMachineManager implements Listener {
         if (canManage(event.getPlayer(), machine.get().ownerId())) return;
 
         event.setCancelled(true);
-        event.getPlayer().sendMessage(ChatColor.RED + "Esta máquina pertence a outro jogador.");
+        event.getPlayer().sendMessage(Component.text("Esta máquina pertence a outro jogador.", NamedTextColor.RED));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -137,7 +138,7 @@ final class MechaniumMachineManager implements Listener {
         MachineState details = machine.get();
         if (!canManage(player, details.ownerId())) {
             event.setCancelled(true);
-            player.sendMessage(ChatColor.RED + "Somente o proprietário ou um administrador pode desmontar esta máquina.");
+            player.sendMessage(Component.text("Somente o proprietário ou um administrador pode desmontar esta máquina.", NamedTextColor.RED));
             return;
         }
 

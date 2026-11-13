@@ -13,7 +13,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -50,7 +55,13 @@ final class MechaniumResearchMenu implements Listener {
         ItemStack guide = createGuideBook();
         if (player.getInventory().containsAtLeast(guide, 1)) return;
         Map<Integer, ItemStack> leftovers = player.getInventory().addItem(guide);
-        leftovers.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
+        if (!leftovers.isEmpty()) {
+            // Never drop the guide when the inventory is full; retry after the player frees a slot.
+            plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                if (player.isOnline()) giveGuide(player);
+            }, 20L);
+            if (player.isOnline()) player.sendMessage("§eO inventário está cheio. O Guia MECHANIUM será entregue quando houver espaço.");
+        }
     }
 
     private ItemStack createGuideBook() {
@@ -59,8 +70,10 @@ final class MechaniumResearchMenu implements Listener {
         meta.displayName(Component.text("Guia do MECHANIUM", net.kyori.adventure.text.format.NamedTextColor.GOLD));
         meta.lore(List.of(
                 Component.text("Clique com o botão direito para abrir."),
-                Component.text("Pesquisas, máquinas e progresso histórico.")
+                Component.text("Pesquisas, máquinas e progresso histórico."),
+                Component.text("Item vinculado ao jogador: não pode ser movido ou descartado.")
         ));
+        meta.setUnbreakable(true);
         meta.getPersistentDataContainer().set(guideKey, PersistentDataType.BYTE, (byte) 1);
         book.setItemMeta(meta);
         return book;
@@ -237,6 +250,51 @@ final class MechaniumResearchMenu implements Listener {
         if (!lore.isEmpty()) meta.lore(lore.stream().map(LegacyComponentSerializer.legacySection()::deserialize).toList());
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    private boolean isGuide(ItemStack stack) {
+        if (stack == null || !stack.hasItemMeta()) return false;
+        Byte marker = stack.getItemMeta().getPersistentDataContainer().get(guideKey, PersistentDataType.BYTE);
+        return marker != null && marker == (byte) 1;
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onGuideMove(InventoryClickEvent event) {
+        if (isGuide(event.getCurrentItem()) || isGuide(event.getCursor())) {
+            event.setCancelled(true);
+            return;
+        }
+        if (event.getHotbarButton() >= 0 && event.getWhoClicked() instanceof Player player
+                && isGuide(player.getInventory().getItem(event.getHotbarButton()))) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onGuideDrag(InventoryDragEvent event) {
+        if (isGuide(event.getOldCursor())) event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onGuideDrop(PlayerDropItemEvent event) {
+        if (isGuide(event.getItemDrop().getItemStack())) event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onGuideSwap(PlayerSwapHandItemsEvent event) {
+        if (isGuide(event.getMainHandItem()) || isGuide(event.getOffHandItem())) event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onGuideDeath(PlayerDeathEvent event) {
+        event.getDrops().removeIf(this::isGuide);
+    }
+
+    @EventHandler
+    public void onGuideRespawn(PlayerRespawnEvent event) {
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            if (event.getPlayer().isOnline()) giveGuide(event.getPlayer());
+        });
     }
 
     @EventHandler

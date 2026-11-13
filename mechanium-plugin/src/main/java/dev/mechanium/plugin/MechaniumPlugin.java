@@ -91,6 +91,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             Bukkit.getPluginManager().registerEvents(privateStorageListener, this);
             simpleStorageNetworkListener = new SimpleStorageNetworkListener(this);
             Bukkit.getPluginManager().registerEvents(simpleStorageNetworkListener, this);
+            Bukkit.getPluginManager().registerEvents(new PortableStorageListener(this), this);
             researchMenu = new MechaniumResearchMenu(this, api);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
             townyNationHook = new TownyNationHook(this);
@@ -157,6 +158,24 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             return true;
         }
         switch (args[0].toLowerCase(Locale.ROOT)) {
+            case "environment" -> {
+                if (!moduleManager.enabledModuleIds().contains("environment")) {
+                    sender.sendMessage(ChatColor.RED + "O módulo ambiental está desativado.");
+                    return true;
+                }
+                if (sender instanceof Player player) {
+                    long impact = machineManager == null ? 0L : machineManager.industrialImpact(player.getWorld());
+                    sender.sendMessage(ChatColor.GOLD + "Impacto industrial em " + player.getWorld().getName());
+                    sender.sendMessage(ChatColor.GRAY + "Unidades acumuladas: " + ChatColor.YELLOW + impact);
+                    sender.sendMessage(ChatColor.GRAY + "Pesquise Controle de emissões para evitar novas emissões de máquinas.");
+                } else {
+                    for (org.bukkit.World world : Bukkit.getWorlds()) {
+                        long impact = machineManager == null ? 0L : machineManager.industrialImpact(world);
+                        sender.sendMessage(ChatColor.GOLD + world.getName() + ChatColor.GRAY + ": " + impact + " unidades");
+                    }
+                }
+                return true;
+            }
             case "status" -> {
                 sender.sendMessage(ChatColor.GOLD + "MECHANIUM " + getDescription().getVersion());
                 sender.sendMessage(ChatColor.GRAY + "Eras: " + api.getEras().size()
@@ -438,6 +457,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage list" + ChatColor.GRAY + " — listar acessos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium calc <receita> [quantidade]" + ChatColor.GRAY + " — calcular materiais e lotes");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium environment" + ChatColor.GRAY + " — consultar impacto industrial do mundo");
         if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium era <era> [jogador|todos]" + ChatColor.GRAY + " — alterar era (staff)");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
@@ -449,7 +469,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("help", "status", "menu", "gui", "hud", "research", "book", "storage", "unlock", "calc", "era", "admin");
+        if (args.length == 1) return List.of("help", "status", "menu", "gui", "hud", "research", "book", "storage", "unlock", "calc", "environment", "era", "admin");
         if (args.length == 2 && args[0].equalsIgnoreCase("era") && hasAdminAccess(sender)) {
             return api.getEras().stream().map(EraDefinition::id).toList();
         }

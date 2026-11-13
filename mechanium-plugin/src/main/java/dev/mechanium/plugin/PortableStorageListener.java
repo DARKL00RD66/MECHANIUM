@@ -10,6 +10,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -61,6 +64,21 @@ final class PortableStorageListener implements Listener {
         ItemStack current = event.getCurrentItem();
         ItemStack cursor = event.getCursor();
         if (isPortable(current) || isPortable(cursor) || event.isShiftClick()) event.setCancelled(true);
+        if (event.getClick() == ClickType.NUMBER_KEY && event.getHotbarButton() >= 0
+                && isPortable(player.getInventory().getItem(event.getHotbarButton()))) event.setCancelled(true);
+        if (event.getClick() == ClickType.SWAP_OFFHAND
+                && (isPortable(player.getInventory().getItemInMainHand())
+                    || isPortable(player.getInventory().getItemInOffHand()))) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onDrop(PlayerDropItemEvent event) {
+        if (isPortable(event.getItemDrop().getItemStack())) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onSwap(PlayerSwapHandItemsEvent event) {
+        if (isPortable(event.getMainHandItem()) || isPortable(event.getOffHandItem())) event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

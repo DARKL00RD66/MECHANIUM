@@ -46,7 +46,7 @@
 - [ ] Persistência e recuperação de máquinas após reinício
 
 ## Marco 3 — Portabilidade
-- [ ] Auditar individualmente licença, dependências, API e funcionalidades dos 31 projetos
+- [x] Matriz inicial das 31 referências e auditoria preliminar de licenças\n- [x] Primeiras cadeias independentes de culinária e beneficiamento mineral\n- [x] Hook Towny opcional com UUID da nação exposto pela API\n- [ ] Auditar individualmente licença, dependências, API e funcionalidades dos 31 projetos
 - [ ] Implementar os domínios licenciados ou reimplementar de forma independente
 - [ ] Adaptar sistemas ao contexto histórico-industrial e geopolítico
 - [ ] Registrar recursos não portados, substituídos ou excluídos

@@ -3,6 +3,7 @@ version: ${project.version}
 main: dev.mechanium.plugin.MechaniumPlugin
 api-version: '1.21'
 load: POSTWORLD
+softdepend: [Towny]
 authors: [davitremea1-ops]
 description: Motor independente de progressão histórica, tecnologia, indústria e addons.
 commands:

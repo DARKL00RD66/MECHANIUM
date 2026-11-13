@@ -5,6 +5,7 @@ import dev.mechanium.api.MechaniumAddonContext;
 import dev.mechanium.api.MechaniumApi;
 import dev.mechanium.api.MechaniumDataStore;
 import dev.mechanium.api.MechaniumModuleContext;
+import dev.mechanium.api.integration.NationIdentityProvider;
 import dev.mechanium.api.model.EraDefinition;
 import dev.mechanium.engine.DefaultMechaniumApi;
 import dev.mechanium.modules.BuiltinModules;
@@ -34,6 +35,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumResearchMenu researchMenu;
     private PrivateStorageListener privateStorageListener;
     private MechaniumMachineManager machineManager;
+    private TownyNationHook townyNationHook;
 
     @Override
     public void onEnable() {
@@ -77,6 +79,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             Bukkit.getPluginManager().registerEvents(privateStorageListener, this);
             researchMenu = new MechaniumResearchMenu(this, api);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
+            townyNationHook = new TownyNationHook(this);
+            townyNationHook.start();
+            Bukkit.getServicesManager().register(NationIdentityProvider.class, townyNationHook, this, ServicePriority.Normal);
             PluginCommand command = Objects.requireNonNull(getCommand("mechanium"), "mechanium command missing");
             command.setExecutor(this);
             command.setTabCompleter(this);
@@ -118,6 +123,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                 getLogger().severe("Era inicial inválida em config.yml: " + defaultEra);
             }
         }
+        if (researchMenu != null) researchMenu.giveGuide(event.getPlayer());
+        if (townyNationHook != null) townyNationHook.sync(event.getPlayer());
     }
 
     @Override
@@ -250,8 +257,55 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     }
 
     private boolean handleAdmin(CommandSender sender, String[] args) {
-        if (!sender.hasPermission("mechanium.admin")) {
+        if (!hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.RED + "Sem permissão.");
+            return true;
+        }
+        if (args.length == 3 && args[1].equalsIgnoreCase("staff") && args[2].equalsIgnoreCase("list")) {
+            List<String> admins = getConfig().getStringList("staff.admins");
+            sender.sendMessage(ChatColor.GOLD + "Equipe administrativa configurada:");
+            if (admins.isEmpty()) sender.sendMessage(ChatColor.GRAY + "Nenhum membro adicional. Operadores continuam com acesso.");
+            else admins.forEach(id -> sender.sendMessage(ChatColor.GRAY + "• " + id));
+            return true;
+        }
+        if (args.length == 4 && args[1].equalsIgnoreCase("staff")
+                && (args[2].equalsIgnoreCase("add") || args[2].equalsIgnoreCase("remove"))) {
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[3]);
+            List<String> admins = new ArrayList<>(getConfig().getStringList("staff.admins"));
+            String id = target.getUniqueId().toString();
+            if (args[2].equalsIgnoreCase("add")) {
+                if (!admins.contains(id)) admins.add(id);
+                getConfig().set("staff.admins", admins);
+                saveConfig();
+                sender.sendMessage(ChatColor.GREEN + "Acesso administrativo concedido a " + args[3] + ".");
+            } else {
+                admins.remove(id);
+                getConfig().set("staff.admins", admins);
+                saveConfig();
+                sender.sendMessage(ChatColor.GREEN + "Acesso administrativo removido de " + args[3] + ".");
+            }
+            return true;
+        }
+        if (args.length >= 3 && args.length <= 4 && args[1].equalsIgnoreCase("era")) {
+            String eraId = args[2].toLowerCase(Locale.ROOT);
+            if (api.getEra(eraId).isEmpty()) {
+                sender.sendMessage(ChatColor.RED + "Era inexistente: " + eraId);
+                return true;
+            }
+            if (args.length == 3) {
+                getConfig().set("progression.default-era", eraId);
+                saveConfig();
+                for (Player online : Bukkit.getOnlinePlayers()) api.setPlayerEra(online.getUniqueId(), eraId);
+                sender.sendMessage(ChatColor.GREEN + "Era padrão do servidor alterada para " + eraId
+                        + ". Jogadores online atualizados; novos jogadores também começarão nela.");
+            } else if (args[3].equalsIgnoreCase("todos") || args[3].equalsIgnoreCase("all")) {
+                for (Player online : Bukkit.getOnlinePlayers()) api.setPlayerEra(online.getUniqueId(), eraId);
+                sender.sendMessage(ChatColor.GREEN + "Era de todos os jogadores online alterada para " + eraId + ".");
+            } else {
+                OfflinePlayer target = Bukkit.getOfflinePlayer(args[3]);
+                api.setPlayerEra(target.getUniqueId(), eraId);
+                sender.sendMessage(ChatColor.GREEN + "Era de " + args[3] + " alterada para " + eraId + ".");
+            }
             return true;
         }
         if (args.length == 4 && args[1].equalsIgnoreCase("points")) {
@@ -275,6 +329,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             }
             return true;
         }
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin era <era> [jogador|todos]");
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin staff <add|remove|list> [jogador]");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin points <jogador> <quantidade>");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin setera <jogador> <era>");
         return true;
@@ -283,14 +339,14 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.GOLD + "MECHANIUM — comandos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium status" + ChatColor.GRAY + " — estado do motor");
-        sender.sendMessage(ChatColor.YELLOW + "/mechanium research" + ChatColor.GRAY + " — abrir o catálogo de pesquisas");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium research" + ChatColor.GRAY + " — abrir o menu de baús");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium research info" + ChatColor.GRAY + " — resumo da sua progressão");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium book" + ChatColor.GRAY + " — abrir o catálogo");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage trust <jogador>" + ChatColor.GRAY + " — autorizar acesso ao barril observado");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage untrust <jogador>" + ChatColor.GRAY + " — remover acesso");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage list" + ChatColor.GRAY + " — listar acessos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
-        if (sender.hasPermission("mechanium.admin")) {
+        if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin points <jogador> <quantidade>");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin setera <jogador> <era>");
         }
@@ -309,13 +365,36 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             return api.getTechnologies().stream().map(technology -> technology.id())
                     .filter(id -> id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("admin") && sender.hasPermission("mechanium.admin")) {
-            return List.of("points", "setera");
+        if (args.length == 2 && args[0].equalsIgnoreCase("admin") && hasAdminAccess(sender)) {
+            return List.of("era", "points", "setera", "staff");
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("era")) {
+            return api.getEras().stream().map(EraDefinition::id).toList();
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("staff")) {
+            return List.of("add", "remove", "list");
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("era")) {
+            List<String> suggestions = new ArrayList<>(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+            suggestions.add("todos");
+            return suggestions;
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("staff")
+                && (args[2].equalsIgnoreCase("add") || args[2].equalsIgnoreCase("remove"))) {
+            return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         }
         if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("setera")) {
             return api.getEras().stream().map(EraDefinition::id).toList();
         }
         return List.of();
+    }
+
+    private boolean hasAdminAccess(CommandSender sender) {
+        if (sender.hasPermission("mechanium.admin")) return true;
+        if (!(sender instanceof Player player)) return false;
+        List<String> configured = getConfig().getStringList("staff.admins");
+        return configured.contains(player.getUniqueId().toString())
+                || configured.stream().anyMatch(value -> value.equalsIgnoreCase(player.getName()));
     }
 
     @Override
@@ -334,6 +413,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         }
         researchMenu = null;
         privateStorageListener = null;
+        if (townyNationHook != null) {
+            Bukkit.getServicesManager().unregister(NationIdentityProvider.class, townyNationHook);
+            townyNationHook = null;
+        }
         if (machineManager != null) {
             machineManager.stop();
             machineManager = null;

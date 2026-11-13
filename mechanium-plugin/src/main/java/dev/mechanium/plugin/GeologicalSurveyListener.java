@@ -1,7 +1,8 @@
 package dev.mechanium.plugin;
 
 import dev.mechanium.api.MechaniumApi;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -51,14 +52,14 @@ final class GeologicalSurveyListener implements Listener {
 
         event.setCancelled(true);
         if (!api.canUseItem(player.getUniqueId(), SURVEY_ITEM_ID)) {
-            player.sendMessage(ChatColor.RED + "Você ainda não desbloqueou a prospecção geológica.");
+            player.sendMessage(Component.text("Você ainda não desbloqueou a prospecção geológica.", NamedTextColor.RED));
             return;
         }
 
         long now = System.currentTimeMillis();
         long previous = lastSurveyAt.getOrDefault(player.getUniqueId(), 0L);
         if (now - previous < COOLDOWN_MILLIS) {
-            player.sendMessage(ChatColor.GRAY + "Aguarde um instante antes de realizar outro levantamento.");
+            player.sendMessage(Component.text("Aguarde um instante antes de realizar outro levantamento.", NamedTextColor.GRAY));
             return;
         }
         lastSurveyAt.put(player.getUniqueId(), now);
@@ -68,21 +69,21 @@ final class GeologicalSurveyListener implements Listener {
 
         Map<Material, Integer> deposits = survey(event.getClickedBlock());
         if (deposits.isEmpty()) {
-            player.sendMessage(ChatColor.YELLOW + "Levantamento concluído: nenhum minério encontrado na área analisada.");
+            player.sendMessage(Component.text("Levantamento concluído: nenhum minério encontrado na área analisada.", NamedTextColor.YELLOW));
             return;
         }
 
         int total = deposits.values().stream().mapToInt(Integer::intValue).sum();
-        player.sendMessage(ChatColor.GOLD + "Levantamento geológico — " + ChatColor.WHITE
-                + total + " blocos de minério identificados.");
+        player.sendMessage(Component.text("Levantamento geológico — ", NamedTextColor.GOLD)
+                .append(Component.text(total + " blocos de minério identificados.", NamedTextColor.WHITE)));
         deposits.entrySet().stream()
                 .sorted(Map.Entry.<Material, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(entry -> entry.getKey().name()))
                 .limit(5)
-                .forEach(entry -> player.sendMessage(ChatColor.GRAY + "• "
-                        + displayName(entry.getKey()) + ": " + ChatColor.WHITE + entry.getValue()));
-        player.sendMessage(ChatColor.DARK_GRAY + "Área analisada: raio de " + RADIUS
-                + " blocos ao redor do ponto selecionado; chunks não carregados foram ignorados.");
+                .forEach(entry -> player.sendMessage(Component.text("• " + displayName(entry.getKey()) + ": ", NamedTextColor.GRAY)
+                        .append(Component.text(String.valueOf(entry.getValue()), NamedTextColor.WHITE))));
+        player.sendMessage(Component.text("Área analisada: raio de " + RADIUS
+                + " blocos ao redor do ponto selecionado; chunks não carregados foram ignorados.", NamedTextColor.DARK_GRAY));
     }
 
     private Map<Material, Integer> survey(Block center) {

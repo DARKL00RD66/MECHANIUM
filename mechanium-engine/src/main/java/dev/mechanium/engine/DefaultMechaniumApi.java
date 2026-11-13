@@ -4,7 +4,8 @@ import dev.mechanium.api.*;
 import dev.mechanium.api.event.*;
 import dev.mechanium.api.model.*;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -216,9 +217,14 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         ItemStack stack = new ItemStack(material, amount);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(new NamespacedKey("mechanium", "item_id"), PersistentDataType.STRING, definition.id());
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', definition.displayName()));
-        if (!definition.lore().isEmpty()) meta.setLore(definition.lore().stream().map(line -> ChatColor.translateAlternateColorCodes('&', line)).toList());
-        if (definition.customModelData() > 0) meta.setCustomModelData(definition.customModelData());
+        meta.customName(LegacyComponentSerializer.legacyAmpersand().deserialize(definition.displayName()));
+        if (!definition.lore().isEmpty()) meta.lore(definition.lore().stream()
+                .map(line -> LegacyComponentSerializer.legacyAmpersand().deserialize(line)).toList());
+        if (definition.customModelData() > 0) {
+            CustomModelDataComponent modelData = meta.getCustomModelDataComponent();
+            modelData.setFloats(List.of((float) definition.customModelData()));
+            meta.setCustomModelDataComponent(modelData);
+        }
         meta.setMaxStackSize(definition.maxStackSize());
         stack.setItemMeta(meta);
         return Optional.of(stack);

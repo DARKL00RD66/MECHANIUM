@@ -35,4 +35,4 @@ jobs:
           name: MECHANIUM-java21
           path: mechanium-plugin/target/MECHANIUM-*.jar
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1

@@ -37,10 +37,16 @@
 - [ ] Redes de energia extensíveis por cabos e distribuição entre várias máquinas
 - [ ] Sistema geral de fluidos com líquidos adicionais e válvulas
 - [ ] Rede de armazéns entre locais distantes e logística automatizada
+- [ ] Armazenamento portátil avançado com filtros, upgrades e pesquisa global
 - [ ] Economia monetária, preços e integração com plugin de economia
 - [ ] Depósitos minerais regionais, veios, amostras e integração com mineração
-- [ ] Agricultura completa e processamento avançado com gameplay funcional
+- [x] Primeira expansão de agricultura e culinária: sementes, substrato, colheita embalada, conservas e alimentos processados
+- [x] Moinho e conservadora industriais alimentados por energia
+- [x] Armazém portátil individual de 27 espaços persistido no item
+- [x] Contador abstrato de impacto industrial por mundo e comando de consulta
+- [ ] Agricultura completa: crescimento de culturas customizadas, estufas funcionais e colheita mecanizada
 - [ ] Persistência/reconstrução de máquinas e redes após reinício com teste de servidor
+- [ ] Efeitos ativos para filtros de carbono, reciclagem e recuperação ambiental
 
 ## Marco 3 — Portabilidade
 - [x] Matriz inicial de 31 referências e auditoria preliminar de licenças

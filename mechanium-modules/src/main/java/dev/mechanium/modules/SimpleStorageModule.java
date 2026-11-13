@@ -14,7 +14,9 @@ final class SimpleStorageModule extends AbstractBuiltinModule {
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(
                 new TechnologyDefinition("modular_warehousing", "Armazenamento modular", "industrial_revolution", 34,
-                        List.of("standardized_logistics"))
+                        List.of("standardized_logistics")),
+                new TechnologyDefinition("portable_warehousing", "Armazenamento portátil", "modern", 48,
+                        List.of("modular_warehousing"))
         );
     }
 
@@ -24,8 +26,14 @@ final class SimpleStorageModule extends AbstractBuiltinModule {
         registerItem(api, new ItemDefinition("simple_storage_node", "&bNó de armazenamento", "BARREL",
                 List.of("&8Nó de armazém protegido", "&7Nós conectados pelas faces compartilham um inventário", "&7A rede suporta paginação e até 64 nós"),
                 0, 1, "modular_storage", "modular_warehousing"));
+        registerItem(api, new ItemDefinition("portable_storage", "&bArmazém portátil", "SHULKER_BOX",
+                List.of("&8Contêiner pessoal de 27 espaços", "&7Clique com o botão direito para abrir", "&7O conteúdo fica salvo no próprio item"),
+                0, 1, "modular_storage", "portable_warehousing"));
         registerRecipe(api, new RecipeDefinition("simple_storage_node_recipe", RecipeDefinition.Type.SHAPED,
                 "simple_storage_node", 1, List.of("III", "IBI", "III"),
                 Map.of('I', "IRON_INGOT", 'B', "BARREL"), "modular_warehousing"));
+        registerRecipe(api, new RecipeDefinition("portable_storage_recipe", RecipeDefinition.Type.SHAPED,
+                "portable_storage", 1, List.of("III", "IBS", "III"),
+                Map.of('I', "IRON_INGOT", 'B', "CHEST", 'S', "SHULKER_SHELL"), "portable_warehousing"));
     }
 }

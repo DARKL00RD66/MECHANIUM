@@ -311,7 +311,8 @@ final class MechaniumMachineManager implements Listener {
 
         int progress = Math.max(0, dispenser.getPersistentDataContainer()
                 .getOrDefault(progressKey, PersistentDataType.INTEGER, 0));
-        progress = Math.min(definition.processingTicks(), progress + 20);
+        int progressPerCycle = api.canUseTechnology(owner, "industrial_efficiency") ? 40 : 20;
+        progress = Math.min(definition.processingTicks(), progress + progressPerCycle);
         if (progress < definition.processingTicks()) {
             setProgress(dispenser, progress);
             return;

@@ -143,7 +143,16 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
+        if (args.length == 0) {
+            if (sender instanceof Player player) {
+                if (researchMenu != null) researchMenu.open(player);
+                else player.sendMessage(ChatColor.RED + "O menu MECHANIUM ainda não está disponível.");
+            } else {
+                sendHelp(sender);
+            }
+            return true;
+        }
+        if (args[0].equalsIgnoreCase("help")) {
             sendHelp(sender);
             return true;
         }
@@ -155,6 +164,21 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                         + " | Módulos: " + moduleManager.enabledModuleIds().size()
                         + " | Addons: " + addonLoader.loadedAddonIds().size());
                 return true;
+            }
+            case "menu", "gui", "hud" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
+                    return true;
+                }
+                researchMenu.open(player);
+                return true;
+            }
+            case "era" -> {
+                String[] adminEraArgs = new String[args.length + 1];
+                adminEraArgs[0] = "admin";
+                adminEraArgs[1] = "era";
+                System.arraycopy(args, 1, adminEraArgs, 2, args.length - 1);
+                return handleAdmin(sender, adminEraArgs);
             }
             case "research" -> {
                 if (!(sender instanceof Player player)) {
@@ -404,7 +428,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.GOLD + "MECHANIUM — comandos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium status" + ChatColor.GRAY + " — estado do motor");
-        sender.sendMessage(ChatColor.YELLOW + "/mechanium research" + ChatColor.GRAY + " — abrir o menu de baús");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium" + ChatColor.GRAY + " — abrir o HUD em baú");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium menu" + ChatColor.GRAY + " — abrir o HUD em baú");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium research" + ChatColor.GRAY + " — abrir pesquisas e progressão");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium research info" + ChatColor.GRAY + " — resumo da sua progressão");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium book" + ChatColor.GRAY + " — abrir o catálogo");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage trust <jogador>" + ChatColor.GRAY + " — autorizar acesso ao barril observado");
@@ -413,6 +439,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium calc <receita> [quantidade]" + ChatColor.GRAY + " — calcular materiais e lotes");
         if (hasAdminAccess(sender)) {
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium era <era> [jogador|todos]" + ChatColor.GRAY + " — alterar era (staff)");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin points <jogador> <quantidade>");
@@ -422,7 +449,15 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("help", "status", "research", "book", "storage", "unlock", "calc", "admin");
+        if (args.length == 1) return List.of("help", "status", "menu", "gui", "hud", "research", "book", "storage", "unlock", "calc", "era", "admin");
+        if (args.length == 2 && args[0].equalsIgnoreCase("era") && hasAdminAccess(sender)) {
+            return api.getEras().stream().map(EraDefinition::id).toList();
+        }
+        if (args.length == 3 && args[0].equalsIgnoreCase("era") && hasAdminAccess(sender)) {
+            List<String> suggestions = new ArrayList<>(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
+            suggestions.add("todos");
+            return suggestions;
+        }
         if (args.length == 2 && args[0].equalsIgnoreCase("storage")) return List.of("trust", "untrust", "list");
         if (args.length == 3 && args[0].equalsIgnoreCase("storage")
                 && (args[1].equalsIgnoreCase("trust") || args[1].equalsIgnoreCase("untrust"))) {

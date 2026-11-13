@@ -44,7 +44,7 @@ final class EnergyGridManager implements Listener {
     private static final Set<String> ENERGY_ITEMS = Set.of("wind_rotor", "solar_cell", "energy_cell");
     private static final Set<String> POWERED_MACHINES = Set.of(
             "water_filter_machine", "advanced_assembly_machine",
-            "industrial_crusher_machine", "industrial_smelter_machine");
+            "industrial_crusher_machine", "industrial_smelter_machine", "industrial_mill_machine", "industrial_canner_machine");
     private static final int BATTERY_CAPACITY = 10_000;
 
     private final JavaPlugin plugin;

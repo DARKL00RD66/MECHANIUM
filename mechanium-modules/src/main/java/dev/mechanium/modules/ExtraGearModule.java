@@ -26,7 +26,7 @@ final class ExtraGearModule extends AbstractBuiltinModule {
         registerItem(api, new ItemDefinition("surveying_compass", "&bBússola de levantamento", "COMPASS",
                 List.of("&8Instrumento de orientação e levantamento territorial"), 0, 1, "extra_gear", "field_engineering"));
         registerItem(api, new ItemDefinition("reinforced_pickaxe", "&6Picareta reforçada", "IRON_PICKAXE",
-                List.of("&8Ferramenta de mineração reforçada", "&7Receita especial; atributos vanilla preservados"),
+                List.of("&8Ferramenta de mineração reforçada", "&7Concede aceleração breve ao concluir uma mineração"),
                 0, 1, "extra_gear", "reinforced_toolmaking"));
 
         registerRecipe(api, new RecipeDefinition("reinforced_handle_recipe", RecipeDefinition.Type.SHAPED,

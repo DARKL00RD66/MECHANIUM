@@ -22,7 +22,7 @@ final class SimpleStorageModule extends AbstractBuiltinModule {
         var api = context.api();
         registerCategory(api, new ContentCategory("modular_storage", "Armazenamento modular", "Nós adicionais de armazenamento pessoal"));
         registerItem(api, new ItemDefinition("simple_storage_node", "&bNó de armazenamento", "BARREL",
-                List.of("&8Armazém protegido adicional", "&7Usa proprietário e permissões por UUID"),
+                List.of("&8Nó de armazém protegido", "&7Nós conectados pelas faces compartilham um inventário", "&7A rede suporta paginação e até 64 nós"),
                 0, 1, "modular_storage", "modular_warehousing"));
         registerRecipe(api, new RecipeDefinition("simple_storage_node_recipe", RecipeDefinition.Type.SHAPED,
                 "simple_storage_node", 1, List.of("III", "IBI", "III"),

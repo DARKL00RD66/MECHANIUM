@@ -8,68 +8,57 @@
 - [x] Motor inicial de eras e pesquisas
 - [x] Módulos oficiais e módulos opcionais
 - [x] Dependências declaradas entre módulos internos
-- [x] Ordenação topológica automática, rejeição de ciclos e rollback de módulos parcialmente iniciados
-- [x] Carregador de addons externos
-- [x] Isolamento de JARs inválidos/falhas de linkage e reconciliação de conteúdo por addon
-- [x] Bootstrap e configuração Bukkit
-- [x] Documentação e workflow de CI
-- [x] CI Java 21 aprovado no commit `3616923` (47 testes)
-- [x] Testes de ownership, rollback, conflitos e migração de banco legado v3→v4
+- [x] Ordenação topológica, rejeição de ciclos e rollback de módulos parcialmente iniciados
+- [x] Carregador de addons externos e validação de descriptor/dependências
+- [x] Bootstrap Bukkit, configuração e CI
 - [ ] Teste real em Paper 1.21.11
 - [ ] Teste real em Purpur 1.21.11
 
 ## Marco 1 — Core de conteúdo
-- [x] Registro persistente de categorias, itens e receitas
-- [x] Persistência de definições de máquinas e regras de drops em SQLite
-- [x] Itens com PDC, lore, modelo customizado e limite de pilha
+- [x] Registro persistente de categorias, itens, receitas, máquinas e drops
 - [x] Receitas shaped/shapeless e ingredientes personalizados
 - [x] Integração do crafting com o motor central de progressão
-- [x] Registro dinâmico de receitas novas e limpeza das receitas no desligamento
-- [x] Eventos públicos de registro e progressão para addons
-- [x] Testes de persistência e validação do formato de receitas
-- [x] Reconciliação de conteúdo persistido por proprietário e remoção de conteúdo de módulos/addons inativos
-- [x] Menu paginado de pesquisas com desbloqueio pela API central
-- [x] Menu de baús com árvore de progressão por era
-- [x] Livro-guia entregue automaticamente e usado para abrir o menu
-- [ ] Catálogo pesquisável e páginas de detalhes complementares
-- [ ] Catálogo pesquisável de itens e tecnologias dentro do jogo
+- [x] Menu paginado de pesquisas por era
+- [x] Livro-guia entregue automaticamente
+- [ ] Catálogo pesquisável de itens, receitas e tecnologias dentro do jogo
 
 ## Marco 2 — Sistemas econômicos e industriais
-- [x] Prensa mecânica inicial em dispenser com inventário, proprietário persistente e processamento condicionado à pesquisa
-- [x] Segundo processo funcional de máquina: montadora industrial e filtro de água
-- [ ] Framework geral de máquinas com múltiplos tipos, energia e manutenção
-- [ ] Filas de produção com limites por tick
-- [x] Primeiro processamento de fluido: filtro de água com entrada/saída de itens
-- [ ] Redes de energia e fluidos
-- [x] Cofre privado inicial com proprietário, lista de acesso e proteções de bloco
-- [x] Segundo tipo de armazém protegido usando o sistema de proprietário/permissões
-- [ ] Rede completa de armazéns, propriedade compartilhada e logística
-- [x] Drops agrícolas iniciais de subprodutos animais condicionados à pesquisa
-- [x] Ferramenta inicial de prospecção geológica com pesquisa, scanner local e testes
+- [x] Prensa mecânica inicial em dispenser
+- [x] Montadora industrial, britador, refinaria e filtro de água
+- [x] Controle de máquinas por proprietário e progressão
+- [x] Geradores eólicos/solares e baterias com armazenamento e consumo nas máquinas
+- [x] Tubulações adjacentes e tanques com transporte de água purificada
+- [x] Cofres privados com proprietário e lista de acesso
+- [x] Rede local paginada de armazenamento com até 64 nós adjacentes
+- [x] Cálculo recursivo de lotes e materiais por receita
+- [x] Habilidades utilitárias para ferramentas e kits
+- [ ] Framework geral de máquinas com múltiplos tipos de bloco, múltiplos insumos e múltiplos produtos
+- [ ] Filas de produção e limites configuráveis por tick
+- [ ] Redes de energia extensíveis por cabos e distribuição entre várias máquinas
+- [ ] Sistema geral de fluidos com líquidos adicionais e válvulas
+- [ ] Rede de armazéns entre locais distantes e logística automatizada
+- [ ] Economia monetária, preços e integração com plugin de economia
 - [ ] Depósitos minerais regionais, veios, amostras e integração com mineração
-- [ ] Agricultura completa e processamento com gameplay funcional
-- [ ] Persistência e recuperação de máquinas após reinício
+- [ ] Agricultura completa e processamento avançado com gameplay funcional
+- [ ] Persistência/reconstrução de máquinas e redes após reinício com teste de servidor
 
 ## Marco 3 — Portabilidade
-- [x] Matriz inicial das 31 referências e auditoria preliminar de licenças
+- [x] Matriz inicial de 31 referências e auditoria preliminar de licenças
 - [x] Primeiras cadeias independentes de culinária e beneficiamento mineral
 - [x] Hook Towny opcional com UUID da nação exposto pela API
-- [x] Primeiras fatias de sete referências: ExtraGear, EcoPower, SFCalc, Liquid, AdvancedTech, Simple Storage e SensibleToolbox
+- [x] Primeiras funcionalidades jogáveis dos sete domínios ExtraGear, EcoPower, SFCalc, Liquid, AdvancedTech, Simple Storage e SensibleToolbox
 - [ ] Completar paridade de funcionalidades e sistemas transversais dos addons
 - [ ] Auditar individualmente licença, dependências, API e funcionalidades dos 31 projetos
-- [ ] Implementar os domínios licenciados ou reimplementar de forma independente
 - [ ] Adaptar sistemas ao contexto histórico-industrial e geopolítico
-- [ ] Registrar recursos não portados, substituídos ou excluídos
 - [ ] Criar testes de regressão por domínio
 - [ ] Validar cada implementação em Paper e Purpur
 
 ## Marco 4 — Addon SDK
-- [x] Exemplo de addon Maven independente e compilável (CI compila separadamente)
+- [x] Exemplo Maven independente e compilável
 - [x] API de eventos e registro de conteúdos
 - [x] Validação de descriptor, dependências e ciclo de vida
-- [x] Escopos transacionais automáticos durante onEnable e rollback em falha
-- [ ] Ferramenta independente para validar o descriptor de um JAR
-- [ ] Testes de integração abrangentes de addons reais e falhas de carregamento em servidor
+- [ ] Ferramenta independente para validar descriptor de JAR
+- [ ] Testes abrangentes de addons reais e falhas de carregamento em servidor
 - [ ] Documentação de migração entre versões da API
 - [ ] Publicação da API em registry Maven
 
@@ -79,6 +68,6 @@
 - Teste de integração em servidor
 - Bloqueio antes e liberação após pesquisa
 - Autorização de proprietário online/offline quando aplicável
-- Proveniência e licença registradas quando houver código externo
+- Proveniência e licença registradas para qualquer código externo
 
-O projeto só deve ser considerado pronto para produção quando os testes de servidor real e os critérios de aceite forem concluídos.
+O projeto só deve ser considerado pronto para produção depois da CI, dos testes funcionais em Paper/Purpur e da validação dos critérios de aceite.

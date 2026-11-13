@@ -25,6 +25,10 @@ final class AdvancedTechModule extends AbstractBuiltinModule {
                 List.of("&8Componentes industriais de tolerância aprimorada"), 0, 64, "advanced_industry", "precision_engineering"));
         registerItem(api, new ItemDefinition("industrial_gear", "&6Engrenagem industrial", "CLOCK",
                 List.of("&8Componente para equipamentos industriais"), 0, 32, "advanced_industry", "precision_engineering"));
+        registerItem(api, new ItemDefinition("industrial_crusher", "&6Britador industrial", "DISPENSER",
+                List.of("&8Processa minério britado em concentrado de ferro"), 0, 1, "advanced_industry", "precision_engineering"));
+        registerItem(api, new ItemDefinition("industrial_smelter", "&6Refinaria industrial", "DISPENSER",
+                List.of("&8Refina concentrados em ligas industriais"), 0, 1, "advanced_industry", "advanced_assembly"));
         registerItem(api, new ItemDefinition("assembly_machine", "&bMontadora industrial", "DISPENSER",
                 List.of("&8Máquina de montagem", "&7Entrada: peças mecânicas no primeiro espaço", "&7Saída: peças de precisão no último espaço"),
                 0, 1, "advanced_industry", "advanced_assembly"));
@@ -38,6 +42,18 @@ final class AdvancedTechModule extends AbstractBuiltinModule {
         registerRecipe(api, new RecipeDefinition("assembly_machine_recipe", RecipeDefinition.Type.SHAPED,
                 "assembly_machine", 1, List.of("PIP", "GDG", "PIP"),
                 Map.of('P', "PISTON", 'I', "IRON_INGOT", 'G', "mechanium:industrial_gear", 'D', "DISPENSER"),
+                "advanced_assembly"));
+        registerRecipe(api, new RecipeDefinition("industrial_crusher_recipe", RecipeDefinition.Type.SHAPED,
+                "industrial_crusher", 1, List.of("III", "PDP", "III"),
+                Map.of('I', "IRON_INGOT", 'P', "PISTON", 'D', "DISPENSER"), "precision_engineering"));
+        registerRecipe(api, new RecipeDefinition("industrial_smelter_recipe", RecipeDefinition.Type.SHAPED,
+                "industrial_smelter", 1, List.of("ICI", "BDB", "ICI"),
+                Map.of('I', "IRON_INGOT", 'C', "COPPER_INGOT", 'B', "BRICKS", 'D', "DISPENSER"), "advanced_assembly"));
+        registerMachine(api, new MachineDefinition("industrial_crusher_machine", "Britador industrial",
+                "industrial_crusher", "DISPENSER", "mechanium:crushed_ore", 2, "iron_concentrate", 2, 120,
+                "precision_engineering"));
+        registerMachine(api, new MachineDefinition("industrial_smelter_machine", "Refinaria industrial",
+                "industrial_smelter", "DISPENSER", "mechanium:iron_concentrate", 2, "refined_alloy", 2, 180,
                 "advanced_assembly"));
         registerMachine(api, new MachineDefinition("advanced_assembly_machine", "Montadora industrial",
                 "assembly_machine", "DISPENSER", "mechanium:mechanical_parts", 2, "precision_parts", 1, 160,

@@ -35,6 +35,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumResearchMenu researchMenu;
     private PrivateStorageListener privateStorageListener;
     private MechaniumMachineManager machineManager;
+    private EnergyGridManager energyGridManager;
+    private FluidPipeManager fluidPipeManager;
+    private SpecialEquipmentListener specialEquipmentListener;
+    private SimpleStorageNetworkListener simpleStorageNetworkListener;
     private TownyNationHook townyNationHook;
 
     @Override
@@ -72,11 +76,21 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
             Bukkit.getPluginManager().registerEvents(new MechaniumMobDropListener(api), this);
-            machineManager = new MechaniumMachineManager(this, api);
+            energyGridManager = new EnergyGridManager(this, api);
+            Bukkit.getPluginManager().registerEvents(energyGridManager, this);
+            energyGridManager.start();
+            fluidPipeManager = new FluidPipeManager(this, api);
+            Bukkit.getPluginManager().registerEvents(fluidPipeManager, this);
+            fluidPipeManager.start();
+            specialEquipmentListener = new SpecialEquipmentListener(this);
+            Bukkit.getPluginManager().registerEvents(specialEquipmentListener, this);
+            machineManager = new MechaniumMachineManager(this, api, energyGridManager);
             Bukkit.getPluginManager().registerEvents(machineManager, this);
             machineManager.start();
             privateStorageListener = new PrivateStorageListener(this, api);
             Bukkit.getPluginManager().registerEvents(privateStorageListener, this);
+            simpleStorageNetworkListener = new SimpleStorageNetworkListener(this);
+            Bukkit.getPluginManager().registerEvents(simpleStorageNetworkListener, this);
             researchMenu = new MechaniumResearchMenu(this, api);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
             townyNationHook = new TownyNationHook(this);
@@ -188,36 +202,50 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
                     return true;
                 }
-                if (args.length != 2) {
-                    sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium calc <id-da-receita>");
+                if (args.length < 2 || args.length > 3) {
+                    sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium calc <id-da-receita> [quantidade-final]");
                     return true;
                 }
-                var recipe = api.getRecipe(args[1]);
-                if (recipe.isEmpty()) {
-                    sender.sendMessage(ChatColor.RED + "Receita não encontrada: " + args[1]);
-                    return true;
-                }
-                var definition = recipe.get();
-                String resultName = api.getItem(definition.resultItemId())
-                        .map(dev.mechanium.api.model.ItemDefinition::displayName)
-                        .orElse(definition.resultItemId());
-                sender.sendMessage(ChatColor.GOLD + "Cálculo de receita: " + resultName + " x" + definition.resultAmount());
-                sender.sendMessage(ChatColor.GRAY + "Disponibilidade: " + (api.canCraft(player.getUniqueId(), definition.id())
-                        ? ChatColor.GREEN + "liberada" : ChatColor.RED + "bloqueada pela progressão"));
-                sender.sendMessage(ChatColor.YELLOW + "Ingredientes por símbolo:");
-                definition.ingredients().entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
-                    String ingredient = entry.getValue();
-                    String display = ingredient;
-                    if (ingredient.startsWith("mechanium:")) {
-                        display = api.getItem(ingredient.substring(10))
-                                .map(dev.mechanium.api.model.ItemDefinition::displayName).orElse(ingredient);
-                    } else {
-                        org.bukkit.Material material = org.bukkit.Material.matchMaterial(ingredient);
-                        if (material != null) display = material.name().toLowerCase(Locale.ROOT).replace('_', ' ');
+                long requested = 1;
+                if (args.length == 3) {
+                    try {
+                        requested = Long.parseLong(args[2]);
+                    } catch (NumberFormatException exception) {
+                        sender.sendMessage(ChatColor.RED + "Quantidade inválida.");
+                        return true;
                     }
-                    sender.sendMessage(ChatColor.GRAY + " " + entry.getKey() + " = " + display);
-                });
-                sender.sendMessage(ChatColor.DARK_GRAY + "O modelo atual registra ingredientes por símbolo, não quantidades extras.");
+                }
+                try {
+                    RecipeCostCalculator.Calculation calculation =
+                            new RecipeCostCalculator(api).calculate(args[1], requested);
+                    var definition = calculation.recipe();
+                    String resultName = api.getItem(definition.resultItemId())
+                            .map(dev.mechanium.api.model.ItemDefinition::displayName)
+                            .orElse(definition.resultItemId());
+                    sender.sendMessage(ChatColor.GOLD + "Cálculo de produção: " + resultName);
+                    sender.sendMessage(ChatColor.GRAY + "Solicitado: " + requested
+                            + " | Produzido: " + calculation.produced()
+                            + " | Lotes: " + calculation.batches());
+                    sender.sendMessage(ChatColor.GRAY + "Disponibilidade da receita principal: "
+                            + (api.canCraft(player.getUniqueId(), definition.id())
+                            ? ChatColor.GREEN + "liberada" : ChatColor.RED + "bloqueada pela progressão"));
+                    sender.sendMessage(ChatColor.YELLOW + "Materiais totais necessários:");
+                    calculation.materials().forEach((ingredient, amount) -> {
+                        String display = ingredient;
+                        if (ingredient.startsWith("mechanium:")) {
+                            display = api.getItem(ingredient.substring(10))
+                                    .map(dev.mechanium.api.model.ItemDefinition::displayName).orElse(ingredient);
+                        } else {
+                            org.bukkit.Material material = org.bukkit.Material.matchMaterial(ingredient);
+                            if (material != null) display = material.name().toLowerCase(Locale.ROOT).replace('_', ' ');
+                        }
+                        sender.sendMessage(ChatColor.GRAY + " • " + display + " x" + amount);
+                    });
+                    sender.sendMessage(ChatColor.DARK_GRAY
+                            + "Custos representam materiais; não há integração com moedas/economia.");
+                } catch (IllegalArgumentException exception) {
+                    sender.sendMessage(ChatColor.RED + exception.getMessage());
+                }
                 return true;
             }
             case "admin" -> {
@@ -383,7 +411,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage untrust <jogador>" + ChatColor.GRAY + " — remover acesso");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage list" + ChatColor.GRAY + " — listar acessos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
-        sender.sendMessage(ChatColor.YELLOW + "/mechanium calc <id-da-receita>" + ChatColor.GRAY + " — consultar uma receita");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium calc <receita> [quantidade]" + ChatColor.GRAY + " — calcular materiais e lotes");
         if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
@@ -455,6 +483,19 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             }
             recipeBridge = null;
         }
+        if (simpleStorageNetworkListener != null) {
+            simpleStorageNetworkListener.closeAll();
+            simpleStorageNetworkListener = null;
+        }
+        if (fluidPipeManager != null) {
+            fluidPipeManager.stop();
+            fluidPipeManager = null;
+        }
+        if (energyGridManager != null) {
+            energyGridManager.stop();
+            energyGridManager = null;
+        }
+        specialEquipmentListener = null;
         researchMenu = null;
         privateStorageListener = null;
         if (townyNationHook != null) {

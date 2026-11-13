@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Renewable-energy components; grid simulation and machine power accounting are future work. */
+/** Renewable generators, energy cells and progression unlocks for the local power grid. */
 final class EcoPowerModule extends AbstractBuiltinModule {
     @Override public String id() { return "eco-power"; }
     @Override public boolean optional() { return true; }
@@ -22,12 +22,12 @@ final class EcoPowerModule extends AbstractBuiltinModule {
     @Override protected void registerExtra(dev.mechanium.api.MechaniumModuleContext context) {
         var api = context.api();
         registerCategory(api, new ContentCategory("eco_power", "Energia renovável", "Componentes para tecnologias energéticas sustentáveis"));
-        registerItem(api, new ItemDefinition("wind_rotor", "&fRotor eólico", "IRON_BARS",
-                List.of("&8Componente de geração eólica"), 0, 16, "eco_power", "wind_generation"));
-        registerItem(api, new ItemDefinition("solar_cell", "&bCélula solar", "LIGHT_BLUE_STAINED_GLASS",
-                List.of("&8Componente de captação solar"), 0, 16, "eco_power", "solar_cells"));
-        registerItem(api, new ItemDefinition("energy_cell", "&eCélula de armazenamento", "AMETHYST_BLOCK",
-                List.of("&8Componente de armazenamento energético", "&7Ainda não participa de uma rede elétrica simulada"),
+        registerItem(api, new ItemDefinition("wind_rotor", "&fRotor eólico", "FURNACE",
+                List.of("&8Gerador eólico", "&7Produz energia quando ligado a uma bateria MECHANIUM"), 0, 16, "eco_power", "wind_generation"));
+        registerItem(api, new ItemDefinition("solar_cell", "&bCélula solar", "SMOKER",
+                List.of("&8Gerador solar", "&7Produz energia durante o dia quando ligado a uma bateria"), 0, 16, "eco_power", "solar_cells"));
+        registerItem(api, new ItemDefinition("energy_cell", "&eCélula de armazenamento", "BARREL",
+                List.of("&8Bateria MECHANIUM", "&7Armazena até 10.000 unidades de energia", "&7Conecte a um gerador e a uma máquina"),
                 0, 16, "eco_power", "energy_accumulation"));
 
         registerRecipe(api, new RecipeDefinition("wind_rotor_recipe", RecipeDefinition.Type.SHAPED,

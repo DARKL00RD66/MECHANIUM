@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Practical field-tool recipes; active tool abilities are intentionally not implied by item names. */
+/** Practical field and maintenance kits with active utility abilities. */
 final class SensibleToolboxModule extends AbstractBuiltinModule {
     @Override public String id() { return "sensible-toolbox"; }
     @Override public boolean optional() { return true; }
@@ -22,11 +22,11 @@ final class SensibleToolboxModule extends AbstractBuiltinModule {
         var api = context.api();
         registerCategory(api, new ContentCategory("field_toolbox", "Ferramentas de campo", "Kits de utilidade e manutenção"));
         registerItem(api, new ItemDefinition("field_toolkit", "&eKit de campo", "CHEST",
-                List.of("&8Conjunto de ferramentas e materiais de apoio"), 0, 1, "field_toolbox", "field_tooling"));
+                List.of("&8Kit utilitário reutilizável", "&7Clique direito: velocidade e visão noturna temporárias"), 0, 1, "field_toolbox", "field_tooling"));
         registerItem(api, new ItemDefinition("maintenance_kit", "&6Kit de manutenção", "ANVIL",
-                List.of("&8Conjunto de peças para manutenção de equipamentos"), 0, 1, "field_toolbox", "maintenance_workshop"));
+                List.of("&8Kit consumível para manutenção", "&7Clique direito: repara um equipamento danificado do inventário"), 0, 1, "field_toolbox", "maintenance_workshop"));
         registerItem(api, new ItemDefinition("technical_manual", "&fManual técnico", "BOOK",
-                List.of("&8Manual de consulta para trabalhadores especializados"), 0, 16, "field_toolbox", "maintenance_workshop"));
+                List.of("&8Manual técnico de consulta e referência"), 0, 16, "field_toolbox", "maintenance_workshop"));
 
         registerRecipe(api, new RecipeDefinition("field_toolkit_recipe", RecipeDefinition.Type.SHAPED,
                 "field_toolkit", 1, List.of("PIP", "ICI", "PIP"),

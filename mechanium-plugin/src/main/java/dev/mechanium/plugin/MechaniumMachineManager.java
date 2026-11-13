@@ -53,6 +53,7 @@ final class MechaniumMachineManager implements Listener {
 
     private final JavaPlugin plugin;
     private final MechaniumApi api;
+    private final EnergyGridManager energyGridManager;
     private final NamespacedKey itemIdKey;
     private final NamespacedKey machineIdKey;
     private final NamespacedKey ownerKey;
@@ -60,9 +61,10 @@ final class MechaniumMachineManager implements Listener {
     private final Map<String, Location> loadedMachines = new HashMap<>();
     private BukkitTask ticker;
 
-    MechaniumMachineManager(JavaPlugin plugin, MechaniumApi api) {
+    MechaniumMachineManager(JavaPlugin plugin, MechaniumApi api, EnergyGridManager energyGridManager) {
         this.plugin = plugin;
         this.api = api;
+        this.energyGridManager = energyGridManager;
         this.itemIdKey = Objects.requireNonNull(NamespacedKey.fromString("mechanium:item_id"));
         this.machineIdKey = new NamespacedKey(plugin, "machine_id");
         this.ownerKey = new NamespacedKey(plugin, "machine_owner");
@@ -320,6 +322,12 @@ final class MechaniumMachineManager implements Listener {
                 && (!existing.isSimilar(output)
                     || existing.getAmount() + output.getAmount() > existing.getMaxStackSize())) {
             setProgress(dispenser, definition.processingTicks());
+            return;
+        }
+
+        if (energyGridManager != null && energyGridManager.requiresPower(machineId)
+                && !energyGridManager.consume(owner, dispenser.getLocation(), 1)) {
+            setProgress(dispenser, progress);
             return;
         }
 

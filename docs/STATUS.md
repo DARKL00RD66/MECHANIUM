@@ -41,6 +41,10 @@
 - **AdvancedTech:** britador, refinaria e montadora; todos usam o runtime de máquina e exigem energia.
 - **Simple Storage:** inventário virtual paginado para até 64 nós de barril conectados por faces, respeitando propriedade e jogadores confiáveis.
 - **SensibleToolbox:** kit de campo com Speed/Night Vision temporárias e kit consumível para reparar equipamento em 25% da durabilidade máxima.
+- **Agricultura/culinária:** novos insumos agrícolas, sementes, substrato, caixotes, queijo, ensopado, carne conservada e rações.
+- **Máquinas alimentares:** moinho de trigo para farinha e conservadora de frutas, ambas alimentadas por energia.
+- **Armazenamento portátil:** item único com 27 espaços, conteúdo serializado no PDC do item e salvo ao fechar a interface; depende do módulo opcional simple-storage.
+- **Ambiente:** contador persistente de impacto industrial por mundo; cada ciclo de máquina soma uma unidade, exceto quando o proprietário possui emissions_control; comando /mechanium environment consulta o total.
 
 ## Limitações conhecidas
 

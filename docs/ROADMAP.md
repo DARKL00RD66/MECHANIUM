@@ -44,9 +44,11 @@
 - [x] Moinho e conservadora industriais alimentados por energia
 - [x] Armazém portátil individual de 27 espaços persistido no item
 - [x] Contador abstrato de impacto industrial por mundo e comando de consulta
+- [x] Desgaste de máquinas, manutenção com ferro e bônus de eficiência por pesquisa
 - [ ] Agricultura completa: crescimento de culturas customizadas, estufas funcionais e colheita mecanizada
 - [ ] Persistência/reconstrução de máquinas e redes após reinício com teste de servidor
 - [ ] Efeitos ativos para filtros de carbono, reciclagem e recuperação ambiental
+- [ ] Balanceamento avançado: níveis de desgaste, falhas configuráveis e manutenção escalonada
 
 ## Marco 3 — Portabilidade
 - [x] Matriz inicial de 31 referências e auditoria preliminar de licenças

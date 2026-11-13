@@ -19,7 +19,9 @@ final class CulinaryModule extends AbstractBuiltinModule {
                 new TechnologyDefinition("horticulture", "Horticultura", "medieval", 12, List.of("crop_rotation")),
                 new TechnologyDefinition("culinary_preservation", "Conservação culinária", "renaissance", 20, List.of("food_preservation")),
                 new TechnologyDefinition("industrial_food_processing", "Processamento alimentar industrial", "industrial_revolution", 38,
-                        List.of("culinary_preservation", "mechanized_production"))
+                        List.of("culinary_preservation", "mechanized_production")),
+                new TechnologyDefinition("food_quality_control", "Controle de qualidade alimentar", "modern", 46,
+                        List.of("industrial_food_processing", "greenhouse_cultivation"))
         );
     }
 
@@ -35,6 +37,14 @@ final class CulinaryModule extends AbstractBuiltinModule {
                 List.of("&8Alimento conservado para armazenamento"), 0, 16, "culinary_goods", "culinary_preservation"));
         registerItem(api, new ItemDefinition("industrial_ration", "&6Ração industrial", "COOKED_BEEF",
                 List.of("&8Alimento padronizado para cadeias de abastecimento"), 0, 64, "culinary_goods", "industrial_food_processing"));
+        registerItem(api, new ItemDefinition("cheese_wheel", "&eQueijo artesanal", "HONEYCOMB",
+                List.of("&8Alimento produzido por processamento de leite"), 0, 16, "culinary_goods", "culinary_preservation"));
+        registerItem(api, new ItemDefinition("vegetable_stew", "&aEnsopado de legumes", "RABBIT_STEW",
+                List.of("&8Refeição preparada com produtos agrícolas"), 0, 16, "culinary_goods", "horticulture"));
+        registerItem(api, new ItemDefinition("preserved_meat", "&6Carne conservada", "COOKED_PORKCHOP",
+                List.of("&8Proteína preparada para armazenamento prolongado"), 0, 16, "culinary_goods", "food_quality_control"));
+        registerItem(api, new ItemDefinition("ration_crate", "&6Caixa de rações", "CHEST",
+                List.of("&8Lote de alimentos para abastecimento"), 0, 16, "culinary_goods", "food_quality_control"));
 
         registerRecipe(api, new RecipeDefinition("mechanium_flour_recipe", RecipeDefinition.Type.SHAPELESS,
                 "mechanium_flour", 2, List.of(), Map.of('W', "WHEAT", 'S', "WHEAT"), "horticulture"));
@@ -47,5 +57,17 @@ final class CulinaryModule extends AbstractBuiltinModule {
         registerRecipe(api, new RecipeDefinition("industrial_ration_recipe", RecipeDefinition.Type.SHAPELESS,
                 "industrial_ration", 2, List.of(), Map.of('D', "mechanium:bread_dough", 'M', "COOKED_BEEF",
                         'C', "COOKED_COD"), "industrial_food_processing"));
+        registerRecipe(api, new RecipeDefinition("cheese_wheel_recipe", RecipeDefinition.Type.SHAPELESS,
+                "cheese_wheel", 2, List.of(), Map.of('M', "MILK_BUCKET", 'S', "SUGAR", 'H', "HONEY_BOTTLE"),
+                "culinary_preservation"));
+        registerRecipe(api, new RecipeDefinition("vegetable_stew_recipe", RecipeDefinition.Type.SHAPELESS,
+                "vegetable_stew", 1, List.of(), Map.of('C', "CARROT", 'P', "POTATO", 'B', "BEETROOT"),
+                "horticulture"));
+        registerRecipe(api, new RecipeDefinition("preserved_meat_recipe", RecipeDefinition.Type.SHAPELESS,
+                "preserved_meat", 2, List.of(), Map.of('M', "COOKED_PORKCHOP", 'S', "SUGAR", 'F', "mechanium:industrial_fertilizer"),
+                "food_quality_control"));
+        registerRecipe(api, new RecipeDefinition("ration_crate_recipe", RecipeDefinition.Type.SHAPED,
+                "ration_crate", 1, List.of("PPP", "P R", "PPP"),
+                Map.of('P', "OAK_PLANKS", 'R', "mechanium:industrial_ration"), "food_quality_control"));
     }
 }

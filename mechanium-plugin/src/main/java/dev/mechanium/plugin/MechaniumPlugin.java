@@ -91,7 +91,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             Bukkit.getPluginManager().registerEvents(privateStorageListener, this);
             simpleStorageNetworkListener = new SimpleStorageNetworkListener(this);
             Bukkit.getPluginManager().registerEvents(simpleStorageNetworkListener, this);
-            Bukkit.getPluginManager().registerEvents(new PortableStorageListener(this), this);
+            if (moduleManager.enabledModuleIds().contains("simple-storage")) {
+                Bukkit.getPluginManager().registerEvents(new PortableStorageListener(this), this);
+            }
             researchMenu = new MechaniumResearchMenu(this, api);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
             townyNationHook = new TownyNationHook(this);

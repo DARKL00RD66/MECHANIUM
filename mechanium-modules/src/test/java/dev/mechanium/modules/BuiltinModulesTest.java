@@ -24,9 +24,7 @@ class BuiltinModulesTest {
                 "sensible-toolbox",
                 "agriculture",
                 "culinary",
-                "environment",
-                "advanced-tech",
-                "simple-storage"
+                "environment"
         )));
     }
 

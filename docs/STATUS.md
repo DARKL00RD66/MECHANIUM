@@ -24,7 +24,12 @@
 - Registro transacional de conteúdo por proprietário (`module:<id>` / `addon:<id>`), rollback de registros quando `onEnable` falha e reconciliação das definições que deixam de ser declaradas.
 - Migração SQLite v4 com tabela de ownership; remove no bootstrap conteúdo pertencente a módulos/addons que não carregaram. A migração adota IDs conhecidos dos módulos oficiais antigos; conteúdo externo legado sem ownership é preservado por segurança.
 - Bootstrap Bukkit/Paper, comandos iniciais e configuração.
-- Menu de inventário com baús, árvore de pesquisas por era, páginas, pré-requisitos e desbloqueio por clique.\n- Livro-guia entregue automaticamente no inventário ao entrar; clique direito abre o menu.\n- Integração Towny opcional: sincroniza UUID/nome da nação do jogador e publica o serviço `NationIdentityProvider`.\n- Administração simplificada: lista de UUIDs em `staff.admins`, comandos para adicionar/remover equipe e alterar era padrão, de todos online ou de um jogador.\n- Módulo `culinary`: primeira cadeia de horticultura, culinária e conservação de alimentos inspirada em referências agrícolas/culinárias.\n- Módulo `ore-processing`: primeira cadeia de peneiramento, britagem e refino; sem geração de depósitos regionais ainda.
+- Menu de inventário com baús, árvore de pesquisas por era, páginas, pré-requisitos e desbloqueio por clique.
+- Livro-guia entregue automaticamente no inventário ao entrar; clique direito abre o menu.
+- Integração Towny opcional: sincroniza UUID/nome da nação do jogador e publica o serviço `NationIdentityProvider`.
+- Administração simplificada: lista de UUIDs em `staff.admins`, comandos para adicionar/remover equipe e alterar era padrão, de todos online ou de um jogador.
+- Módulo `culinary`: primeira cadeia de horticultura, culinária e conservação de alimentos inspirada em referências agrícolas/culinárias.
+- Módulo `ore-processing`: primeira cadeia de peneiramento, britagem e refino; sem geração de depósitos regionais ainda.
 - Receitas criadas por addons após a inicialização são encaminhadas automaticamente ao registro de crafting; receitas do MECHANIUM são removidas no desligamento.
 - Primeiro sistema funcional do domínio PrivateStorage: barril privado com proprietário UUID persistente, até 32 usuários autorizados, comandos de confiança, proteção contra quebra não autorizada, funis, pistões e explosões.
 - API extensível de drops de criaturas: definições públicas com entidade, item de saída, intervalo de quantidade, chance e tecnologia exigida; listener acrescenta subprodutos sem remover drops vanilla.

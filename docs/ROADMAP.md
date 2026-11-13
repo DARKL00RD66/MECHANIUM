@@ -29,7 +29,9 @@
 - [x] Testes de persistência e validação do formato de receitas
 - [x] Reconciliação de conteúdo persistido por proprietário e remoção de conteúdo de módulos/addons inativos
 - [x] Menu paginado de pesquisas com desbloqueio pela API central
-- [ ] Livro/guia de tecnologias e interfaces visuais complementares
+- [x] Menu de baús com árvore de progressão por era
+- [x] Livro-guia entregue automaticamente e usado para abrir o menu
+- [ ] Catálogo pesquisável e páginas de detalhes complementares
 - [ ] Catálogo pesquisável de itens e tecnologias dentro do jogo
 
 ## Marco 2 — Sistemas econômicos e industriais
@@ -46,7 +48,10 @@
 - [ ] Persistência e recuperação de máquinas após reinício
 
 ## Marco 3 — Portabilidade
-- [x] Matriz inicial das 31 referências e auditoria preliminar de licenças\n- [x] Primeiras cadeias independentes de culinária e beneficiamento mineral\n- [x] Hook Towny opcional com UUID da nação exposto pela API\n- [ ] Auditar individualmente licença, dependências, API e funcionalidades dos 31 projetos
+- [x] Matriz inicial das 31 referências e auditoria preliminar de licenças\n- [x] Primeiras cadeias independentes de culinária e beneficiamento mineral\n- [x] Hook Towny opcional com UUID da nação exposto pela API\n- [x] Matriz inicial das 31 referências e auditoria preliminar de licenças
+- [x] Primeiras cadeias independentes de culinária e beneficiamento mineral
+- [x] Hook Towny opcional com UUID da nação exposto pela API
+- [ ] Auditar individualmente licença, dependências, API e funcionalidades dos 31 projetos
 - [ ] Implementar os domínios licenciados ou reimplementar de forma independente
 - [ ] Adaptar sistemas ao contexto histórico-industrial e geopolítico
 - [ ] Registrar recursos não portados, substituídos ou excluídos

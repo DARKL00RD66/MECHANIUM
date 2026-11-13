@@ -347,6 +347,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage list" + ChatColor.GRAY + " — listar acessos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
         if (hasAdminAccess(sender)) {
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin points <jogador> <quantidade>");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin setera <jogador> <era>");
         }

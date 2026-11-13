@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      publish_prerelease:
+        description: "Publicar o JAR como GitHub Pre-release"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -36,3 +42,38 @@ jobs:
           path: mechanium-plugin/target/MECHANIUM-*.jar
           if-no-files-found: error
           retention-days: 1
+
+  publish-prerelease:
+    name: Publish MECHANIUM Pre-release
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_prerelease
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build distributable JAR
+        run: |
+          mvn --batch-mode --no-transfer-progress clean package -pl mechanium-plugin -am -DskipTests
+      - name: Create or update GitHub Pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: snapshot
+          name: MECHANIUM Snapshot
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          generate_release_notes: false
+          body: |
+            Snapshot de testes do MECHANIUM.
+            Compilado automaticamente pelo GitHub Actions.
+            Esta versão é experimental e ainda precisa de validação em servidor Paper/Purpur.
+          files: mechanium-plugin/target/MECHANIUM-*.jar
+          overwrite_files: true
+          fail_on_unmatched_files: true

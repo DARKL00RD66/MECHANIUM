@@ -53,7 +53,7 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 - **Networks (parcial):** rede local de depósitos face a face existente, com limite de 64 nós e paginação.
 - **DankTech2 (parcial):** armazém portátil único com inventário de 27 espaços salvo no próprio item. Não há upgrades, filtros, compressão ou busca global.
 - **GlobalWarming (parcial):** contador persistente abstrato por mundo; ciclos industriais somam impacto, e a tecnologia emissions_control interrompe novas contagens para máquinas daquele proprietário. Não simula temperatura, clima ou eventos ambientais.
-- **HardcoreSlimefun/FastMachines (parcial):** novos processos industriais seguem os custos energéticos e tempos definidos; ainda não existem desgaste geral, manutenção, filas, paralelismo ou multiplicadores configuráveis.
+- **HardcoreSlimefun/FastMachines (parcial):** máquinas acumulam desgaste até 100 ciclos e podem ser reparadas pelo proprietário com uma barra de ferro; a pesquisa industrial_efficiency dobra o avanço de processamento por atualização. Ainda não existem desgaste configurável, falhas aleatórias, filas, paralelismo ou multiplicadores configuráveis.
 ## Regras de portabilidade
 
 1. Auditar repositório, commit, licença, dependências e funcionalidades antes de copiar código.

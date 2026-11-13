@@ -58,6 +58,7 @@ final class MechaniumMachineManager implements Listener {
     private final NamespacedKey machineIdKey;
     private final NamespacedKey ownerKey;
     private final NamespacedKey progressKey;
+    private final NamespacedKey emissionsKey;
     private final Map<String, Location> loadedMachines = new HashMap<>();
     private BukkitTask ticker;
 
@@ -69,6 +70,7 @@ final class MechaniumMachineManager implements Listener {
         this.machineIdKey = new NamespacedKey(plugin, "machine_id");
         this.ownerKey = new NamespacedKey(plugin, "machine_owner");
         this.progressKey = new NamespacedKey(plugin, "machine_progress");
+        this.emissionsKey = new NamespacedKey(plugin, "industrial_emissions");
     }
 
     void start() {
@@ -348,6 +350,22 @@ final class MechaniumMachineManager implements Listener {
             inventory.setItem(OUTPUT_SLOT, existing);
         }
         setProgress(dispenser, 0);
+        recordIndustrialImpact(dispenser.getWorld(), owner);
+    }
+
+    private void recordIndustrialImpact(World world, UUID owner) {
+        // Emissions are an abstract gameplay metric, not a real-world pollution simulation.
+        if (api.canUseTechnology(owner, "emissions_control")) return;
+        long current = world.getPersistentDataContainer()
+                .getOrDefault(emissionsKey, PersistentDataType.LONG, 0L);
+        world.getPersistentDataContainer().set(emissionsKey, PersistentDataType.LONG,
+                current == Long.MAX_VALUE ? current : current + 1L);
+    }
+
+    long industrialImpact(World world) {
+        if (world == null) return 0L;
+        return world.getPersistentDataContainer()
+                .getOrDefault(emissionsKey, PersistentDataType.LONG, 0L);
     }
 
     private boolean matchesInput(ItemStack input, String inputId) {

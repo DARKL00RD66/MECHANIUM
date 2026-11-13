@@ -31,7 +31,8 @@ final class IndustryModule extends AbstractBuiltinModule {
         return List.of(
             new TechnologyDefinition("basic_mechanics", "Mecânica básica", "renaissance", 10, List.of()),
             new TechnologyDefinition("steam_power", "Energia a vapor", "industrial_revolution", 35, List.of("basic_mechanics")),
-            new TechnologyDefinition("mechanized_production", "Produção mecanizada", "industrial_revolution", 55, List.of("steam_power"))
+            new TechnologyDefinition("mechanized_production", "Produção mecanizada", "industrial_revolution", 55, List.of("steam_power")),
+            new TechnologyDefinition("industrial_efficiency", "Eficiência industrial", "modern", 52, List.of("mechanized_production"))
         );
     }
 }

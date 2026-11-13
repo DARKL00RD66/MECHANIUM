@@ -59,6 +59,7 @@ final class MechaniumMachineManager implements Listener {
     private final NamespacedKey ownerKey;
     private final NamespacedKey progressKey;
     private final NamespacedKey emissionsKey;
+    private final NamespacedKey wearKey;
     private final Map<String, Location> loadedMachines = new HashMap<>();
     private BukkitTask ticker;
 
@@ -71,6 +72,7 @@ final class MechaniumMachineManager implements Listener {
         this.ownerKey = new NamespacedKey(plugin, "machine_owner");
         this.progressKey = new NamespacedKey(plugin, "machine_progress");
         this.emissionsKey = new NamespacedKey(plugin, "industrial_emissions");
+        this.wearKey = new NamespacedKey(plugin, "machine_wear");
     }
 
     void start() {
@@ -113,6 +115,7 @@ final class MechaniumMachineManager implements Listener {
         dispenser.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,
                 event.getPlayer().getUniqueId().toString());
         dispenser.getPersistentDataContainer().set(progressKey, PersistentDataType.INTEGER, 0);
+        dispenser.getPersistentDataContainer().set(wearKey, PersistentDataType.INTEGER, 0);
         if (!dispenser.update(true, false)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage(Component.text("Não foi possível salvar os dados da máquina.", NamedTextColor.RED));
@@ -127,10 +130,27 @@ final class MechaniumMachineManager implements Listener {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
         Optional<MachineState> machine = machineState(event.getClickedBlock());
         if (machine.isEmpty()) return;
-        if (canManage(event.getPlayer(), machine.get().ownerId())) return;
-
-        event.setCancelled(true);
-        event.getPlayer().sendMessage(Component.text("Esta máquina pertence a outro jogador.", NamedTextColor.RED));
+        Player player = event.getPlayer();
+        if (!canManage(player, machine.get().ownerId())) {
+            event.setCancelled(true);
+            player.sendMessage(Component.text("Esta máquina pertence a outro jogador.", NamedTextColor.RED));
+            return;
+        }
+        BlockState machineBlockState = event.getClickedBlock().getState();
+        if (machineBlockState instanceof Dispenser dispenser) {
+            int wear = dispenser.getPersistentDataContainer().getOrDefault(wearKey, PersistentDataType.INTEGER, 0);
+            ItemStack hand = player.getInventory().getItemInMainHand();
+            if (player.isSneaking() && hand.getType() == Material.IRON_INGOT && wear > 0) {
+                if (hand.getAmount() == 1) player.getInventory().setItemInMainHand(null);
+                else hand.setAmount(hand.getAmount() - 1);
+                dispenser.getPersistentDataContainer().set(wearKey, PersistentDataType.INTEGER, 0);
+                dispenser.update(true, false);
+                event.setCancelled(true);
+                player.sendMessage(Component.text("Manutenção concluída. Desgaste zerado.", NamedTextColor.GREEN));
+                return;
+            }
+            player.sendMessage(Component.text("Desgaste da máquina: " + wear + "/100. Agache com uma barra de ferro para fazer manutenção.", NamedTextColor.GRAY));
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -300,6 +320,9 @@ final class MechaniumMachineManager implements Listener {
                 || !api.canUseItem(owner, definition.machineItemId())
                 || !api.canUseItem(owner, definition.outputItemId())) return;
 
+        int wear = dispenser.getPersistentDataContainer().getOrDefault(wearKey, PersistentDataType.INTEGER, 0);
+        if (wear >= 100) return;
+
         Inventory inventory = dispenser.getInventory();
         ItemStack input = inventory.getItem(INPUT_SLOT);
         if (!matchesInput(input, definition.inputId()) || input.getAmount() < definition.inputAmount()) {
@@ -352,6 +375,8 @@ final class MechaniumMachineManager implements Listener {
         }
         setProgress(dispenser, 0);
         recordIndustrialImpact(dispenser.getWorld(), owner);
+        dispenser.getPersistentDataContainer().set(wearKey, PersistentDataType.INTEGER, Math.min(100, wear + 1));
+        dispenser.update(true, false);
     }
 
     private void recordIndustrialImpact(World world, UUID owner) {

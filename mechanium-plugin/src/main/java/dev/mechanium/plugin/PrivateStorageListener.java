@@ -46,6 +46,7 @@ final class PrivateStorageListener implements Listener {
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
     private final NamespacedKey trustedKey;
+    private final NamespacedKey storageTypeKey;
 
     PrivateStorageListener(JavaPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
@@ -53,11 +54,13 @@ final class PrivateStorageListener implements Listener {
         this.itemIdKey = new NamespacedKey("mechanium", "item_id");
         this.ownerKey = new NamespacedKey(plugin, "private_storage_owner");
         this.trustedKey = new NamespacedKey(plugin, "private_storage_trusted");
+        this.storageTypeKey = new NamespacedKey(plugin, "private_storage_type");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlace(BlockPlaceEvent event) {
-        if (!isStorageItem(event.getItemInHand())) return;
+        String storageItemId = storageItemId(event.getItemInHand());
+        if (storageItemId == null) return;
 
         BlockState state = event.getBlockPlaced().getState();
         if (!(state instanceof TileState tile) || event.getBlockPlaced().getType() != Material.BARREL) {
@@ -66,6 +69,7 @@ final class PrivateStorageListener implements Listener {
             return;
         }
 
+        tile.getPersistentDataContainer().set(storageTypeKey, PersistentDataType.STRING, storageItemId);
         tile.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,
                 event.getPlayer().getUniqueId().toString());
         tile.getPersistentDataContainer().set(trustedKey, PersistentDataType.STRING, "");
@@ -110,7 +114,12 @@ final class PrivateStorageListener implements Listener {
         }
 
         event.setDropItems(false);
-        ItemStack recovered = api.createItemStack(STORAGE_ITEM_ID, 1)
+        String storageItemId = STORAGE_ITEM_ID;
+        if (state instanceof TileState tile) {
+            storageItemId = tile.getPersistentDataContainer().getOrDefault(
+                    storageTypeKey, PersistentDataType.STRING, STORAGE_ITEM_ID);
+        }
+        ItemStack recovered = api.createItemStack(storageItemId, 1)
                 .orElseGet(() -> new ItemStack(Material.BARREL));
         Location dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
         // Defer world drops until Bukkit has finalized the break event. Another plugin may cancel it later.
@@ -186,11 +195,11 @@ final class PrivateStorageListener implements Listener {
         return List.copyOf(result);
     }
 
-    private boolean isStorageItem(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) return false;
+    private String storageItemId(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
         String id = item.getItemMeta().getPersistentDataContainer()
                 .get(itemIdKey, PersistentDataType.STRING);
-        return STORAGE_ITEM_ID.equals(id);
+        return STORAGE_ITEM_ID.equals(id) || "simple_storage_node".equals(id) ? id : null;
     }
 
     private boolean isPrivateStorage(Block block) {

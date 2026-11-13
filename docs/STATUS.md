@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.1.0-SNAPSHOT  
+**Versão:** 0.2.0-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -30,6 +30,13 @@
 - Administração simplificada: lista de UUIDs em `staff.admins`, comandos para adicionar/remover equipe e alterar era padrão, de todos online ou de um jogador.
 - Módulo `culinary`: primeira cadeia de horticultura, culinária e conservação de alimentos inspirada em referências agrícolas/culinárias.
 - Módulo `ore-processing`: primeira cadeia de peneiramento, britagem e refino; sem geração de depósitos regionais ainda.
+- Sete novas integrações por módulos independentes: `extra-gear`, `eco-power`, `sfcalc`, `liquid`, `advanced-tech`, `simple-storage` e `sensible-toolbox`.
+- `liquid`: filtro de água funcional construído sobre o runtime atual de dispensers.
+- `advanced-tech`: montadora industrial adicional, processando peças mecânicas em peças de precisão.
+- `simple-storage`: segundo tipo de armazém protegido, mantendo proprietário e usuários autorizados após reinícios.
+- `sfcalc`: comando `/mechanium calc <id-da-receita>` para consultar resultado, ingredientes e bloqueio de progressão.
+- `extra-gear` e `sensible-toolbox`: equipamentos e kits com itens/receitas próprios; ainda utilizam atributos vanilla.
+- `eco-power`: componentes e tecnologias eólicas/solares; geração contínua e rede elétrica ainda não implementadas.
 - Receitas criadas por addons após a inicialização são encaminhadas automaticamente ao registro de crafting; receitas do MECHANIUM são removidas no desligamento.
 - Primeiro sistema funcional do domínio PrivateStorage: barril privado com proprietário UUID persistente, até 32 usuários autorizados, comandos de confiança, proteção contra quebra não autorizada, funis, pistões e explosões.
 - API extensível de drops de criaturas: definições públicas com entidade, item de saída, intervalo de quantidade, chance e tecnologia exigida; listener acrescenta subprodutos sem remover drops vanilla.
@@ -40,8 +47,9 @@
 ## Limitações e trabalho pendente
 
 - A prospecção atual é um levantamento local simples; ainda não há geração de depósitos, veios regionais, amostras, mapas geológicos ou integração com mineração.
+- Os sete módulos recém-adicionados são primeiras integrações funcionais de conteúdo, não substituições completas dos addons de referência. Consulte `docs/MODULOS.md` e `docs/INTEGRACOES_ADDONS.md`.
 - O runtime de máquinas suporta somente a prensa em bloco dispenser, com uma entrada e uma saída; ainda faltam tipos de máquinas, receitas múltiplas, energia, manutenção e filas de produção.
-- Redes de energia, fluidos, logística e transferência entre blocos.
+- Redes de energia e fluidos ainda não existem; EcoPower fornece componentes e Liquid contém somente filtragem de água. Simple Storage ainda não conecta inventários entre locais.
 - Detalhes visuais e páginas pesquisáveis para catálogo de itens, receitas e máquinas.
 - Economia de recursos e balanceamento completo.
 

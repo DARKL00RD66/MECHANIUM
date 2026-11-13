@@ -9,6 +9,8 @@ public final class BuiltinModules {
     public static List<MechaniumModule> create() {
         return List.of(new IndustryModule(), new GeologyModule(), new AgricultureModule(), new EnergyModule(),
                 new StorageModule(), new EnvironmentModule(),
-                new OptionalFantasyModule(), new OptionalFuturisticModule(), new CulinaryModule(), new OreProcessingModule());
+                new OptionalFantasyModule(), new OptionalFuturisticModule(), new CulinaryModule(), new OreProcessingModule(),
+                new ExtraGearModule(), new EcoPowerModule(), new SFCalcModule(), new LiquidModule(),
+                new AdvancedTechModule(), new SimpleStorageModule(), new SensibleToolboxModule());
     }
 }

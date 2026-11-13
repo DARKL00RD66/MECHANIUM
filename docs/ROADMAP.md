@@ -36,10 +36,13 @@
 
 ## Marco 2 — Sistemas econômicos e industriais
 - [x] Prensa mecânica inicial em dispenser com inventário, proprietário persistente e processamento condicionado à pesquisa
+- [x] Segundo processo funcional de máquina: montadora industrial e filtro de água
 - [ ] Framework geral de máquinas com múltiplos tipos, energia e manutenção
 - [ ] Filas de produção com limites por tick
+- [x] Primeiro processamento de fluido: filtro de água com entrada/saída de itens
 - [ ] Redes de energia e fluidos
 - [x] Cofre privado inicial com proprietário, lista de acesso e proteções de bloco
+- [x] Segundo tipo de armazém protegido usando o sistema de proprietário/permissões
 - [ ] Rede completa de armazéns, propriedade compartilhada e logística
 - [x] Drops agrícolas iniciais de subprodutos animais condicionados à pesquisa
 - [x] Ferramenta inicial de prospecção geológica com pesquisa, scanner local e testes
@@ -48,9 +51,11 @@
 - [ ] Persistência e recuperação de máquinas após reinício
 
 ## Marco 3 — Portabilidade
-- [x] Matriz inicial das 31 referências e auditoria preliminar de licenças\n- [x] Primeiras cadeias independentes de culinária e beneficiamento mineral\n- [x] Hook Towny opcional com UUID da nação exposto pela API\n- [x] Matriz inicial das 31 referências e auditoria preliminar de licenças
+- [x] Matriz inicial das 31 referências e auditoria preliminar de licenças
 - [x] Primeiras cadeias independentes de culinária e beneficiamento mineral
 - [x] Hook Towny opcional com UUID da nação exposto pela API
+- [x] Primeiras fatias de sete referências: ExtraGear, EcoPower, SFCalc, Liquid, AdvancedTech, Simple Storage e SensibleToolbox
+- [ ] Completar paridade de funcionalidades e sistemas transversais dos addons
 - [ ] Auditar individualmente licença, dependências, API e funcionalidades dos 31 projetos
 - [ ] Implementar os domínios licenciados ou reimplementar de forma independente
 - [ ] Adaptar sistemas ao contexto histórico-industrial e geopolítico

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0-SNAPSHOT
+- Incremento de versão do projeto, módulos Maven e addon de exemplo para `0.2.0-SNAPSHOT`.
+- Integração inicial independente de sete referências: ExtraGear, EcoPower, SFCalc, Liquid, AdvancedTech, Simple Storage e SensibleToolbox.
+- Novas tecnologias, categorias, itens e receitas distribuídos por eras e protegidos pelo sistema central de pesquisas.
+- Segundo processo funcional de máquina: montadora industrial para peças de precisão.
+- Primeiro processamento de fluidos: filtro de água com entrada de balde e saída de item personalizado.
+- Nó adicional de armazenamento protegido, com persistência do tipo de armazém para recuperação correta ao quebrar.
+- Comando `/mechanium calc <id-da-receita>` para consultar receitas e requisitos.
+- Documentação atualizada sobre as integrações e os limites ainda pendentes.
+
 ## 0.1.0-SNAPSHOT
 - Fundação independente MECHANIUM.
 - Maven multi-módulo para Java 21/Paper 1.21.11.

@@ -44,6 +44,20 @@ modules:
     enabled: true
   ore-processing:
     enabled: true
+  extra-gear:
+    enabled: true
+  eco-power:
+    enabled: true
+  sfcalc:
+    enabled: true
+  liquid:
+    enabled: true
+  advanced-tech:
+    enabled: true
+  simple-storage:
+    enabled: true
+  sensible-toolbox:
+    enabled: true
 
 addons:
   directory: addons

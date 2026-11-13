@@ -41,7 +41,7 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.1.0-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.2.0-SNAPSHOT.jar
 ```
 
 ## Instalar
@@ -56,10 +56,9 @@ A fundação ainda está em desenvolvimento e não substitui todas as funcionali
 
 ## CI e estado
 
-- [Build Java 21 / Maven verify — run 43323981115](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43323981115) — **BUILD SUCCESS** no commit `7028e79`.
-- Foram executados **37 testes automatizados**, sem falhas ou erros; o projeto principal e o addon de exemplo também compilaram.
-- O JAR foi gerado pelo Maven Shade, mas o upload do artefato falhou porque a quota de armazenamento do GitHub Actions está esgotada. O passo é não bloqueante; este run não oferece download do JAR.
-- A base ainda não foi validada em servidor real e não é uma versão de produção.
+- Build Java 21 / Maven: consulte [GitHub Actions](https://github.com/davitremea1-ops/MECHANIUM/actions) para o estado mais recente.
+- Os módulos oficiais são incorporados em um JAR único e podem ser ativados/desativados em `config.yml`.
+- A versão `0.2.0-SNAPSHOT` é experimental. O build automatizado não substitui o teste de gameplay em Paper/Purpur.
 
 ## Documentação
 

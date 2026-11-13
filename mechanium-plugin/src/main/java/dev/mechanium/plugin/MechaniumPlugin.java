@@ -183,6 +183,43 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                 player.sendMessage((result.successful() ? ChatColor.GREEN : ChatColor.RED) + result.message());
                 return true;
             }
+            case "calc" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
+                    return true;
+                }
+                if (args.length != 2) {
+                    sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium calc <id-da-receita>");
+                    return true;
+                }
+                var recipe = api.getRecipe(args[1]);
+                if (recipe.isEmpty()) {
+                    sender.sendMessage(ChatColor.RED + "Receita não encontrada: " + args[1]);
+                    return true;
+                }
+                var definition = recipe.get();
+                String resultName = api.getItem(definition.resultItemId())
+                        .map(dev.mechanium.api.model.ItemDefinition::displayName)
+                        .orElse(definition.resultItemId());
+                sender.sendMessage(ChatColor.GOLD + "Cálculo de receita: " + resultName + " x" + definition.resultAmount());
+                sender.sendMessage(ChatColor.GRAY + "Disponibilidade: " + (api.canCraft(player.getUniqueId(), definition.id())
+                        ? ChatColor.GREEN + "liberada" : ChatColor.RED + "bloqueada pela progressão"));
+                sender.sendMessage(ChatColor.YELLOW + "Ingredientes por símbolo:");
+                definition.ingredients().entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(entry -> {
+                    String ingredient = entry.getValue();
+                    String display = ingredient;
+                    if (ingredient.startsWith("mechanium:")) {
+                        display = api.getItem(ingredient.substring(10))
+                                .map(dev.mechanium.api.model.ItemDefinition::displayName).orElse(ingredient);
+                    } else {
+                        org.bukkit.Material material = org.bukkit.Material.matchMaterial(ingredient);
+                        if (material != null) display = material.name().toLowerCase(Locale.ROOT).replace('_', ' ');
+                    }
+                    sender.sendMessage(ChatColor.GRAY + " " + entry.getKey() + " = " + display);
+                });
+                sender.sendMessage(ChatColor.DARK_GRAY + "O modelo atual registra ingredientes por símbolo, não quantidades extras.");
+                return true;
+            }
             case "admin" -> {
                 return handleAdmin(sender, args);
             }
@@ -346,6 +383,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage untrust <jogador>" + ChatColor.GRAY + " — remover acesso");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage list" + ChatColor.GRAY + " — listar acessos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium calc <id-da-receita>" + ChatColor.GRAY + " — consultar uma receita");
         if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
@@ -356,13 +394,17 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("help", "status", "research", "book", "storage", "unlock", "admin");
+        if (args.length == 1) return List.of("help", "status", "research", "book", "storage", "unlock", "calc", "admin");
         if (args.length == 2 && args[0].equalsIgnoreCase("storage")) return List.of("trust", "untrust", "list");
         if (args.length == 3 && args[0].equalsIgnoreCase("storage")
                 && (args[1].equalsIgnoreCase("trust") || args[1].equalsIgnoreCase("untrust"))) {
             return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("research")) return List.of("info");
+        if (args.length == 2 && args[0].equalsIgnoreCase("calc")) {
+            return api.getRecipes().stream().map(recipe -> recipe.id())
+                    .filter(id -> id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
+        }
         if (args.length == 2 && args[0].equalsIgnoreCase("unlock")) {
             return api.getTechnologies().stream().map(technology -> technology.id())
                     .filter(id -> id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();

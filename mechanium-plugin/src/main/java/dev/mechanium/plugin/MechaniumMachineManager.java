@@ -13,7 +13,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Dispenser;
-import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -116,7 +115,7 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
         loadedMachines.put(key(block.getLocation()), block.getLocation());
-        event.getPlayer().sendMessage(ChatColor.GREEN + definition.displayName() + " instalada. Entrada no primeiro espaço; saída no último.");
+        event.getPlayer().sendMessage(Component.text(definition.displayName() + " instalada. Entrada no primeiro espaço; saída no último.", NamedTextColor.GREEN));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

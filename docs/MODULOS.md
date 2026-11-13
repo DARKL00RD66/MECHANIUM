@@ -35,7 +35,8 @@ A ferramenta atual é uma prospecção local. Depósitos regionais, veios minera
 - O gerador solar é colocado como defumador e produz 2 unidades por segundo durante o dia, sem tempestade.
 - Uma bateria é colocada como barril e armazena até 10.000 unidades.
 - Geradores carregam uma bateria adjacente do mesmo proprietário. Baterias adjacentes entre si formam uma rede local; máquinas conectadas a uma bateria dessa rede podem consumir energia.
-- O filtro de água, a montadora, o britador e a refinaria exigem energia: cada ciclo concluído consome 1 unidade.
+- O filtro de água, a montadora, o britador, a refinaria, o moinho e a conservadora exigem energia: cada ciclo concluído consome 1 unidade.
+- Máquinas acumulam desgaste por ciclo até 100; ao atingir o limite, param. O proprietário pode agachar e clicar com uma barra de ferro para reparar e zerar o desgaste.
 - A rede atual é local, limitada a 64 baterias na busca por consumo e não carrega chunks automaticamente. Quebrar a bateria recupera o item, mas não preserva a carga restante.
 
 ### Liquid — distribuição de água
@@ -82,7 +83,7 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 
 ### Armazenamento e logística
 - Simple Storage continua oferecendo redes locais de até 64 nós conectados por faces.
-- Armazém portátil: item único com inventário de 27 espaços persistido no próprio item; clique direito abre e fechar salva o conteúdo. O módulo simple-storage é opcional e precisa ser ativado em modules.simple-storage.enabled: true.
+- Armazém portátil: item único com inventário de 27 espaços persistido no próprio item; clique direito abre e fechar salva o conteúdo. O módulo simple-storage é opcional na arquitetura e vem ativado na configuração padrão; pode ser controlado por modules.simple-storage.enabled.
 
 ### Ambiente e impacto industrial
 - Cada ciclo de produção de máquina acrescenta uma unidade abstrata de impacto industrial ao mundo.

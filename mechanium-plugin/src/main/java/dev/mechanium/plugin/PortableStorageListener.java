@@ -60,7 +60,11 @@ final class PortableStorageListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onClick(InventoryClickEvent event) {
-        if (!(event.getView().getTopInventory().getHolder() instanceof PortableHolder)) return;
+        if (!(event.getView().getTopInventory().getHolder() instanceof PortableHolder holder)) return;
+        if (!(event.getWhoClicked() instanceof Player player) || !holder.playerId.equals(player.getUniqueId())) {
+            event.setCancelled(true);
+            return;
+        }
         ItemStack current = event.getCurrentItem();
         ItemStack cursor = event.getCursor();
         if (isPortable(current) || isPortable(cursor) || event.isShiftClick()) event.setCancelled(true);

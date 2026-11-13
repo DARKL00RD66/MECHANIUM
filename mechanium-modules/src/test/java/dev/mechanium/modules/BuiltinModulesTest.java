@@ -21,7 +21,12 @@ class BuiltinModulesTest {
                 "liquid",
                 "advanced-tech",
                 "simple-storage",
-                "sensible-toolbox"
+                "sensible-toolbox",
+                "agriculture",
+                "culinary",
+                "environment",
+                "advanced-tech",
+                "simple-storage"
         )));
     }
 

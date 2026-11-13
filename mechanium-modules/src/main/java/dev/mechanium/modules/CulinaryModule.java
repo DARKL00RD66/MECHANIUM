@@ -64,7 +64,7 @@ final class CulinaryModule extends AbstractBuiltinModule {
                 "vegetable_stew", 1, List.of(), Map.of('C', "CARROT", 'P', "POTATO", 'B', "BEETROOT"),
                 "horticulture"));
         registerRecipe(api, new RecipeDefinition("preserved_meat_recipe", RecipeDefinition.Type.SHAPELESS,
-                "preserved_meat", 2, List.of(), Map.of('M', "COOKED_PORKCHOP", 'S', "SUGAR", 'F', "mechanium:industrial_fertilizer"),
+                "preserved_meat", 2, List.of(), Map.of('M', "COOKED_PORKCHOP", 'S', "SUGAR", 'F', "SWEET_BERRIES"),
                 "food_quality_control"));
         registerRecipe(api, new RecipeDefinition("ration_crate_recipe", RecipeDefinition.Type.SHAPED,
                 "ration_crate", 1, List.of("PPP", "P R", "PPP"),

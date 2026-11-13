@@ -56,9 +56,9 @@ A fundação ainda está em desenvolvimento e não substitui todas as funcionali
 
 ## CI e estado
 
-- Build Java 21 / Maven: consulte [GitHub Actions](https://github.com/davitremea1-ops/MECHANIUM/actions) para o estado mais recente.
-- Os módulos oficiais são incorporados em um JAR único e podem ser ativados/desativados em `config.yml`.
-- A versão `0.2.0-SNAPSHOT` é experimental. O build automatizado não substitui o teste de gameplay em Paper/Purpur.
+- [Build Java 21 / Maven verify — run 43349904209](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43349904209) — **BUILD SUCCESS**, 49 testes sem falhas ou erros.
+- O [pré-release 0.2.0-SNAPSHOT](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot) contém o JAR único com os módulos oficiais.
+- A versão é experimental. O build automatizado não substitui o teste de gameplay em Paper/Purpur.
 
 ## Documentação
 

@@ -32,7 +32,7 @@ O MECHANIUM é independente do Slimefun. Os nomes abaixo são referências de fu
 | EMCTech | Processamento e conversão de recursos | Aguardando confirmação da referência e da licença |
 | Gastronomicon | Culinária e conservação de alimentos | Primeira cadeia de culinária adicionada |
 | Better Nuclear Reactor | Modelagem abstrata de geração e eficiência energética | Planejado; sem instruções ou simulação técnica do mundo real |
-| AdvancedTech | Processos industriais avançados | Primeiros componentes e processos em expansão |
+| AdvancedTech | Processos industriais avançados | Peças de precisão e montadora industrial adicionadas |
 | FastMachines | Filas, desempenho e limites de processamento | Planejado |
 | MapJammers | Interferência/jamming não será implementada; cartografia civil pode ser avaliada separadamente | Excluído o mecanismo de interferência |
 | SensibleToolbox | Ferramentas utilitárias e qualidade de vida | Kits utilitários e manuais com receitas adicionados; habilidades especiais pendentes |

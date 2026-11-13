@@ -60,12 +60,11 @@
 
 ## Validação
 
-- Workflow: Java 21 / Maven `clean verify`.
-- [GitHub Actions — run 43327115991](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43327115991): **BUILD SUCCESS** no commit `36169239279c0a7a5b5fef05cd4a9190ed08175d`.
-- Testes automatizados: **47 executados, 0 falhas, 0 erros** (16 API/modelos, 10 SQLite, 8 motor de progressão/ownership, 4 módulos, 2 classloaders de addons, 7 testes do plugin).
-- O workflow executou `mvn clean verify`, instalou a API no repositório Maven local e compilou/empacotou o addon de exemplo. As três etapas Maven terminaram com `BUILD SUCCESS`.
-- O endpoint de artefatos deste run não retornou um JAR disponível para download; portanto, não há link de binário confirmado.
-- Ainda não realizado: inicialização em Paper/Purpur real, testes funcionais de gameplay, integração de addons externos reais e validação em servidores de produção.
+- Workflow [GitHub Actions — run 43349904209](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43349904209): **BUILD SUCCESS** no commit `a2227e55f6820f3866a86ea1b848f96a64b09899`.
+- Testes automatizados: **49 executados, 0 falhas, 0 erros** (16 API/modelos, 10 SQLite, 8 motor de progressão/ownership, 6 módulos, 2 classloaders de addons e 7 testes do plugin).
+- As três etapas Maven de verificação, instalação local da API e compilação do addon de exemplo terminaram com `BUILD SUCCESS`.
+- O job de distribuição também terminou com sucesso e publicou `MECHANIUM-0.2.0-SNAPSHOT.jar` no [GitHub Pre-release](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot).
+- Ainda não realizado: inicialização em Paper/Purpur real, testes funcionais de gameplay e validação em servidor de produção.
 
 ## Classificação
 

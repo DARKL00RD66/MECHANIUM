@@ -75,6 +75,21 @@ Nós `simple_storage_node` colocados face a face, do mesmo proprietário e com p
 
 Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera a progressão histórica padrão. Administradores podem ativá-los explicitamente em `plugins/MECHANIUM/config.yml`.
 
+### Expansão agrícola e alimentar
+- Agricultura: pacotes de sementes, substrato fértil, caixotes de colheita e progressão de cultivo protegido/colheita mecanizada. Nesta entrega, itens e receitas estão integrados à progressão; crescimento de plantações customizadas e colheita automática ainda não existem.
+- Culinária: queijo artesanal, ensopado, carne conservada e caixas de rações, além das receitas anteriores.
+- Maquinário alimentar: moinho industrial converte trigo em farinha MECHANIUM; conservadora converte frutas doces em conserva. Ambas usam o runtime de máquinas atual e exigem energia.
+
+### Armazenamento e logística
+- Simple Storage continua oferecendo redes locais de até 64 nós conectados por faces.
+- Armazém portátil: item único com inventário de 27 espaços persistido no próprio item; clique direito abre e fechar salva o conteúdo. O módulo simple-storage é opcional e precisa ser ativado em modules.simple-storage.enabled: true.
+
+### Ambiente e impacto industrial
+- Cada ciclo de produção de máquina acrescenta uma unidade abstrata de impacto industrial ao mundo.
+- O comando /mechanium environment consulta o contador do mundo atual (ou todos os mundos pelo console).
+- Pesquisar emissions_control interrompe a contabilização de novas emissões das máquinas daquele jogador. O contador já acumulado não é reduzido.
+- Filtro de carbono e kit de recuperação possuem receitas, mas ainda não têm efeito de instalação/uso no mundo.
+
 ## Limites conhecidos antes do teste de servidor
 
 - O build automatizado pode verificar compilação e testes unitários, mas não confirma comportamento real em Paper/Purpur 1.21.11.

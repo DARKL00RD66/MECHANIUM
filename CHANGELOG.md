@@ -10,7 +10,8 @@
 - ExtraGear: habilidades de picareta reforçada e bússola de levantamento.
 - SensibleToolbox: habilidades de kit de campo e kit consumível de manutenção.
 - Atualização da documentação e versão de todos os módulos Maven para 0.3.0-SNAPSHOT.
-- CI e teste real Paper/Purpur desta versão pendentes de validação.
+- CI Java 21/Maven aprovado no run 43352161651: 52 testes automatizados sem falhas ou erros.
+- JAR `MECHANIUM-0.3.0-SNAPSHOT.jar` publicado no GitHub Pre-release; smoke test em Paper/Purpur 1.21.11 ainda pendente.
 
 ## 0.2.0-SNAPSHOT
 - Integração inicial independente de sete referências: ExtraGear, EcoPower, SFCalc, Liquid, AdvancedTech, Simple Storage e SensibleToolbox.

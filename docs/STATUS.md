@@ -57,7 +57,8 @@
 ## Validação
 
 - A versão 0.2.0-SNAPSHOT teve workflow Maven bem-sucedido no run [43349904209](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43349904209), com 49 testes automatizados sem falhas ou erros.
-- A implementação 0.3.0-SNAPSHOT ainda precisa passar pelo novo workflow Java 21/Maven após o commit.
+- A versão 0.3.0-SNAPSHOT passou no workflow [43352161651](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43352161651): **52 testes executados, 0 falhas e 0 erros**; os módulos Maven, a instalação local da API e a compilação do addon de exemplo terminaram com sucesso.
+- O workflow também publicou `MECHANIUM-0.3.0-SNAPSHOT.jar` no [GitHub Pre-release](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot). SHA-256: `adf591250a1785680a1f13e60b735b77fa56f41370a749856866dc85fdfb745b`.
 - Ainda não foi realizado smoke test em Paper/Purpur 1.21.11, teste real de gameplay ou validação de servidor de produção. Não considerar pronta para produção antes dessas etapas.
 
 ## Classificação

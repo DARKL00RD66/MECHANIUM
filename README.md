@@ -56,8 +56,8 @@ Esta versão amplia sete módulos adicionais com energia, fluidos, armazenamento
 
 ## CI e estado
 
-- Build Java 21 / Maven para a 0.3.0-SNAPSHOT será confirmado pelo workflow desta revisão.
-- O [pré-release 0.3.0-SNAPSHOT](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot) contém o JAR único com os módulos oficiais.
+- - [Build Java 21 / Maven verify — run 43352161651](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43352161651) — **BUILD SUCCESS**, 52 testes automatizados sem falhas ou erros.
+- O [pré-release 0.3.0-SNAPSHOT](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot) contém `MECHANIUM-0.3.0-SNAPSHOT.jar`, publicado pelo mesmo workflow.
 - A versão é experimental. O build automatizado não substitui o teste de gameplay em Paper/Purpur.
 
 ## Documentação

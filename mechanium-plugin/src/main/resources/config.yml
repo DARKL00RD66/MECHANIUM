@@ -22,6 +22,51 @@ progression:
     - id: modern
       name: Era Moderna
       order: 5
+    - id: atomic_age
+      name: Era Atômica e do Pós-Guerra
+      order: 6
+    - id: information_age
+      name: Era da Informação
+      order: 7
+    - id: digital_age
+      name: Era Digital
+      order: 8
+    - id: space_age
+      name: Era Espacial
+      order: 9
+    - id: mythic_age
+      name: Era Mítica
+      order: 10
+    - id: speculative_future
+      name: Futuro Especulativo
+      order: 11
+
+# Keys are Bukkit recipe IDs. A recipe is unrestricted when its entry is absent.
+# The administrator HUD can cycle each recipe through the configured eras.
+vanilla-recipe-gates:
+  enabled: true
+  recipes:
+    'minecraft:stone_pickaxe': ancient
+    'minecraft:iron_pickaxe': medieval
+    'minecraft:iron_sword': medieval
+    'minecraft:shield': medieval
+    'minecraft:bow': medieval
+    'minecraft:crossbow': renaissance
+    'minecraft:anvil': renaissance
+    'minecraft:enchanting_table': renaissance
+    'minecraft:piston': industrial_revolution
+    'minecraft:hopper': industrial_revolution
+    'minecraft:minecart': industrial_revolution
+    'minecraft:rail': industrial_revolution
+    'minecraft:dispenser': industrial_revolution
+    'minecraft:repeater': electrification
+    'minecraft:comparator': electrification
+    'minecraft:redstone_lamp': electrification
+    'minecraft:observer': modern
+    'minecraft:blast_furnace': modern
+    'minecraft:smoker': modern
+    'minecraft:daylight_detector': modern
+    'minecraft:crafter': digital_age
 
 modules:
   industry:

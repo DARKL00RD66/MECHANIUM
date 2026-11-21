@@ -129,7 +129,7 @@ final class MechaniumAdminMenu implements Listener {
             inv.setItem(slot, head);
             holder.actions.put(slot, p -> openEraSelector(p, target.getUniqueId(), target.getName()));
         }
-        player.openInventory(inv);
+        admin.openInventory(inv);
     }
 
     private void openEraSelector(Player admin, UUID targetId, String targetName) {

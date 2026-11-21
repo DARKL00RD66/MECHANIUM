@@ -33,6 +33,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumAddonLoader addonLoader;
     private MechaniumRecipeBridge recipeBridge;
     private MechaniumResearchMenu researchMenu;
+    private MechaniumAdminMenu adminMenu;
     private PrivateStorageListener privateStorageListener;
     private MechaniumMachineManager machineManager;
     private EnergyGridManager energyGridManager;
@@ -75,6 +76,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
+            Bukkit.getPluginManager().registerEvents(new VanillaRecipeGateListener(this, api), this);
             Bukkit.getPluginManager().registerEvents(new MechaniumMobDropListener(api), this);
             energyGridManager = new EnergyGridManager(this, api);
             Bukkit.getPluginManager().registerEvents(energyGridManager, this);
@@ -96,6 +98,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             }
             researchMenu = new MechaniumResearchMenu(this, api);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
+            adminMenu = new MechaniumAdminMenu(this, api);
+            Bukkit.getPluginManager().registerEvents(adminMenu, this);
             townyNationHook = new TownyNationHook(this);
             townyNationHook.start();
             Bukkit.getServicesManager().register(NationIdentityProvider.class, townyNationHook, this, ServicePriority.Normal);

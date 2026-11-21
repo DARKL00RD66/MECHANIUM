@@ -63,6 +63,7 @@ Esta versão amplia sete módulos adicionais com energia, fluidos, armazenamento
 ## Documentação
 
 - [Arquitetura](docs/ARQUITETURA.md)
+- [Painel administrativo e configuração de progressão](docs/ADMINISTRACAO.md)
 - [Desenvolvimento de addons externos](docs/ADDONS_EXTERNOS.md)
 - [Projeto-exemplo de addon Maven](examples/mechanium-addon-example/README.md)
 - [Módulos oficiais e opcionais](docs/MODULOS.md)

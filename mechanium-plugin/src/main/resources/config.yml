@@ -3,6 +3,7 @@ storage:
 
 progression:
   default-era: ancient
+  starting-research-points: 40
   eras:
     - id: ancient
       name: Antiguidade

@@ -51,7 +51,7 @@ final class MechaniumAdminMenu implements Listener {
             new VanillaRecipe("minecraft:blast_furnace", Material.BLAST_FURNACE, "Alto-forno"),
             new VanillaRecipe("minecraft:smoker", Material.SMOKER, "Defumador"),
             new VanillaRecipe("minecraft:daylight_detector", Material.DAYLIGHT_DETECTOR, "Sensor de luz solar"),
-            new VanillaRecipe("minecraft:crafter", Material.CRAFTER, "Autocraf ter")
+            new VanillaRecipe("minecraft:crafter", Material.CRAFTER, "Autocrafter")
     );
 
     private final JavaPlugin plugin;
@@ -112,7 +112,7 @@ final class MechaniumAdminMenu implements Listener {
         inv.setItem(4, item(Material.PLAYER_HEAD, "§eEscolher jogador",
                 List.of("§7Clique em um jogador para alterar sua era.")));
         button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openHome);
-        button(holder, 45, Material.GLOBE, "§6Todos os jogadores online",
+        button(holder, 45, Material.COMPASS, "§6Todos os jogadores online",
                 List.of("§7Escolher uma era para todos conectados."), p -> openEraSelector(p, null, "todos os jogadores online"));
         int index = 0;
         for (Player target : Bukkit.getOnlinePlayers().stream()
@@ -218,6 +218,8 @@ final class MechaniumAdminMenu implements Listener {
         }
         admin.openInventory(inv);
     }
+
+    void openRecipes(Player player) { openVanillaRecipes(player); }
 
     private void openVanillaRecipes(Player admin) {
         AdminHolder holder = create("MECHANIUM • Receitas vanilla");

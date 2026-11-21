@@ -476,6 +476,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             }
             return true;
         }
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin hud — abrir o painel administrativo");
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipes — configurar receitas vanilla");
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipe <minecraft:id> <era|off>");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin era <era> [jogador|todos]");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin staff <add|remove|list> [jogador]");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin points <jogador> <quantidade>");
@@ -499,6 +502,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium environment" + ChatColor.GRAY + " — consultar impacto industrial do mundo");
         if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium era <era> [jogador|todos]" + ChatColor.GRAY + " — alterar era (staff)");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin hud" + ChatColor.GRAY + " — painel administrativo");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipes" + ChatColor.GRAY + " — configurar bloqueios de receitas");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipe <minecraft:id> <era|off>");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin points <jogador> <quantidade>");
@@ -532,7 +538,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     .filter(id -> id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin") && hasAdminAccess(sender)) {
-            return List.of("era", "points", "setera", "staff");
+            return List.of("hud", "gui", "recipes", "recipe", "era", "points", "setera", "staff");
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("era")) {
             return api.getEras().stream().map(EraDefinition::id).toList();
@@ -555,7 +561,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         return List.of();
     }
 
-    private boolean hasAdminAccess(CommandSender sender) {
+    boolean hasAdminAccess(CommandSender sender) {
         if (sender.hasPermission("mechanium.admin")) return true;
         if (!(sender instanceof Player player)) return false;
         List<String> configured = getConfig().getStringList("staff.admins");
@@ -591,6 +597,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         }
         specialEquipmentListener = null;
         researchMenu = null;
+        adminMenu = null;
         privateStorageListener = null;
         if (townyNationHook != null) {
             Bukkit.getServicesManager().unregister(NationIdentityProvider.class, townyNationHook);

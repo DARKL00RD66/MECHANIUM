@@ -80,6 +80,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             Bukkit.getPluginManager().registerEvents(this, this);
             Bukkit.getPluginManager().registerEvents(new MechaniumContentListener(api), this);
             Bukkit.getPluginManager().registerEvents(new VanillaRecipeGateListener(this, api), this);
+            Bukkit.getPluginManager().registerEvents(new ResearchPointRewardListener(this, api), this);
             Bukkit.getPluginManager().registerEvents(new MechaniumMobDropListener(api), this);
             energyGridManager = new EnergyGridManager(this, api);
             Bukkit.getPluginManager().registerEvents(energyGridManager, this);

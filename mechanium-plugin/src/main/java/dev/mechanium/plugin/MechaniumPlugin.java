@@ -540,6 +540,14 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         if (args.length == 2 && args[0].equalsIgnoreCase("admin") && hasAdminAccess(sender)) {
             return List.of("hud", "gui", "recipes", "recipe", "era", "points", "setera", "staff");
         }
+        if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("recipe")) {
+            return List.of("minecraft:iron_pickaxe", "minecraft:piston", "minecraft:hopper", "minecraft:repeater");
+        }
+        if (args.length == 4 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("recipe")) {
+            List<String> values = new ArrayList<>(api.getEras().stream().map(EraDefinition::id).toList());
+            values.add("off");
+            return values;
+        }
         if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("era")) {
             return api.getEras().stream().map(EraDefinition::id).toList();
         }

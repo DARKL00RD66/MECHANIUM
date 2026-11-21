@@ -375,6 +375,39 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             sender.sendMessage(ChatColor.RED + "Sem permissão.");
             return true;
         }
+        if (args.length == 1 || (args.length == 2
+                && (args[1].equalsIgnoreCase("hud") || args[1].equalsIgnoreCase("gui")))) {
+            if (sender instanceof Player player && adminMenu != null) adminMenu.open(player);
+            else sendHelp(sender);
+            return true;
+        }
+        if (args.length == 2 && args[1].equalsIgnoreCase("recipes")) {
+            if (sender instanceof Player player && adminMenu != null) adminMenu.openRecipes(player);
+            else sender.sendMessage(ChatColor.RED + "O HUD de receitas exige um jogador.");
+            return true;
+        }
+        if (args.length == 4 && args[1].equalsIgnoreCase("recipe")) {
+            String key = args[2].toLowerCase(Locale.ROOT);
+            String eraId = args[3].toLowerCase(Locale.ROOT);
+            if (!key.matches("minecraft:[a-z0-9_./-]+")) {
+                sender.sendMessage(ChatColor.RED + "ID inválido. Use minecraft:<id-da-receita>.");
+                return true;
+            }
+            String configPath = "vanilla-recipe-gates.recipes." + key;
+            if (eraId.equals("off") || eraId.equals("none")) {
+                getConfig().set(configPath, null);
+                saveConfig();
+                sender.sendMessage(ChatColor.GREEN + "Bloqueio removido da receita " + key + ".");
+            } else if (api.getEra(eraId).isEmpty()) {
+                sender.sendMessage(ChatColor.RED + "Era inexistente: " + eraId);
+            } else {
+                getConfig().set(configPath, eraId);
+                saveConfig();
+                sender.sendMessage(ChatColor.GREEN + "Receita " + key + " agora exige a era "
+                        + api.getEra(eraId).orElseThrow().displayName() + ".");
+            }
+            return true;
+        }
         if (args.length == 3 && args[1].equalsIgnoreCase("staff") && args[2].equalsIgnoreCase("list")) {
             List<String> admins = getConfig().getStringList("staff.admins");
             sender.sendMessage(ChatColor.GOLD + "Equipe administrativa configurada:");

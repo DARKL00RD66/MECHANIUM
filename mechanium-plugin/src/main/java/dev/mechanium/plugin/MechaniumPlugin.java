@@ -144,6 +144,16 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                 getLogger().severe("Era inicial inválida em config.yml: " + defaultEra);
             }
         }
+        long startingPoints = Math.max(0L, getConfig().getLong("progression.starting-research-points", 40L));
+        boolean hasResearch = api.getTechnologies().stream()
+                .anyMatch(technology -> api.hasUnlockedTechnology(playerId, technology.id()));
+        // Existing players who never received points are bootstrapped too; spending the balance
+        // cannot trigger another grant because a successful research remains recorded.
+        if (startingPoints > 0 && api.getResearchPoints(playerId) == 0 && !hasResearch) {
+            api.addResearchPoints(playerId, startingPoints);
+            event.getPlayer().sendMessage(ChatColor.GREEN + "Você recebeu " + startingPoints
+                    + " pontos científicos iniciais do MECHANIUM.");
+        }
         if (researchMenu != null) researchMenu.giveGuide(event.getPlayer());
         if (townyNationHook != null) townyNationHook.sync(event.getPlayer());
     }

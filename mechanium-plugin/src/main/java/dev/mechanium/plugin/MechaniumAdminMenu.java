@@ -217,7 +217,13 @@ final class MechaniumAdminMenu implements Listener {
         admin.openInventory(inv);
     }
 
-    void openRecipes(Player player) { openVanillaRecipes(player); }
+    void openRecipes(Player player) {
+        if (!mechanium.hasAdminAccess(player)) {
+            player.sendMessage("§cVocê não tem permissão para abrir o painel administrativo.");
+            return;
+        }
+        openVanillaRecipes(player);
+    }
 
     private void openVanillaRecipes(Player admin) {
         AdminHolder holder = create("MECHANIUM • Receitas vanilla");

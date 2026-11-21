@@ -75,4 +75,5 @@ final class IndustryModule extends AbstractBuiltinModule {
             new TechnologyDefinition("orbital_research", "Pesquisa orbital", "space_age", 85, List.of("satellite_navigation")),
             new TechnologyDefinition("space_industry", "Indústria espacial", "space_age", 90, List.of("orbital_research"))
         );
-    }}
+    }
+}

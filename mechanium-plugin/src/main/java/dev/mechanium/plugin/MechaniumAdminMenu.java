@@ -235,7 +235,7 @@ final class MechaniumAdminMenu implements Listener {
             VanillaRecipe recipe = VANILLA_RECIPES.get(i);
             String path = "vanilla-recipe-gates.recipes." + recipe.key();
             String requiredEra = plugin.getConfig().getString(path);
-            String state = requiredEra == null ? "§aSem bloqueio" :
+            String state = requiredEra == null || requiredEra.equalsIgnoreCase("off") ? "§aSem bloqueio" :
                     api.getEra(requiredEra).map(era -> "§e" + era.displayName()).orElse("§cEra inválida: " + requiredEra);
             button(holder, CONTENT_SLOTS[i], recipe.icon(), "§b" + recipe.displayName(),
                     List.of("§7Receita: §f" + recipe.key(), "§7Requisito: " + state,
@@ -260,7 +260,7 @@ final class MechaniumAdminMenu implements Listener {
         }
         int nextIndex = currentIndex + 1;
         if (nextIndex >= eras.size()) {
-            plugin.getConfig().set(path, null);
+            plugin.getConfig().set(path, "off");
         } else {
             plugin.getConfig().set(path, eras.get(nextIndex).id());
         }
@@ -283,7 +283,10 @@ final class MechaniumAdminMenu implements Listener {
 
     private int configuredRecipeCount() {
         var section = plugin.getConfig().getConfigurationSection("vanilla-recipe-gates.recipes");
-        return section == null ? 0 : section.getKeys(false).size();
+        if (section == null) return 0;
+        return (int) section.getKeys(false).stream()
+                .filter(key -> !plugin.getConfig().getString("vanilla-recipe-gates.recipes." + key, "off").equalsIgnoreCase("off"))
+                .count();
     }
 
     private AdminHolder create(String title) {

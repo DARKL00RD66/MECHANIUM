@@ -445,7 +445,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             }
             String configPath = "vanilla-recipe-gates.recipes." + key;
             if (eraId.equals("off") || eraId.equals("none")) {
-                getConfig().set(configPath, null);
+                getConfig().set(configPath, "off");
                 saveConfig();
                 sender.sendMessage(ChatColor.GREEN + "Bloqueio removido da receita " + key + ".");
             } else if (api.getEra(eraId).isEmpty()) {

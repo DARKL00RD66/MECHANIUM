@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -142,8 +141,7 @@ final class MechaniumAdminMenu implements Listener {
                 "§7Alvo: §f" + targetName,
                 "§7Clique na era que deseja aplicar."
         )));
-        button(holder, 49, Material.ARROW, "§eVoltar", List.of(),
-                targetId == null ? this::openPlayerTargets : this::openPlayerTargets);
+        button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openPlayerTargets);
         int index = 0;
         for (EraDefinition era : eras) {
             if (index >= CONTENT_SLOTS.length) break;
@@ -243,14 +241,14 @@ final class MechaniumAdminMenu implements Listener {
                     List.of("§7Receita: §f" + recipe.key(), "§7Requisito: " + state,
                             "§aClique para avançar a era exigida."),
                     p -> {
-                        cycleRecipeRequirement(recipe, path);
+                        cycleRecipeRequirement(path);
                         openVanillaRecipes(p);
                     });
         }
         admin.openInventory(inv);
     }
 
-    private void cycleRecipeRequirement(VanillaRecipe recipe, String path) {
+    private void cycleRecipeRequirement(String path) {
         List<EraDefinition> eras = orderedEras();
         String currentId = plugin.getConfig().getString(path);
         int currentIndex = -1;

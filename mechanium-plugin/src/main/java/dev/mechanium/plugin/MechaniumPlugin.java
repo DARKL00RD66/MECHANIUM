@@ -45,6 +45,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        getConfig().options().copyDefaults(true);
+        mergeDefaultErasIntoExistingConfig();
+        saveConfig();
         try {
             Path database = getDataFolder().toPath()
                     .resolve(getConfig().getString("storage.database", "mechanium.db"));
@@ -116,6 +119,43 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             shutdownServices();
             getServer().getPluginManager().disablePlugin(this);
         }
+    }
+
+    /**
+     * Existing servers keep their old YAML list after upgrading. Merge newly shipped eras by ID,
+     * while preserving custom eras and avoiding order collisions with administrator-defined eras.
+     */
+    private void mergeDefaultErasIntoExistingConfig() {
+        var defaults = getConfig().getDefaults();
+        if (defaults == null) return;
+
+        List<Map<?, ?>> merged = new ArrayList<>(getConfig().getMapList("progression.eras"));
+        Set<String> existingIds = new HashSet<>();
+        Set<Integer> usedOrders = new HashSet<>();
+        for (Map<?, ?> row : merged) {
+            Object id = row.get("id");
+            Object order = row.get("order");
+            if (id instanceof String eraId) existingIds.add(eraId.toLowerCase(Locale.ROOT));
+            if (order instanceof Number number) usedOrders.add(number.intValue());
+        }
+        int nextOrder = usedOrders.stream().mapToInt(Integer::intValue).max().orElse(-1) + 1;
+        for (Map<?, ?> row : defaults.getMapList("progression.eras")) {
+            Object rawId = row.get("id");
+            Object rawName = row.get("name");
+            Object rawOrder = row.get("order");
+            if (!(rawId instanceof String id) || !(rawName instanceof String name)
+                    || !(rawOrder instanceof Number number)) continue;
+            if (!existingIds.add(id.toLowerCase(Locale.ROOT))) continue;
+
+            int order = number.intValue();
+            if (usedOrders.contains(order)) {
+                while (usedOrders.contains(nextOrder)) nextOrder++;
+                order = nextOrder++;
+            }
+            usedOrders.add(order);
+            merged.add(Map.of("id", id, "name", name, "order", order));
+        }
+        getConfig().set("progression.eras", merged);
     }
 
     private void registerConfiguredEras() {

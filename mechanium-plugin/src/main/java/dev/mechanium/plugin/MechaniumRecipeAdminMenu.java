@@ -152,7 +152,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
                         "§7Clique para escolher uma tecnologia."),
                 p -> openTechnologySelector(p, 0));
         button(holder, 16, draft.type == RecipeDefinition.Type.SHAPED
-                        ? Material.CRAFTING_TABLE : Material.CRAFTING,
+                        ? Material.CRAFTING_TABLE : Material.FURNACE,
                 "§aTipo: " + draft.type,
                 List.of("§7Clique para alternar SHAPED / SHAPELESS.",
                         "§7Ao mudar para SHAPED, um padrão inicial é criado."),
@@ -272,7 +272,8 @@ final class MechaniumRecipeAdminMenu implements Listener {
         if (prompt == null) return;
         event.setCancelled(true);
         String message = event.getMessage();
-        Bukkit.getScheduler().runTask(javaPlugin, () -> handleInput(event.getPlayer(), prompt, message));
+        Player player = event.getPlayer();
+        Bukkit.getScheduler().runTask(javaPlugin, () -> handleInput(player, prompt, message));
     }
 
     private void handleInput(Player player, InputPrompt prompt, String message) {
@@ -303,8 +304,9 @@ final class MechaniumRecipeAdminMenu implements Listener {
                 case RESULT_ITEM -> {
                     String itemId = value.toLowerCase(Locale.ROOT);
                     if (itemId.startsWith("mechanium:")) itemId = itemId.substring(10);
-                    ItemDefinition result = api.getItem(itemId)
-                            .orElseThrow(() -> new IllegalArgumentException("ID de item MECHANIUM não encontrado: " + itemId));
+                    final String resolvedItemId = itemId;
+                    ItemDefinition result = api.getItem(resolvedItemId)
+                            .orElseThrow(() -> new IllegalArgumentException("ID de item MECHANIUM não encontrado: " + resolvedItemId));
                     draft.resultItemId = result.id();
                     draft.resultAmount = Math.min(draft.resultAmount, result.maxStackSize());
                 }

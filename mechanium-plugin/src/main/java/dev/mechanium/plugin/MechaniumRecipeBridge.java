@@ -36,7 +36,11 @@ final class MechaniumRecipeBridge implements Listener {
 
     void register(RecipeDefinition definition) {
         NamespacedKey key = new NamespacedKey(plugin, definition.id());
-        if (registered.contains(key)) return;
+        // A recipe-register event can also represent an administrator override. Remove only
+        // recipes previously installed by this bridge, then install the validated replacement.
+        if (registered.remove(key)) {
+            Bukkit.removeRecipe(key);
+        }
 
         ItemStack result = api.createItemStack(definition.resultItemId(), definition.resultAmount())
                 .orElseThrow(() -> new IllegalStateException("Missing result item " + definition.resultItemId()));

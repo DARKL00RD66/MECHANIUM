@@ -208,10 +208,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     boolean saveAdminRecipeOverride(RecipeDefinition replacement) {
         RecipeDefinition previous = api.getRecipe(replacement.id())
                 .orElseThrow(() -> new IllegalArgumentException("Receita não encontrada: " + replacement.id()));
-        if (!api.overrideRecipe(replacement)) {
-            throw new IllegalArgumentException("Não foi possível substituir a receita " + replacement.id() + ".");
-        }
         try {
+            if (!api.overrideRecipe(replacement)) {
+                throw new IllegalArgumentException("Não foi possível substituir a receita " + replacement.id() + ".");
+            }
             String storageKey = Base64.getUrlEncoder().withoutPadding()
                     .encodeToString(replacement.id().getBytes(StandardCharsets.UTF_8));
             Map<String, Object> values = new LinkedHashMap<>();

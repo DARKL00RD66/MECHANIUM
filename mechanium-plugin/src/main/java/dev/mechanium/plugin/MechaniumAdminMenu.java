@@ -89,7 +89,7 @@ final class MechaniumAdminMenu implements Listener {
         button(holder, 24, Material.CLOCK, "§aEra inicial do servidor",
                 List.of("§7Define a era de novos jogadores.", "§7Não altera automaticamente os jogadores atuais."),
                 this::openDefaultEraSelector);
-        button(holder, 26, Material.BOOK, "§bReceitas MECHANIUM",
+        button(holder, 29, Material.BOOK, "§bReceitas MECHANIUM",
                 List.of("§7Editar receitas dos módulos e addons.", "§7Resultado, quantidade, ingredientes e tecnologia."),
                 mechanium::openRecipeAdminMenu);
         button(holder, 31, Material.EXPERIENCE_BOTTLE, "§dPontos de pesquisa",

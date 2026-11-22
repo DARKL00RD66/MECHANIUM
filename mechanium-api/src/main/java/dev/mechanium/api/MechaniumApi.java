@@ -44,6 +44,8 @@ public interface MechaniumApi {
     Optional<ItemStack> createItemStack(String itemId, int amount);
     boolean canUseItem(UUID playerId, String itemId);
     boolean registerRecipe(RecipeDefinition recipe);
+    /** Replaces an already registered recipe in memory. Administrators persist overrides separately from module-owned definitions. */
+    default boolean overrideRecipe(RecipeDefinition recipe) { return false; }
     Optional<RecipeDefinition> getRecipe(String recipeId);
     Collection<RecipeDefinition> getRecipes();
     boolean canCraft(UUID playerId, String recipeId);

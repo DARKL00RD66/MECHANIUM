@@ -33,12 +33,13 @@ final class MechaniumRecipeAdminMenu implements Listener {
             10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25,
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43
     };
+    private static final int[] INGREDIENT_SLOTS = {19, 20, 21, 22, 23, 24, 25, 28, 29};
 
     private final MechaniumPlugin plugin;
     private final JavaPlugin javaPlugin;
     private final MechaniumApi api;
     private final Map<UUID, Draft> drafts = new HashMap<>();
-    private final Map<UUID, InputPrompt> prompts = new HashMap<>();
+    private final Map<UUID, InputPrompt> prompts = new java.util.concurrent.ConcurrentHashMap<>();
 
     MechaniumRecipeAdminMenu(MechaniumPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
@@ -161,7 +162,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
         int ingredientIndex = 0;
         for (Map.Entry<Character, String> entry : new TreeMap<>(draft.ingredients).entrySet()) {
             if (ingredientIndex >= 9) break;
-            int slot = 19 + ingredientIndex;
+            int slot = INGREDIENT_SLOTS[ingredientIndex];
             String value = entry.getValue();
             Material iconMaterial = ingredientIcon(value);
             button(holder, slot, iconMaterial, "§eIngrediente " + entry.getKey(),
@@ -172,7 +173,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
             ingredientIndex++;
         }
         for (int i = ingredientIndex; i < 9; i++) {
-            inventory.setItem(19 + i, item(Material.GRAY_STAINED_GLASS_PANE, "§8Sem ingrediente " + (i + 1),
+            inventory.setItem(INGREDIENT_SLOTS[i], item(Material.GRAY_STAINED_GLASS_PANE, "§8Sem ingrediente " + (i + 1),
                     List.of("§7Edite o mapa de ingredientes para adicionar entradas.")));
         }
 
@@ -268,7 +269,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
     @EventHandler
     public void onAdminChatInput(AsyncPlayerChatEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
-        InputPrompt prompt = prompts.get(playerId);
+        InputPrompt prompt = prompts.remove(playerId);
         if (prompt == null) return;
         event.setCancelled(true);
         String message = event.getMessage();
@@ -317,6 +318,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
             player.sendMessage("§aValor atualizado no rascunho. Clique em Salvar alterações para aplicar.");
             openEditor(player);
         } catch (RuntimeException exception) {
+            prompts.put(player.getUniqueId(), prompt);
             player.sendMessage("§cEntrada inválida: " + exception.getMessage());
             player.sendMessage("§eTente novamente ou digite cancel.");
         }

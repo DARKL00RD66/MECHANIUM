@@ -278,7 +278,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             }
             if (!ingredient.startsWith("mechanium:")) {
                 Material material = Material.matchMaterial(ingredient);
-                if (material == null || !material.isItem()) {
+                if (material == null || (Bukkit.getServer() != null && !material.isItem())) {
                     throw new IllegalArgumentException("Recipe ingredient is not a valid item material: " + ingredient);
                 }
             }

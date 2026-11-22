@@ -87,11 +87,11 @@ final class MechaniumRecipeAdminMenu implements Listener {
                 meta.displayName(LegacyComponentSerializer.legacySection()
                         .deserialize("§e" + recipe.id()));
                 meta.lore(List.of(
-                        Component.text("§7Resultado: §f" + recipe.resultItemId() + " x" + recipe.resultAmount()),
-                        Component.text("§7Tipo: §f" + recipe.type()),
-                        Component.text("§7Ingredientes: §f" + recipe.ingredients().size()),
-                        Component.text("§7Tecnologia: §f" + Objects.toString(recipe.requiredTechnologyId(), "Nenhuma")),
-                        Component.text("§aClique para editar.")
+                        legacy("§7Resultado: §f" + recipe.resultItemId() + " x" + recipe.resultAmount()),
+                        legacy("§7Tipo: §f" + recipe.type()),
+                        legacy("§7Ingredientes: §f" + recipe.ingredients().size()),
+                        legacy("§7Tecnologia: §f" + Objects.toString(recipe.requiredTechnologyId(), "Nenhuma")),
+                        legacy("§aClique para editar.")
                 ));
                 icon.setItemMeta(meta);
             }
@@ -454,6 +454,10 @@ final class MechaniumRecipeAdminMenu implements Listener {
                         List<String> lore, Consumer<Player> action) {
         holder.inventory.setItem(slot, item(material, name, lore));
         holder.actions.put(slot, action);
+    }
+
+    private Component legacy(String text) {
+        return LegacyComponentSerializer.legacySection().deserialize(text);
     }
 
     private ItemStack item(Material material, String name, List<String> lore) {

@@ -236,12 +236,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
 
     @Override public synchronized boolean registerRecipe(RecipeDefinition value) {
         Objects.requireNonNull(value);
-        ItemDefinition resultItem = items.get(value.resultItemId());
-        if (resultItem == null) throw new IllegalArgumentException("Recipe result item is not registered: " + value.resultItemId());
-        if (value.resultAmount() > resultItem.maxStackSize()) {
-            throw new IllegalArgumentException("Recipe result amount exceeds max stack size for " + resultItem.id());
-        }
-        if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
+        validateRecipeDefinition(value);
         RecipeDefinition old = recipes.get(value.id());
         if (old != null) {
             if (!old.equals(value)) return false;
@@ -253,6 +248,41 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         trackContent(MechaniumContentStore.RECIPE, value.id());
         publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumRecipeRegisterEvent(value)));
         return true;
+    }
+
+    /**
+     * Replaces a module/addon recipe for the current runtime. The caller owns persistence of this
+     * administrative override so module registration can continue to reconcile its canonical data.
+     */
+    @Override public synchronized boolean overrideRecipe(RecipeDefinition value) {
+        Objects.requireNonNull(value);
+        if (!recipes.containsKey(value.id())) return false;
+        validateRecipeDefinition(value);
+        recipes.put(value.id(), value);
+        publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumRecipeRegisterEvent(value)));
+        return true;
+    }
+
+    private void validateRecipeDefinition(RecipeDefinition value) {
+        ItemDefinition resultItem = items.get(value.resultItemId());
+        if (resultItem == null) {
+            throw new IllegalArgumentException("Recipe result item is not registered: " + value.resultItemId());
+        }
+        if (value.resultAmount() > resultItem.maxStackSize()) {
+            throw new IllegalArgumentException("Recipe result amount exceeds max stack size for " + resultItem.id());
+        }
+        if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
+        for (String ingredient : value.ingredients().values()) {
+            if (ingredient.startsWith("mechanium:") && !items.containsKey(ingredient.substring(10))) {
+                throw new IllegalArgumentException("Recipe references unregistered custom ingredient: " + ingredient);
+            }
+            if (!ingredient.startsWith("mechanium:")) {
+                Material material = Material.matchMaterial(ingredient);
+                if (material == null || (Bukkit.getServer() != null && !material.isItem())) {
+                    throw new IllegalArgumentException("Recipe ingredient is not a valid item material: " + ingredient);
+                }
+            }
+        }
     }
     @Override public Optional<RecipeDefinition> getRecipe(String id) { return Optional.ofNullable(recipes.get(normalize(id))); }
     @Override public Collection<RecipeDefinition> getRecipes() { return recipes.values().stream().sorted(Comparator.comparing(RecipeDefinition::id)).toList(); }

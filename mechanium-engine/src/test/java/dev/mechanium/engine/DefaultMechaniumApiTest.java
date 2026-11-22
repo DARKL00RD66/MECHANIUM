@@ -219,4 +219,67 @@ class DefaultMechaniumApiTest {
         }
     }
 
+
+    @Test
+    void administrativeRecipeOverrideReplacesRuntimeDefinitionWithoutMutatingModuleOwnedStorage() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("admin-recipe-override.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            api.registerTechnology(new TechnologyDefinition("basic_crafting", "Artesanato básico",
+                    "ancient", 0, List.of()));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                    "components", "Componentes", "Itens de teste"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                    "test_gear", "Engrenagem de teste", "IRON_INGOT", List.of(), 0, 64,
+                    "components", null));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                    "test_plate", "Placa de teste", "COPPER_INGOT", List.of(), 0, 64,
+                    "components", null));
+
+            var original = new dev.mechanium.api.model.RecipeDefinition(
+                    "test_gear_recipe", dev.mechanium.api.model.RecipeDefinition.Type.SHAPED,
+                    "test_gear", 1, List.of("I"), java.util.Map.of('I', "IRON_INGOT"), "basic_crafting");
+            assertTrue(api.registerRecipe(original));
+
+            var replacement = new dev.mechanium.api.model.RecipeDefinition(
+                    "test_gear_recipe", dev.mechanium.api.model.RecipeDefinition.Type.SHAPELESS,
+                    "test_gear", 3, List.of(), java.util.Map.of('P', "mechanium:test_plate"), null);
+            assertTrue(api.overrideRecipe(replacement));
+            assertEquals(replacement, api.getRecipe("test_gear_recipe").orElseThrow());
+
+            // The administrative layer is intentionally separate: module defaults remain the canonical
+            // SQLite record, while the plugin's YAML override is applied after module registration.
+            assertEquals(original, store.loadRecipes().stream()
+                    .filter(recipe -> recipe.id().equals(original.id())).findFirst().orElseThrow());
+            assertTrue(api.validateContent().isEmpty());
+        }
+    }
+
+    @Test
+    void administrativeRecipeOverrideRejectsUnknownIngredientsAndUnknownRecipeIds() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("invalid-admin-recipe-override.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                    "components", "Componentes", "Itens de teste"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                    "test_gear", "Engrenagem de teste", "IRON_INGOT", List.of(), 0, 64,
+                    "components", null));
+            var original = new dev.mechanium.api.model.RecipeDefinition(
+                    "test_gear_recipe", dev.mechanium.api.model.RecipeDefinition.Type.SHAPELESS,
+                    "test_gear", 1, List.of(), java.util.Map.of('I', "IRON_INGOT"), null);
+            assertTrue(api.registerRecipe(original));
+
+            var missingIngredient = new dev.mechanium.api.model.RecipeDefinition(
+                    "test_gear_recipe", dev.mechanium.api.model.RecipeDefinition.Type.SHAPELESS,
+                    "test_gear", 1, List.of(), java.util.Map.of('X', "mechanium:missing_item"), null);
+            assertThrows(IllegalArgumentException.class, () -> api.overrideRecipe(missingIngredient));
+            assertFalse(api.overrideRecipe(new dev.mechanium.api.model.RecipeDefinition(
+                    "unregistered_recipe", dev.mechanium.api.model.RecipeDefinition.Type.SHAPELESS,
+                    "test_gear", 1, List.of(), java.util.Map.of('I', "IRON_INGOT"), null)));
+            assertEquals(original, api.getRecipe("test_gear_recipe").orElseThrow());
+        }
+    }
 }

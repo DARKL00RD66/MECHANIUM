@@ -7,6 +7,7 @@ import dev.mechanium.api.MechaniumDataStore;
 import dev.mechanium.api.MechaniumModuleContext;
 import dev.mechanium.api.integration.NationIdentityProvider;
 import dev.mechanium.api.model.EraDefinition;
+import dev.mechanium.api.model.RecipeDefinition;
 import dev.mechanium.engine.DefaultMechaniumApi;
 import dev.mechanium.modules.BuiltinModules;
 import dev.mechanium.modules.ModuleManager;
@@ -15,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.*;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,6 +26,7 @@ import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public final class MechaniumPlugin extends JavaPlugin implements Listener, CommandExecutor, TabCompleter {
@@ -34,6 +37,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumRecipeBridge recipeBridge;
     private MechaniumResearchMenu researchMenu;
     private MechaniumAdminMenu adminMenu;
+    private MechaniumRecipeAdminMenu recipeAdminMenu;
     private PrivateStorageListener privateStorageListener;
     private MechaniumMachineManager machineManager;
     private EnergyGridManager energyGridManager;
@@ -71,6 +75,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             moduleManager.enabledModuleIds().forEach(id -> activeContentOwners.add("module:" + id));
             addonLoader.loadedAddonIds().forEach(id -> activeContentOwners.add("addon:" + id));
             api.pruneInactiveContentOwners(activeContentOwners);
+            applyConfiguredRecipeOverrides();
             List<String> contentErrors = api.validateContent();
             if (!contentErrors.isEmpty()) throw new IllegalStateException("Conteúdo MECHANIUM inválido: " + String.join("; ", contentErrors));
             recipeBridge = new MechaniumRecipeBridge(this, api);
@@ -104,6 +109,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
             adminMenu = new MechaniumAdminMenu(this, api);
             Bukkit.getPluginManager().registerEvents(adminMenu, this);
+            recipeAdminMenu = new MechaniumRecipeAdminMenu(this, api);
+            Bukkit.getPluginManager().registerEvents(recipeAdminMenu, this);
             townyNationHook = new TownyNationHook(this);
             townyNationHook.start();
             Bukkit.getServicesManager().register(NationIdentityProvider.class, townyNationHook, this, ServicePriority.Normal);
@@ -157,6 +164,87 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             merged.add(Map.of("id", id, "name", name, "order", order));
         }
         getConfig().set("progression.eras", merged);
+    }
+
+    /** Applies administrator-managed recipe definitions after modules and addons register their canonical content. */
+    private void applyConfiguredRecipeOverrides() {
+        ConfigurationSection overrides = getConfig().getConfigurationSection("admin-recipe-overrides");
+        if (overrides == null) return;
+        for (String storageKey : overrides.getKeys(false)) {
+            ConfigurationSection section = overrides.getConfigurationSection(storageKey);
+            if (section == null) continue;
+            String recipeId = section.getString("id", "");
+            try {
+                RecipeDefinition.Type type = RecipeDefinition.Type.valueOf(
+                        section.getString("type", "SHAPED").toUpperCase(Locale.ROOT));
+                String resultItemId = section.getString("result-item", "");
+                int resultAmount = section.getInt("result-amount", 1);
+                List<String> shape = section.getStringList("shape");
+                Map<Character, String> ingredients = new LinkedHashMap<>();
+                ConfigurationSection ingredientSection = section.getConfigurationSection("ingredients");
+                if (ingredientSection != null) {
+                    for (String symbol : ingredientSection.getKeys(false)) {
+                        if (symbol.length() != 1) throw new IllegalArgumentException(
+                                "Símbolo de ingrediente deve ter um caractere: " + symbol);
+                        ingredients.put(symbol.charAt(0), ingredientSection.getString(symbol, ""));
+                    }
+                }
+                String technology = section.getString("required-technology", "");
+                RecipeDefinition override = new RecipeDefinition(recipeId, type, resultItemId,
+                        resultAmount, shape, ingredients, technology.isBlank() ? null : technology);
+                if (!api.overrideRecipe(override)) {
+                    getLogger().warning("Override administrativo ignorado: receita não encontrada: " + recipeId);
+                } else {
+                    getLogger().info("Override administrativo aplicado à receita " + recipeId + ".");
+                }
+            } catch (RuntimeException exception) {
+                getLogger().warning("Override administrativo inválido para '" + recipeId + "': "
+                        + exception.getMessage());
+            }
+        }
+    }
+
+    /** Updates the runtime registry and saves a separate YAML override, leaving module-owned SQLite data intact. */
+    boolean saveAdminRecipeOverride(RecipeDefinition replacement) {
+        RecipeDefinition previous = api.getRecipe(replacement.id())
+                .orElseThrow(() -> new IllegalArgumentException("Receita não encontrada: " + replacement.id()));
+        try {
+            if (!api.overrideRecipe(replacement)) {
+                throw new IllegalArgumentException("Não foi possível substituir a receita " + replacement.id() + ".");
+            }
+            String storageKey = Base64.getUrlEncoder().withoutPadding()
+                    .encodeToString(replacement.id().getBytes(StandardCharsets.UTF_8));
+            Map<String, Object> values = new LinkedHashMap<>();
+            values.put("id", replacement.id());
+            values.put("type", replacement.type().name());
+            values.put("result-item", replacement.resultItemId());
+            values.put("result-amount", replacement.resultAmount());
+            values.put("shape", replacement.shape());
+            Map<String, String> ingredients = new LinkedHashMap<>();
+            replacement.ingredients().entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> ingredients.put(String.valueOf(entry.getKey()), entry.getValue()));
+            values.put("ingredients", ingredients);
+            values.put("required-technology", Objects.toString(replacement.requiredTechnologyId(), ""));
+            getConfig().set("admin-recipe-overrides." + storageKey, values);
+            saveConfig();
+            return true;
+        } catch (RuntimeException exception) {
+            api.overrideRecipe(previous);
+            throw exception;
+        }
+    }
+
+    void openRecipeAdminMenu(Player player) {
+        if (!hasAdminAccess(player)) {
+            player.sendMessage(ChatColor.RED + "Sem permissão.");
+            return;
+        }
+        if (recipeAdminMenu == null) {
+            player.sendMessage(ChatColor.RED + "O editor de receitas ainda não está disponível.");
+            return;
+        }
+        recipeAdminMenu.open(player);
     }
 
     private void registerConfiguredEras() {
@@ -437,6 +525,11 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             else sender.sendMessage(ChatColor.RED + "O HUD de receitas exige um jogador.");
             return true;
         }
+        if (args.length == 2 && args[1].equalsIgnoreCase("custom-recipes")) {
+            if (sender instanceof Player player) openRecipeAdminMenu(player);
+            else sender.sendMessage(ChatColor.RED + "O editor de receitas exige um jogador.");
+            return true;
+        }
         if (args.length == 4 && args[1].equalsIgnoreCase("recipe")) {
             String key = args[2].toLowerCase(Locale.ROOT);
             String eraId = args[3].toLowerCase(Locale.ROOT);
@@ -529,6 +622,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         }
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin hud — abrir o painel administrativo");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipes — configurar receitas vanilla");
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin custom-recipes — editar receitas MECHANIUM");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipe <minecraft:id> <era|off>");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin era <era> [jogador|todos]");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin staff <add|remove|list> [jogador]");
@@ -554,7 +648,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium era <era> [jogador|todos]" + ChatColor.GRAY + " — alterar era (staff)");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin hud" + ChatColor.GRAY + " — painel administrativo");
-            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipes" + ChatColor.GRAY + " — configurar bloqueios de receitas");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipes" + ChatColor.GRAY + " — configurar bloqueios de receitas vanilla");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin custom-recipes" + ChatColor.GRAY + " — editar receitas MECHANIUM");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipe <minecraft:id> <era|off>");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
@@ -589,7 +684,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     .filter(id -> id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin") && hasAdminAccess(sender)) {
-            return List.of("hud", "gui", "recipes", "recipe", "era", "points", "setera", "staff");
+            return List.of("hud", "gui", "recipes", "custom-recipes", "recipe", "era", "points", "setera", "staff");
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("recipe")) {
             return List.of("minecraft:iron_pickaxe", "minecraft:piston", "minecraft:hopper", "minecraft:repeater");
@@ -657,6 +752,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         specialEquipmentListener = null;
         researchMenu = null;
         adminMenu = null;
+        recipeAdminMenu = null;
         privateStorageListener = null;
         if (townyNationHook != null) {
             Bukkit.getServicesManager().unregister(NationIdentityProvider.class, townyNationHook);

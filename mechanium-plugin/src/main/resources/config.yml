@@ -134,3 +134,6 @@ addons:
 
 staff:
   admins: []
+
+# Administrative recipe edits override module/addon definitions without modifying SQLite ownership.
+admin-recipe-overrides: {}

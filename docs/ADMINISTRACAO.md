@@ -46,6 +46,37 @@ vanilla-recipe-gates:
 
 Ausência de regra ou valor `off` deixa a receita liberada.
 
+## Editor de receitas próprias do MECHANIUM
+
+Abra pelo painel administrativo em **Receitas MECHANIUM** ou diretamente:
+
+```
+/mechanium admin custom-recipes
+```
+
+O editor lista as receitas registradas pelos módulos e addons. Ao selecionar uma receita, é possível:
+
+- Alterar o item de resultado escolhendo outro ID de item registrado no MECHANIUM.
+- Aumentar ou diminuir a quantidade produzida, respeitando o limite de pilha do item.
+- Escolher a tecnologia exigida; a era necessária vem da tecnologia selecionada. Também é possível remover o requisito específico da receita.
+- Alternar entre `SHAPED` e `SHAPELESS`.
+- Editar o mapa de ingredientes e, para receitas `SHAPED`, o padrão 3×3.
+- Salvar ou descartar as alterações antes de sair.
+
+Alguns campos são digitados no chat após clicar no botão correspondente:
+
+```
+Resultado: mechanical_parts
+Ingredientes: I=IRON_INGOT,P=PISTON
+Padrão: III/IPI/III
+```
+
+Para ingredientes MECHANIUM, use `mechanium:item_id`, por exemplo `I=mechanium:copper_coil`. Para deixar uma célula vazia no padrão, use `.`. Separe as linhas do padrão com `/`. Os materiais vanilla precisam ser itens válidos; o resultado precisa ser um item registrado pelo MECHANIUM.
+
+As alterações ficam em `admin-recipe-overrides` no `config.yml`, separadas das definições canônicas dos módulos no SQLite. O plugin aplica esses overrides depois de carregar os módulos e addons, e atualiza a receita Bukkit durante a sessão. Assim, uma atualização do módulo não sobrescreve a edição administrativa.
+
+Este editor modifica receitas já registradas; não cria itens ou tecnologias novos, e não adiciona IDs de receita que não pertençam a um módulo ou addon carregado.
+
 ## Eras e tecnologias
 
 A progressão padrão inclui Antiguidade, Idade Média, Renascimento, Revolução Industrial, Eletrificação, Era Moderna, Era Atômica e do Pós-Guerra, Era da Informação, Era Digital e Era Espacial. As eras Mítica e Futuro Especulativo permanecem disponíveis para os módulos opcionais de fantasia e futuro.

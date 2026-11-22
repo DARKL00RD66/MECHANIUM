@@ -525,6 +525,11 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             else sender.sendMessage(ChatColor.RED + "O HUD de receitas exige um jogador.");
             return true;
         }
+        if (args.length == 2 && args[1].equalsIgnoreCase("custom-recipes")) {
+            if (sender instanceof Player player) openRecipeAdminMenu(player);
+            else sender.sendMessage(ChatColor.RED + "O editor de receitas exige um jogador.");
+            return true;
+        }
         if (args.length == 4 && args[1].equalsIgnoreCase("recipe")) {
             String key = args[2].toLowerCase(Locale.ROOT);
             String eraId = args[3].toLowerCase(Locale.ROOT);
@@ -617,6 +622,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         }
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin hud — abrir o painel administrativo");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipes — configurar receitas vanilla");
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin custom-recipes — editar receitas MECHANIUM");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipe <minecraft:id> <era|off>");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin era <era> [jogador|todos]");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin staff <add|remove|list> [jogador]");
@@ -642,7 +648,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium era <era> [jogador|todos]" + ChatColor.GRAY + " — alterar era (staff)");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin hud" + ChatColor.GRAY + " — painel administrativo");
-            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipes" + ChatColor.GRAY + " — configurar bloqueios de receitas");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipes" + ChatColor.GRAY + " — configurar bloqueios de receitas vanilla");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin custom-recipes" + ChatColor.GRAY + " — editar receitas MECHANIUM");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipe <minecraft:id> <era|off>");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
@@ -677,7 +684,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     .filter(id -> id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin") && hasAdminAccess(sender)) {
-            return List.of("hud", "gui", "recipes", "recipe", "era", "points", "setera", "staff");
+            return List.of("hud", "gui", "recipes", "custom-recipes", "recipe", "era", "points", "setera", "staff");
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("recipe")) {
             return List.of("minecraft:iron_pickaxe", "minecraft:piston", "minecraft:hopper", "minecraft:repeater");
@@ -745,6 +752,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         specialEquipmentListener = null;
         researchMenu = null;
         adminMenu = null;
+        recipeAdminMenu = null;
         privateStorageListener = null;
         if (townyNationHook != null) {
             Bukkit.getServicesManager().unregister(NationIdentityProvider.class, townyNationHook);

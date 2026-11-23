@@ -9,7 +9,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
-import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -68,7 +67,7 @@ final class MaterialGeneratorManager implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlace(BlockPlaceEvent event) {
         String id = itemId(event.getItemInHand());
-        if (!OUTPUTS.containsKey(id)) return;
+        if (id == null || !OUTPUTS.containsKey(id)) return;
         Block block = event.getBlockPlaced();
         if (block.getType() != Material.DISPENSER || !(block.getState() instanceof TileState tile)) {
             event.setCancelled(true);
@@ -88,7 +87,7 @@ final class MaterialGeneratorManager implements Listener {
     public void onInteract(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
         String id = blockItemId(event.getClickedBlock());
-        if (!OUTPUTS.containsKey(id)) return;
+        if (id == null || !OUTPUTS.containsKey(id)) return;
         event.setCancelled(true);
         BlockState state = event.getClickedBlock().getState();
         if (!(state instanceof TileState tile)) return;
@@ -102,7 +101,7 @@ final class MaterialGeneratorManager implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
         String id = blockItemId(event.getBlock());
-        if (!OUTPUTS.containsKey(id)) return;
+        if (id == null || !OUTPUTS.containsKey(id)) return;
         BlockState state = event.getBlock().getState();
         if (!(state instanceof TileState tile)) return;
         String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
@@ -144,6 +143,7 @@ final class MaterialGeneratorManager implements Listener {
                 for (BlockState state : chunk.getTileEntities()) {
                     if (!(state instanceof TileState tile)) continue;
                     String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
+                    if (id == null) continue;
                     Material output = OUTPUTS.get(id);
                     if (output == null || state.getType() != Material.DISPENSER) continue;
                     Block chestBlock = state.getBlock().getRelative(BlockFace.UP);
@@ -168,7 +168,7 @@ final class MaterialGeneratorManager implements Listener {
         return Math.max(20, plugin.getConfig().getInt("modules.material-generators.interval-ticks", 200));
     }
 
-    private boolean isGenerator(Block block) { return OUTPUTS.containsKey(blockItemId(block)); }
+    private boolean isGenerator(Block block) { String id = blockItemId(block); return id != null && OUTPUTS.containsKey(id); }
 
     private String blockItemId(Block block) {
         if (block == null || !(block.getState() instanceof TileState tile)) return null;

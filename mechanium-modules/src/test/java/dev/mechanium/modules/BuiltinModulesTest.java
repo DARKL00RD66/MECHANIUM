@@ -34,7 +34,11 @@ class BuiltinModulesTest {
                 "advanced-metallurgy",
                 "pressure-engineering",
                 "industrial-automation",
-                "industrial-logistics"
+                "industrial-logistics",
+                "forestry",
+                "textile-industry",
+                "biofuel",
+                "construction-materials"
         )));
     }
 

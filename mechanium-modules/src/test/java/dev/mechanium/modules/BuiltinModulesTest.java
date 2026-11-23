@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BuiltinModulesTest {
     @Test
-    void includesAllSevenNewAddonDomainModules() {
+    void includesAllRegisteredAddonDomainModules() {
         Set<String> ids = BuiltinModules.create().stream()
                 .map(module -> module.id())
                 .collect(Collectors.toSet());
@@ -26,7 +26,10 @@ class BuiltinModulesTest {
                 "exotic-garden",
                 "dank-tech2",
                 "culinary",
-                "environment"
+                "environment",
+                "electric-spawners",
+                "fast-machines",
+                "hardcore-slimefun"
         )));
     }
 

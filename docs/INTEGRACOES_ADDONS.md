@@ -7,13 +7,13 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | Referência | Direção no MECHANIUM | Situação |
 |---|---|---|
 | ExoticGarden | Horticultura, cultivo e cadeias agrícolas | Primeira expansão funcional: sementes, ervas, extratos botânicos, conservas e caixote de colheita; cultivo customizado pendente |
-| ElectricSpawners | Manejo de criação e produção animal | Planejado |
+| ElectricSpawners | Manejo de criação e produção animal | Primeira etapa: quatro incubadoras elétricas para galinha, vaca, porco e ovelha; somente animais passivos |
 | PrivateStorage | Armazéns privados, proprietário e permissões | Base funcional implementada |
 | ExtraGear | Ferramentas e equipamentos de utilidade | Picareta reforçada e bússola de levantamento com habilidades utilitárias |
 | SlimefunOreChunks | Prospecção e beneficiamento mineral | Scanner local e primeira cadeia de beneficiamento; depósitos regionais pendentes |
 | LiteXpansion | Cadeias industriais e processamento | Primeira cadeia e máquinas industriais adicionais implementadas |
 | EcoPower | Energia renovável e eficiência | Geradores eólicos/solares, baterias e consumo de energia nas máquinas |
-| HardcoreSlimefun | Regras configuráveis de progressão e balanceamento | Planejado |
+| HardcoreSlimefun | Regras configuráveis de progressão e balanceamento | Desgaste configurável, modo hardcore opcional e kit de manutenção liberado por pesquisa |
 | SFMobDrops | Subprodutos de criaturas | Base funcional implementada |
 | SFCalc | Consulta e cálculo de receitas/custos | Comando com lotes e materiais recursivos; sem preços monetários |
 | FluffyMachines | Máquinas industriais e automação | Prensa, britador, refinaria, montadora e filtro com runtime inicial |
@@ -33,7 +33,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | Gastronomicon | Culinária e conservação de alimentos | Primeira cadeia de culinária adicionada |
 | Better Nuclear Reactor | Modelagem abstrata de geração e eficiência energética | Planejado; sem instruções ou simulação técnica do mundo real |
 | AdvancedTech | Processos industriais avançados | Britador, refinaria e montadora com energia |
-| FastMachines | Filas, desempenho e limites de processamento | Planejado |
+| FastMachines | Filas, desempenho e limites de processamento | Prensa e enrolador acelerados usando o runtime compartilhado; filas e paralelismo pendentes |
 | MapJammers | Interferência/jamming não será implementada; cartografia civil pode ser avaliada separadamente | Excluído o mecanismo de interferência |
 | SensibleToolbox | Ferramentas utilitárias e qualidade de vida | Kit de campo e kit de manutenção com habilidades próprias |
 | GeyserHeads | Compatibilidade de apresentação com clientes Bedrock/Geyser | Planejado |
@@ -48,6 +48,12 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 - **Simple Storage:** inventário virtual paginado para nós de barril face a face, com até 64 nós e controle de acesso.
 - **SensibleToolbox:** kit de campo concede velocidade/visão noturna temporárias; kit de manutenção repara um equipamento em 25% da durabilidade máxima.
 
+## Expansões 0.5.0-SNAPSHOT
+
+- **ElectricSpawners:** incubadoras elétricas para galinhas, vacas, porcos e ovelhas. Cada máquina consome insumos, exige tecnologia e energia de uma bateria adjacente e produz um spawn egg vanilla correspondente. O escopo inicial é limitado a animais passivos.
+- **FastMachines:** prensa rápida (20 ticks por lote) e enrolador de bobinas (40 ticks por lote), ambos conectados à rede de energia e protegidos pela progressão.
+- **HardcoreSlimefun:** kit de manutenção desbloqueável e parâmetros para ativar regras mais exigentes de desgaste e reparo. O modo hardcore é opcional e vem desativado por padrão.
+
 ## Regras de portabilidade
 
 1. Cada domínio é implementado como módulo oficial independente e pode ser desativado em `config.yml`.
@@ -55,4 +61,4 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 3. Uma entrada nesta matriz não equivale à paridade integral com o projeto de referência.
 4. Conteúdo fantástico/futurista permanece opcional e desativado por padrão.
 5. Sistemas de combate, armas, ataques, mísseis e interferência não fazem parte da implementação operacional.
-6. A versão 0.4.0-SNAPSHOT ainda depende de CI e testes funcionais em Paper/Purpur 1.21.11.
+6. A versão 0.5.0-SNAPSHOT ainda depende de CI e testes funcionais em Paper/Purpur 1.21.11.

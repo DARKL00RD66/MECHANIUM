@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.4.1-SNAPSHOT  
+**Versão:** 0.5.0-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -65,9 +65,16 @@
 - **Interface:** exibe duração estimada, estado, barra percentual e tempo restante; atualiza a cada segundo sem reiniciar a animação.
 - **Compatibilidade:** `unlockTechnology` imediato da API permanece disponível para addons antigos; menu e comando do jogador usam o caminho temporizado.
 
+## Expansões 0.5.0-SNAPSHOT
+
+- **ElectricSpawners:** quatro incubadoras para animais passivos (galinha, vaca, porco e ovelha), com insumos, tempo de processamento, pesquisa e energia de bateria adjacente.
+- **FastMachines:** prensa rápida (20 ticks) e enrolador de bobinas (40 ticks), com dois produtos por lote e consumo de energia.
+- **HardcoreSlimefun:** kit de manutenção desbloqueado por pesquisa, parâmetros configuráveis de desgaste e modo hardcore opcional (multiplicador de desgaste e reparo com ferro).
+- Os três domínios são reimplementações independentes; nenhum JAR upstream do Slimefun foi adicionado como dependência.
+
 ## Limitações conhecidas
 
-- O runtime de máquinas ainda suporta apenas dispenser, uma entrada e uma saída; não há filas de produção nem múltiplos insumos/produtos.
+- O runtime de máquinas ainda suporta apenas dispenser, uma entrada e uma saída; não há filas de produção nem múltiplos insumos/produtos. As incubadoras e máquinas rápidas herdam esse limite.
 - O sistema energético é uma rede local e simplificada: geradores carregam bateria adjacente; baterias face a face podem fornecer energia a máquinas próximas. A carga se perde ao desmontar a bateria.
 - O catálogo de receitas não inclui processos cujo resultado não esteja no registro de receitas suportado (por exemplo, operações especiais de bancada e cozimento em fogueira); itens sem receita registrada não recebem desbloqueio por crafting.\n- O sistema de fluidos transporta somente o item MECHANIUM `purified_water`, não líquidos vanilla ou outros fluidos.
 - O Simple Storage conecta somente nós adjacentes pelas faces e limita cada rede a 64 depósitos.
@@ -82,8 +89,8 @@
 - A versão 0.2.0-SNAPSHOT teve workflow Maven bem-sucedido no run [43349904209](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43349904209), com 49 testes automatizados sem falhas ou erros.
 - A versão 0.3.0-SNAPSHOT passou no workflow [43352161651](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43352161651): **52 testes executados, 0 falhas e 0 erros**; os módulos Maven, a instalação local da API e a compilação do addon de exemplo terminaram com sucesso.
 - O workflow também publicou `MECHANIUM-0.3.0-SNAPSHOT.jar` no [GitHub Pre-release](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot). SHA-256: `adf591250a1785680a1f13e60b735b77fa56f41370a749856866dc85fdfb745b`.
-- Ainda não foi realizado smoke test em Paper/Purpur 1.21.11, teste real de gameplay ou validação de servidor de produção. Não considerar pronta para produção antes dessas etapas.
+- As novas incubadoras e máquinas rápidas ainda precisam de smoke test em Paper/Purpur 1.21.11, inclusive a confirmação em jogo de que os spawn eggs personalizados continuam utilizáveis como itens vanilla. Não considerar pronta para produção antes dessas etapas.
 
 ## Classificação
 
-**Fundação em desenvolvimento; funcionalidades 0.4.1-SNAPSHOT aguardam CI e validação no servidor real.**
+**Fundação em desenvolvimento; funcionalidades 0.5.0-SNAPSHOT aguardam CI e validação no servidor real.**

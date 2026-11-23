@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0-SNAPSHOT
+- Adicionados os módulos opcionais `electric-spawners`, `fast-machines` e `hardcore-slimefun`.
+- ElectricSpawners: incubadoras elétricas de galinha, vaca, porco e ovelha; usam sementes, feno, cenouras ou trigo e geram spawn eggs vanilla após processamento e consumo de energia.
+- FastMachines: prensa de alto rendimento e enrolador rápido de bobinas, com ciclos de 20 e 40 ticks, respectivamente, e alimentação pela rede elétrica.
+- HardcoreSlimefun: pesquisas de confiabilidade e manutenção, kit reparador desbloqueável e configuração opcional de desgaste/custo de reparo mais rigorosa.
+- A configuração mantém o modo hardcore desativado por padrão; os três módulos ficam habilitados por padrão e podem ser desligados individualmente.
+- A linha Maven avança para 0.5.0-SNAPSHOT por incluir um novo conjunto de integrações.
+
 ## 0.4.1-SNAPSHOT
 - Animação de abertura dos menus mais cadenciada: moldura revelada em grupos de 3 itens e conteúdo em grupos de 2, com intervalo de 2 ticks por etapa.
 - Pesquisas agora possuem tempo individual; duração padrão calculada pelo custo científico e pela era, com mínimo obrigatório de 120 segundos.

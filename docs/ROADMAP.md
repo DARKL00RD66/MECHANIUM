@@ -33,7 +33,7 @@
 - [x] Cálculo recursivo de lotes e materiais por receita
 - [x] Habilidades utilitárias para ferramentas e kits
 - [ ] Framework geral de máquinas com múltiplos tipos de bloco, múltiplos insumos e múltiplos produtos
-- [ ] Filas de produção e limites configuráveis por tick
+- [ ] Filas de produção, múltiplos insumos/produtos e limites configuráveis por tick
 - [ ] Redes de energia extensíveis por cabos e distribuição entre várias máquinas
 - [ ] Sistema geral de fluidos com líquidos adicionais e válvulas
 - [ ] Rede de armazéns entre locais distantes e logística automatizada
@@ -45,6 +45,9 @@
 - [x] Armazém portátil individual de 27 espaços persistido no item
 - [x] Contador abstrato de impacto industrial por mundo e comando de consulta
 - [x] Desgaste de máquinas, manutenção com ferro e bônus de eficiência por pesquisa
+- [x] Incubadoras elétricas para animais passivos, com ovos produzidos por máquinas e energia
+- [x] Prensa rápida e enrolador de bobinas com energia e ciclos acelerados
+- [x] Kit de manutenção por pesquisa e regras configuráveis de dificuldade hardcore
 - [ ] Agricultura completa: crescimento de culturas customizadas, estufas funcionais e colheita mecanizada
 - [ ] Persistência/reconstrução de máquinas e redes após reinício com teste de servidor
 - [ ] Efeitos ativos para filtros de carbono, reciclagem e recuperação ambiental
@@ -55,6 +58,7 @@
 - [x] Primeiras cadeias independentes de culinária e beneficiamento mineral
 - [x] Hook Towny opcional com UUID da nação exposto pela API
 - [x] Primeiras funcionalidades jogáveis dos domínios ExtraGear, EcoPower, SFCalc, Liquid, AdvancedTech, Simple Storage, SensibleToolbox e ExoticGarden
+- [x] Primeira etapa de ElectricSpawners, FastMachines e HardcoreSlimefun
 - [ ] Completar paridade de funcionalidades e sistemas transversais dos addons, incluindo crescimento de culturas exóticas
 - [ ] Auditar individualmente licença, dependências, API e funcionalidades dos 31 projetos
 - [ ] Adaptar sistemas ao contexto histórico-industrial e geopolítico

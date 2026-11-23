@@ -68,26 +68,29 @@ final class SpecialEquipmentListener implements Listener {
             return;
         }
 
-        if (id.equals("maintenance_kit")) {
+        if (id.equals("maintenance_kit") || id.equals("precision_repair_kit")) {
             event.setCancelled(true);
-            if (player.hasCooldown(held.getType())) return;
-            if (repairOneItem(player)) {
+            if (player.hasCooldown(Material.ANVIL)) return;
+            double fraction = id.equals("precision_repair_kit") ? 0.50d : 0.25d;
+            if (repairOneItem(player, fraction)) {
                 consumeOne(player, held);
                 player.setCooldown(Material.ANVIL, 20 * 10);
-                player.sendMessage("§aManutenção concluída: um equipamento foi reparado.");
+                player.sendMessage(id.equals("precision_repair_kit")
+                        ? "§aReparo de precisão concluído: 50% da durabilidade máxima restaurada."
+                        : "§aManutenção concluída: 25% da durabilidade máxima restaurada.");
             } else {
                 player.sendMessage("§cNão há equipamento danificado para reparar no inventário.");
             }
         }
     }
 
-    private boolean repairOneItem(Player player) {
+    private boolean repairOneItem(Player player, double fraction) {
         for (ItemStack item : player.getInventory().getStorageContents()) {
             if (item == null || item.getType().isAir() || item.getType().getMaxDurability() <= 0) continue;
             if (item == player.getInventory().getItemInMainHand()) continue;
             ItemMeta meta = item.getItemMeta();
             if (!(meta instanceof Damageable damageable) || damageable.getDamage() <= 0) continue;
-            int repair = Math.max(1, item.getType().getMaxDurability() / 4);
+            int repair = Math.max(1, (int) Math.ceil(item.getType().getMaxDurability() * fraction));
             damageable.setDamage(Math.max(0, damageable.getDamage() - repair));
             item.setItemMeta(meta);
             return true;

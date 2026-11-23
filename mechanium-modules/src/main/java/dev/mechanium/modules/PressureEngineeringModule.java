@@ -6,6 +6,7 @@ import java.util.Map;
 
 final class PressureEngineeringModule extends AbstractBuiltinModule {
     @Override public String id() { return "pressure-engineering"; }
+    @Override public java.util.Set<String> dependencies() { return java.util.Set.of("industry"); }
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(new TechnologyDefinition("pressure_engineering", "Engenharia de pressão",
                 "modern", 42, List.of("industrial_efficiency")));

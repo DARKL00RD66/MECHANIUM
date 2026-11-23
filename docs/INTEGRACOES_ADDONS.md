@@ -27,7 +27,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | FNAmplifications | Extensões de conteúdo e amplificação | Aguardando validação funcional e de licença |
 | Element Manipulation | Conteúdo fantástico | Apenas módulo de fantasia opcional, desativado por padrão |
 | DankTech2 | Armazenamento portátil | Primeira expansão: upgrade para armazém portátil persistente de 54 espaços; outras tiers e filtros pendentes |
-| Networks | Redes logísticas entre máquinas e depósitos | Planejado; redes atuais são locais e específicas por domínio |
+| Networks | Redes logísticas entre máquinas e depósitos | Primeira etapa: conduítes e caixas protegidas transportam itens MECHANIUM em redes locais de até 128 conduítes; logística remota pendente |
 | MissileWarfare | Não serão portadas armas, mísseis ou mecânicas de ataque | Excluído do escopo operacional |
 | EMCTech | Processamento e conversão de recursos | Aguardando confirmação da referência e da licença |
 | Gastronomicon | Culinária e conservação de alimentos | Primeira cadeia de culinária adicionada |
@@ -62,6 +62,10 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 - **Construction Materials:** cerâmica industrial, painéis reforçados, estruturas pré-fabricadas e misturador.
 
 Os quatro módulos são opcionais e habilitados por padrão; cada um pode ser desligado em `config.yml`. Suas receitas e tecnologias são registradas na API pública, sem dependência dos addons originais.
+
+## Expansões adicionais 0.7.0 — Networks
+
+- Networks: conduítes conectam caixas de rede do mesmo proprietário; um item MECHANIUM é transferido por ciclo de 2 segundos. Limite de 128 conduítes e somente chunks carregados. Não há roteamento remoto, filtros por item ou transporte de itens vanilla nesta etapa.
 
 ## Regras de portabilidade
 

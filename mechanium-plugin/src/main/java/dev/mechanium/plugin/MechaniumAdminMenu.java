@@ -29,30 +29,6 @@ final class MechaniumAdminMenu implements Listener {
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43
     };
 
-    private static final List<VanillaRecipe> VANILLA_RECIPES = List.of(
-            new VanillaRecipe("minecraft:stone_pickaxe", Material.STONE_PICKAXE, "Picareta de pedra"),
-            new VanillaRecipe("minecraft:iron_pickaxe", Material.IRON_PICKAXE, "Picareta de ferro"),
-            new VanillaRecipe("minecraft:iron_sword", Material.IRON_SWORD, "Espada de ferro"),
-            new VanillaRecipe("minecraft:shield", Material.SHIELD, "Escudo"),
-            new VanillaRecipe("minecraft:bow", Material.BOW, "Arco"),
-            new VanillaRecipe("minecraft:crossbow", Material.CROSSBOW, "Besta"),
-            new VanillaRecipe("minecraft:anvil", Material.ANVIL, "Bigorna"),
-            new VanillaRecipe("minecraft:enchanting_table", Material.ENCHANTING_TABLE, "Mesa de encantamentos"),
-            new VanillaRecipe("minecraft:piston", Material.PISTON, "Pistão"),
-            new VanillaRecipe("minecraft:hopper", Material.HOPPER, "Funil"),
-            new VanillaRecipe("minecraft:minecart", Material.MINECART, "Carrinho"),
-            new VanillaRecipe("minecraft:rail", Material.RAIL, "Trilho"),
-            new VanillaRecipe("minecraft:dispenser", Material.DISPENSER, "Distribuidor"),
-            new VanillaRecipe("minecraft:repeater", Material.REPEATER, "Repetidor de redstone"),
-            new VanillaRecipe("minecraft:comparator", Material.COMPARATOR, "Comparador de redstone"),
-            new VanillaRecipe("minecraft:redstone_lamp", Material.REDSTONE_LAMP, "Lâmpada de redstone"),
-            new VanillaRecipe("minecraft:observer", Material.OBSERVER, "Observador"),
-            new VanillaRecipe("minecraft:blast_furnace", Material.BLAST_FURNACE, "Alto-forno"),
-            new VanillaRecipe("minecraft:smoker", Material.SMOKER, "Defumador"),
-            new VanillaRecipe("minecraft:daylight_detector", Material.DAYLIGHT_DETECTOR, "Sensor de luz solar"),
-            new VanillaRecipe("minecraft:crafter", Material.CRAFTER, "Autocrafter")
-    );
-
     private final JavaPlugin plugin;
     private final MechaniumPlugin mechanium;
     private final MechaniumApi api;
@@ -80,6 +56,7 @@ final class MechaniumAdminMenu implements Listener {
                 "§7Eras cadastradas: §f" + api.getEras().size(),
                 "§7Tecnologias: §f" + api.getTechnologies().size(),
                 "§7Receitas vanilla configuradas: §f" + configuredRecipeCount(),
+                "§7Receitas vanilla detectadas: §f" + VanillaRecipeCatalog.discover().size(),
                 "§7Era inicial: §e" + defaultEraName()
         )));
         button(holder, 20, Material.PLAYER_HEAD, "§eEras individuais (testes)",
@@ -286,31 +263,54 @@ final class MechaniumAdminMenu implements Listener {
     }
 
     private void openVanillaRecipes(Player admin) {
+        openVanillaRecipes(admin, 0);
+    }
+
+    private void openVanillaRecipes(Player admin, int requestedPage) {
+        List<VanillaRecipeCatalog.Entry> recipes = VanillaRecipeCatalog.discover();
+        int pageCount = Math.max(1, (recipes.size() + CONTENT_SLOTS.length - 1) / CONTENT_SLOTS.length);
+        int page = Math.max(0, Math.min(requestedPage, pageCount - 1));
+        int start = page * CONTENT_SLOTS.length;
+
         AdminHolder holder = create("MECHANIUM • Receitas vanilla");
         Inventory inv = holder.getInventory();
         fillFrame(inv);
         boolean enabled = plugin.getConfig().getBoolean("vanilla-recipe-gates.enabled", true);
         inv.setItem(4, item(Material.CRAFTING_TABLE, "§bReceitas vanilla por era", List.of(
+                "§7Receitas descobertas: §f" + recipes.size(),
+                "§7Página: §f" + (page + 1) + "§7/§f" + pageCount,
                 "§7Sistema global: " + (enabled ? "§aativado" : "§cdesativado"),
-                "§7Clique numa receita para avançar pela lista de eras.",
-                "§7Depois da última era, o bloqueio volta a ficar desligado.",
-                "§7Para remover uma regra diretamente: /mechanium admin recipe <id> off"
+                "§7Clique num item para avançar sua era exigida.",
+                "§7Depois da Era Mítica, o ciclo passa por Futuro Especulativo e sem bloqueio.",
+                "§7Comando: /mechanium admin recipe <id> <era|off>"
         )));
         button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openHome);
-        for (int i = 0; i < Math.min(VANILLA_RECIPES.size(), CONTENT_SLOTS.length); i++) {
-            VanillaRecipe recipe = VANILLA_RECIPES.get(i);
-            String path = "vanilla-recipe-gates.recipes." + recipe.key();
-            String requiredEra = plugin.getConfig().getString(path);
+
+        int count = Math.min(CONTENT_SLOTS.length, recipes.size() - start);
+        for (int i = 0; i < count; i++) {
+            VanillaRecipeCatalog.Entry recipe = recipes.get(start + i);
+            String configPath = "vanilla-recipe-gates.recipes." + recipe.key();
+            String requiredEra = plugin.getConfig().getString(configPath);
             String state = requiredEra == null || requiredEra.equalsIgnoreCase("off") ? "§aSem bloqueio" :
                     api.getEra(requiredEra).map(era -> "§e" + era.displayName()).orElse("§cEra inválida: " + requiredEra);
-            button(holder, CONTENT_SLOTS[i], recipe.icon(), "§b" + recipe.displayName(),
-                    List.of("§7Receita: §f" + recipe.key(), "§7Requisito: " + state,
+            button(holder, CONTENT_SLOTS[i], recipe.result(), "§b" + recipe.displayName(),
+                    List.of("§7Receita: §f" + recipe.key(),
+                            "§7Tipo: §f" + recipe.type(),
+                            "§7Requisito: " + state,
+                            "§8Era inicial sugerida: §f" + api.getEra(recipe.suggestedEraId())
+                                    .map(EraDefinition::displayName).orElse(recipe.suggestedEraId()),
                             "§aClique para avançar a era exigida."),
                     p -> {
-                        cycleRecipeRequirement(path);
-                        openVanillaRecipes(p);
+                        cycleRecipeRequirement(configPath);
+                        openVanillaRecipes(p, page);
                     });
         }
+
+        if (page > 0) button(holder, 45, Material.PAPER, "§ePágina anterior",
+                List.of("§7Página " + page + " de " + pageCount), p -> openVanillaRecipes(p, page - 1));
+        if (page + 1 < pageCount) button(holder, 53, Material.PAPER, "§ePróxima página",
+                List.of("§7Página " + (page + 2) + " de " + pageCount), p -> openVanillaRecipes(p, page + 1));
+
         animateOpen(admin, holder);
     }
 
@@ -410,8 +410,6 @@ final class MechaniumAdminMenu implements Listener {
     public void onMenuDrag(InventoryDragEvent event) {
         if (event.getView().getTopInventory().getHolder() instanceof AdminHolder) event.setCancelled(true);
     }
-
-    private record VanillaRecipe(String key, Material icon, String displayName) { }
 
     private static final class AdminHolder implements InventoryHolder {
         private Inventory inventory;

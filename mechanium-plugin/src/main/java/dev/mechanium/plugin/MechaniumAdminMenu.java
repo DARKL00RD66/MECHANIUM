@@ -76,19 +76,26 @@ final class MechaniumAdminMenu implements Listener {
         Inventory inv = holder.getInventory();
         fillFrame(inv);
         inv.setItem(4, item(Material.NETHER_STAR, "§6§lPainel administrativo", List.of(
+                "§7Era global do servidor: §e" + mechanium.serverEraName(),
                 "§7Eras cadastradas: §f" + api.getEras().size(),
                 "§7Tecnologias: §f" + api.getTechnologies().size(),
                 "§7Receitas vanilla configuradas: §f" + configuredRecipeCount(),
                 "§7Era inicial: §e" + defaultEraName()
         )));
-        button(holder, 20, Material.PLAYER_HEAD, "§eAlterar era de jogadores",
-                List.of("§7Selecione um jogador conectado.", "§7Também é possível alterar todos online."), this::openPlayerTargets);
+        button(holder, 20, Material.PLAYER_HEAD, "§eEras individuais (testes)",
+                List.of("§7Ajuste a era de um jogador por vez.", "§7Sobrescrita isolada; não altera o servidor."), this::openPlayerTargets);
         button(holder, 22, Material.CRAFTING_TABLE, "§bReceitas vanilla por era",
                 List.of("§7Defina a era exigida para receitas do Minecraft.", "§7Clique numa receita para avançar a era.", "§7Ao passar da última era, o bloqueio é removido."),
                 this::openVanillaRecipes);
-        button(holder, 24, Material.CLOCK, "§aEra inicial do servidor",
-                List.of("§7Define a era de novos jogadores.", "§7Não altera automaticamente os jogadores atuais."),
+        button(holder, 24, Material.CLOCK, "§aEra inicial de configuração",
+                List.of("§7Fallback usado apenas quando o banco", "§7ainda não possui uma era global definida."),
                 this::openDefaultEraSelector);
+        button(holder, 26, Material.NETHER_STAR, "§6§lTrocar era GLOBAL",
+                List.of("§7Era atual: §e" + mechanium.serverEraName(),
+                        "§7Altera a progressão para todo o servidor.",
+                        "§7Jogadores online recebem título e som.",
+                        "§7Jogadores offline recebem o aviso ao entrar."),
+                this::openGlobalEraSelector);
         button(holder, 29, Material.BOOK, "§bReceitas MECHANIUM",
                 List.of("§7Editar receitas dos módulos e addons.", "§7Resultado, quantidade, ingredientes e tecnologia."),
                 mechanium::openRecipeAdminMenu);
@@ -104,18 +111,18 @@ final class MechaniumAdminMenu implements Listener {
                     openHome(p);
                 });
         button(holder, 49, Material.BARRIER, "§cFechar", List.of(), Player::closeInventory);
-        player.openInventory(inv);
+        animateOpen(player, holder);
     }
 
     private void openPlayerTargets(Player admin) {
         AdminHolder holder = create("MECHANIUM • Jogadores");
         Inventory inv = holder.getInventory();
         fillFrame(inv);
-        inv.setItem(4, item(Material.PLAYER_HEAD, "§eEscolher jogador",
-                List.of("§7Clique em um jogador para alterar sua era.")));
+        inv.setItem(4, item(Material.PLAYER_HEAD, "§eSobrescritas individuais",
+                List.of("§7Use este menu para testar progressões", "§7em uma era sem mudar a era global.")));
         button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openHome);
-        button(holder, 45, Material.COMPASS, "§6Todos os jogadores online",
-                List.of("§7Escolher uma era para todos conectados."), p -> openEraSelector(p, null, "todos os jogadores online"));
+        button(holder, 45, Material.COMPASS, "§6Testar era em todos online",
+                List.of("§7Aplica uma sobrescrita de teste", "§7a todos que estão conectados."), p -> openEraSelector(p, null, "todos os jogadores online"));
         int index = 0;
         for (Player target : Bukkit.getOnlinePlayers().stream()
                 .sorted(Comparator.comparing(Player::getName, String.CASE_INSENSITIVE_ORDER))
@@ -132,7 +139,7 @@ final class MechaniumAdminMenu implements Listener {
             inv.setItem(slot, head);
             holder.actions.put(slot, p -> openEraSelector(p, target.getUniqueId(), target.getName()));
         }
-        admin.openInventory(inv);
+        animateOpen(admin, holder);
     }
 
     private void openEraSelector(Player admin, UUID targetId, String targetName) {
@@ -172,13 +179,47 @@ final class MechaniumAdminMenu implements Listener {
         admin.openInventory(inv);
     }
 
+    private void openGlobalEraSelector(Player admin) {
+        List<EraDefinition> eras = orderedEras();
+        AdminHolder holder = create("MECHANIUM • Era global");
+        Inventory inv = holder.getInventory();
+        fillFrame(inv);
+        inv.setItem(4, item(Material.NETHER_STAR, "§6§lEra global do servidor", List.of(
+                "§7Era ativa: §e" + mechanium.serverEraName(),
+                "§7A próxima escolha será aplicada como",
+                "§7progressão padrão para todos os jogadores."
+        )));
+        button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openHome);
+        int index = 0;
+        for (EraDefinition era : eras) {
+            if (index >= CONTENT_SLOTS.length) break;
+            int slot = CONTENT_SLOTS[index++];
+            boolean current = api.getServerEra().map(era.id()::equalsIgnoreCase).orElse(false);
+            button(holder, slot, current ? Material.LIME_DYE : Material.CLOCK,
+                    (current ? "§a" : "§e") + era.displayName(),
+                    List.of("§7ID: §f" + era.id(), "§7Ordem histórica: §f" + era.order(),
+                            current ? "§aEra global atual" : "§eClique para tornar global"),
+                    p -> {
+                        if (!current) {
+                            mechanium.changeServerEra(era.id());
+                            p.sendMessage("§aNova era global do servidor: §f" + era.displayName()
+                                    + "§a. Todos os jogadores herdam esta era; testes individuais permanecem intactos.");
+                        } else {
+                            p.sendMessage("§eEsta já é a era global ativa.");
+                        }
+                        openHome(p);
+                    });
+        }
+        animateOpen(admin, holder);
+    }
+
     private void openDefaultEraSelector(Player admin) {
         List<EraDefinition> eras = orderedEras();
         AdminHolder holder = create("MECHANIUM • Era inicial");
         Inventory inv = holder.getInventory();
         fillFrame(inv);
-        inv.setItem(4, item(Material.CLOCK, "§aEra padrão para novos jogadores",
-                List.of("§7Esta seleção não altera jogadores existentes.")));
+        inv.setItem(4, item(Material.CLOCK, "§aEra inicial de configuração",
+                List.of("§7Usada como fallback quando o banco", "§7ainda não possui uma era global.")));
         button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openHome);
         int index = 0;
         for (EraDefinition era : eras) {
@@ -290,6 +331,11 @@ final class MechaniumAdminMenu implements Listener {
         return api.getEra(id).map(EraDefinition::displayName).orElse(id);
     }
 
+    private void animateOpen(Player player, AdminHolder holder) {
+        holder.animating = true;
+        MechaniumMenuAnimator.open(plugin, player, holder.inventory, () -> holder.animating = false);
+    }
+
     private int configuredRecipeCount() {
         var section = plugin.getConfig().getConfigurationSection("vanilla-recipe-gates.recipes");
         if (section == null) return 0;
@@ -338,6 +384,7 @@ final class MechaniumAdminMenu implements Listener {
             player.sendMessage("§cSeu acesso administrativo não está mais ativo.");
             return;
         }
+        if (holder.animating) return;
         if (event.getClickedInventory() != event.getView().getTopInventory()) return;
         Consumer<Player> action = holder.actions.get(event.getSlot());
         if (action != null) action.accept(player);
@@ -352,6 +399,7 @@ final class MechaniumAdminMenu implements Listener {
 
     private static final class AdminHolder implements InventoryHolder {
         private Inventory inventory;
+        private boolean animating;
         private final Map<Integer, Consumer<Player>> actions = new HashMap<>();
         @Override public Inventory getInventory() { return inventory; }
     }

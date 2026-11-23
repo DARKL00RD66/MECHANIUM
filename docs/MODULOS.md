@@ -152,3 +152,13 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 - Não há integração com economia para calcular preços monetários.
 - Não há filas de produção, processamento paralelo ou múltiplas receitas simultâneas; manutenção de máquinas já existe via ferro e kit pesquisável.
 - O conteúdo relacionado a armas, ataques, mísseis ou interferência não faz parte do escopo. Sistemas civis e industriais permanecem no escopo.
+
+
+## Novos módulos 0.7.0-SNAPSHOT
+
+- `forestry`: fibras de madeira, resina e estação florestal.
+- `textile-industry`: fibras, tecidos e tear mecanizado.
+- `biofuel`: biomassa e célula de biocombustível abstrata.
+- `construction-materials`: cerâmica, painéis e estruturas pré-fabricadas.
+
+Todos são opcionais e podem ser configurados individualmente.

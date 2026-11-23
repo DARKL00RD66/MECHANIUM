@@ -186,7 +186,7 @@ final class MechaniumFabricationMenu implements Listener {
     private ItemStack named(Material material, String name, List<String> lore) {
         ItemStack stack = new ItemStack(material);
         ItemMeta meta = stack.getItemMeta();
-        meta.setDisplayName(name);
+        meta.setDisplayName(name.replace('&', '§'));
         meta.setLore(lore);
         stack.setItemMeta(meta);
         return stack;

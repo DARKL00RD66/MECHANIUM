@@ -7,6 +7,15 @@ progression:
   global-era-announcement:
     revision: 0
   starting-research-points: 40
+  # Every player research takes at least two minutes. A per-technology override is optional.
+  # Default duration = base + (research cost * seconds-per-research-point)
+  #                    + (era order * seconds-per-era).
+  research:
+    minimum-seconds: 120
+    base-seconds: 120
+    seconds-per-research-point: 3
+    seconds-per-era: 15
+    overrides: {}
   eras:
     - id: ancient
       name: Antiguidade

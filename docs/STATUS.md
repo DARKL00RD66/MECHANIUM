@@ -72,6 +72,13 @@
 - **HardcoreSlimefun:** kit de manutenção desbloqueado por pesquisa, parâmetros configuráveis de desgaste e modo hardcore opcional (multiplicador de desgaste e reparo com ferro).
 - Os três domínios são reimplementações independentes; nenhum JAR upstream do Slimefun foi adicionado como dependência.
 
+## Expansão 0.7.0.01-SNAPSHOT
+
+- **Material Generators (SMG):** oito geradores passivos; baú diretamente acima; um item a cada 200 ticks por padrão; progresso persistido no bloco; propriedade e proteção contra desmontagem por terceiros, explosões e pistões.
+- **Progressão:** quatro geradores básicos exigem `basic_material_generation`; quatro geradores avançados exigem `advanced_material_generation`.
+- **Configuração:** `modules.material-generators.enabled` e `modules.material-generators.interval-ticks`.
+- **Limite:** produção em um único baú superior, sem rede de distribuição, filtros ou upgrades de velocidade nesta etapa.
+
 ## Limitações conhecidas
 
 - O runtime de máquinas ainda suporta apenas dispenser, uma entrada e uma saída; não há filas de produção nem múltiplos insumos/produtos. As incubadoras e máquinas rápidas herdam esse limite.

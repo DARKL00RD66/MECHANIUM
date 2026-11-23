@@ -151,6 +151,16 @@ modules:
     enabled: true
   hardcore-slimefun:
     enabled: true
+  air-filtration:
+    enabled: true
+  advanced-metallurgy:
+    enabled: true
+  pressure-engineering:
+    enabled: true
+  industrial-automation:
+    enabled: true
+  industrial-logistics:
+    enabled: true
 
 machines:
   wear:

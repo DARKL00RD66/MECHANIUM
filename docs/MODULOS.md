@@ -10,7 +10,7 @@
 | `industrial-automation` | Circuitos de controle e montadora automática. |
 | `industrial-logistics` | Caixas de transporte e roteador de carga. |
 
-## Módulos históricos e industriais padrão
+O catálogo de fabricação do menu central permite selecionar um resultado, conferir categoria, tecnologia e ingredientes e fabricar com um clique. A verificação e o consumo são feitos no servidor; itens personalizados são identificados pelo ID persistente, não apenas pelo nome visível. Máquinas são classificadas separadamente dos componentes e exibem seus processos registrados.\n\n## Módulos históricos e industriais padrão
 
 | ID | Módulo | Padrão |
 |---|---|---|

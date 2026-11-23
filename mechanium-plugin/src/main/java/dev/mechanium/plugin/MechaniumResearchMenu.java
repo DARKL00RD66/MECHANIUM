@@ -114,6 +114,9 @@ final class MechaniumResearchMenu implements Listener {
                 List.of("§7Catálogo organizado por categoria.", "§7Clique no resultado para fabricar.", "§7Os ingredientes serão consumidos."), fabricationMenu::open);
         button(holder, 33, Material.CLOCK, "§dEras históricas",
                 List.of("§7Veja a linha do tempo."), p -> openEraTree(p, 0, 0));
+        button(holder, 37, Material.AMETHYST_SHARD, "§bPontos de pesquisa",
+                List.of("§7Saldo: §f" + api.getResearchPoints(player.getUniqueId()),
+                        "§7Veja todas as formas de obter pontos."), this::openResearchPointsInfo);
         button(holder, 49, Material.BARRIER, "§cFechar", List.of(), Player::closeInventory);
         animateOpen(player, holder);
     }
@@ -254,6 +257,71 @@ final class MechaniumResearchMenu implements Listener {
                         technologyItem(player, technology, era, active, nowEpochMillis));
             }
         }
+    }
+
+
+    private void openResearchPointsInfo(Player player) {
+        MenuHolder holder = create("MECHANIUM • Pontos de pesquisa");
+        Inventory inv = holder.getInventory();
+        fillFrame(inv);
+        long balance = api.getResearchPoints(player.getUniqueId());
+        long starting = Math.max(0L, plugin.getConfig().getLong("progression.starting-research-points", 40L));
+        long advancementReward = plugin.getConfig().getLong("research-rewards.advancements.default", 2L);
+        long biomeReward = plugin.getConfig().getLong("research-rewards.biomes.default", 1L);
+
+        inv.setItem(4, item(Material.AMETHYST_SHARD, "§b§lSEUS PONTOS DE PESQUISA", List.of(
+                "§7Saldo atual: §b" + balance,
+                "§7Os pontos são individuais e salvos no jogador.",
+                "§8Eles são gastos ao iniciar uma pesquisa."
+        )));
+
+        button(holder, 11, Material.IRON_PICKAXE, "§eDescoberta de minérios",
+                List.of("§7Quebre pela primeira vez cada tipo de minério.",
+                        "§7A recompensa é concedida uma vez por material.",
+                        "§7Recompensas configuradas:"));
+        var blockRewards = plugin.getConfig().getConfigurationSection("research-rewards.blocks");
+        if (blockRewards != null) {
+            blockRewards.getKeys(false).stream().sorted().limit(18).forEach(materialId ->
+                    loreAppend(inv, 11, "§8• §f" + materialId.toLowerCase(Locale.ROOT).replace('_', ' ')
+                            + " §7(+" + blockRewards.getLong(materialId) + ")"));
+        }
+
+        button(holder, 13, Material.COMPASS, "§aExploração de biomas",
+                List.of("§7Entre em um bioma ainda não descoberto.",
+                        "§7Cada bioma concede pontos uma única vez.",
+                        "§7Recompensa padrão: §b+" + biomeReward,
+                        "§7Valores específicos podem ser configurados no config.yml."));
+
+        button(holder, 15, Material.WRITABLE_BOOK, "§dConquistas",
+                List.of("§7Conclua conquistas vanilla do Minecraft.",
+                        "§7Cada conquista elegível conta uma vez.",
+                        "§7Receita de itens não concede pontos.",
+                        "§7Recompensa padrão: §b+" + advancementReward));
+
+        button(holder, 29, Material.GIFT, "§6Pontos iniciais",
+                List.of("§7Primeira entrada sem histórico de pesquisa:",
+                        "§b+" + starting + " pontos",
+                        "§7É uma concessão única, não repetível ao gastar o saldo."));
+
+        button(holder, 31, Material.KNOWLEDGE_BOOK, "§eComo usar os pontos",
+                List.of("§71. Abra a árvore de progressão.",
+                        "§72. Selecione uma tecnologia disponível.",
+                        "§73. Confira o custo em pontos.",
+                        "§74. Clique para iniciar a pesquisa.",
+                        "§7O custo é debitado no início; o tempo continua offline."));
+
+        button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openHome);
+        animateOpen(player, holder);
+    }
+
+    private void loreAppend(Inventory inventory, int slot, String line) {
+        ItemStack stack = inventory.getItem(slot);
+        if (stack == null || !stack.hasItemMeta()) return;
+        ItemMeta meta = stack.getItemMeta();
+        List<Component> lore = meta.lore() == null ? new ArrayList<>() : new ArrayList<>(meta.lore());
+        lore.add(LegacyComponentSerializer.legacySection().deserialize(line));
+        meta.lore(lore);
+        stack.setItemMeta(meta);
     }
 
     private void openSimpleList(Player player, String section) {

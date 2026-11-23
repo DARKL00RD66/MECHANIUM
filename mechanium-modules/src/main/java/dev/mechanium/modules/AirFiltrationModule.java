@@ -7,6 +7,7 @@ import java.util.Map;
 /** Air filtration and environmental engineering content. */
 final class AirFiltrationModule extends AbstractBuiltinModule {
     @Override public String id() { return "air-filtration"; }
+    @Override public java.util.Set<String> dependencies() { return java.util.Set.of("industry"); }
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(new TechnologyDefinition("industrial_air_filtration", "Filtragem industrial do ar",
                 "industrial_revolution", 28, List.of("industrial_chemistry")));

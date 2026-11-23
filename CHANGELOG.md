@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.2.01-SNAPSHOT
+- Incremento de manutenção após 0.7.2.00: incorpora a auditoria de consistência, correções de dependências entre módulos, IDs exclusivos para Water Treatment e correção de inserção em pilhas dos Material Generators.
+- Mantidos os cinco módulos adicionados em 0.7.2.00: Aquaculture, Glassworks, Rail Freight, Battery Industry e Cold Chain.
+- Atualizados todos os oito POMs do reactor e o exemplo de addon para `0.7.2.01-SNAPSHOT`.
+- Build Maven/CI desta versão em andamento; validação de gameplay em Paper/Purpur 1.21.11 permanece pendente.
+
+
 ## 0.7.2.00-SNAPSHOT
 - Auditoria de consistência corrigiu dependências de tecnologias entre módulos (Culinary, Air Filtration, Metallurgy, Pressure Engineering, Automation e Logistics), e explicitou a dependência Energy no Battery Industry.
 - Corrigida colisão de IDs com o módulo Liquid: o cartucho de tratamento de água agora usa `water_filter_cartridge` e `water_filter_cartridge_recipe`.

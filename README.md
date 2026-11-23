@@ -41,7 +41,7 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.6.0-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.7.0.00-SNAPSHOT.jar
 ```
 
 ## Instalar
@@ -52,11 +52,11 @@ mechanium-plugin/target/MECHANIUM-0.6.0-SNAPSHOT.jar
 4. Ajuste `plugins/MECHANIUM/config.yml`.
 5. Coloque addons externos em `plugins/MECHANIUM/addons/` e reinicie.
 
-A linha 0.6.0 adiciona cinco domínios industriais: filtragem do ar, metalurgia avançada, engenharia de pressão, automação industrial e logística. Também inclui um catálogo de fabricação por clique e recompensas científicas por descobertas minerais e avanços. A linha 0.5.0 acrescentou ElectricSpawners, FastMachines e HardcoreSlimefun. A linha 0.4.1 também traz pesquisas temporizadas com duração dinâmica e progresso offline, e 0.4.0 ampliou o catálogo vanilla e trouxe as primeiras cadeias ExoticGarden/DankTech2. O projeto segue experimental e precisa de validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
+A linha 0.7.0.00-SNAPSHOT adiciona cinco módulos inspirados em GlobalWarming, Networks, SimpleMaterialGenerators, SlimeCustomizer e SlimyRepair. O catálogo de fabricação agora filtra por tipo/categoria e executa fabricação por clique com consumo transacional de ingredientes. A economia de pesquisa inclui descobertas de minérios, novos biomas e conquistas, com saldo consultável no menu e por comando. A linha 0.4.1 também traz pesquisas temporizadas com duração dinâmica e progresso offline, e 0.4.0 ampliou o catálogo vanilla e trouxe as primeiras cadeias ExoticGarden/DankTech2. O projeto segue experimental e precisa de validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
 
 ## CI e estado
 
-- O CI da linha 0.5.0 deve validar Java 21 / Maven verify antes de considerar o snapshot pronto.
+- O CI da linha 0.7.0.00-SNAPSHOT deve validar Java 21 / Maven verify antes de considerar o snapshot pronto.
 - O [pré-release mais recente](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot) deve conter o JAR correspondente ao snapshot após o CI desta atualização.
 - A versão é experimental. O build automatizado não substitui o teste de gameplay em Paper/Purpur.
 

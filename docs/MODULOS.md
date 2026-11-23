@@ -1,5 +1,18 @@
 # Módulos oficiais do MECHANIUM
 
+### Módulos adicionados em 0.7.0.00-SNAPSHOT
+
+| ID | Funcionalidade inicial |
+|---|---|
+| `global-warming` | Célula consumível de recuperação ambiental, reduzindo o indicador abstrato de impacto industrial do mundo. |
+| `networks` | Nó adicional de armazenamento que se conecta à rede local de nós adjacentes, com propriedade e permissões. |
+| `simple-material-generators` | Peneira de cascalho e separador de areia, máquinas que processam insumos em fragmentos minerais e pelotas de argila. |
+| `slime-customizer` | Projetos de receita/máquina; `/mechanium customizer` abre o editor administrativo existente de receitas registradas. |
+| `slimy-repair` | Kit consumível de reparo de precisão, restaurando 50% da durabilidade máxima de um item danificado. |
+
+Todos os cinco módulos são opcionais na arquitetura e ficam ativados pela configuração padrão desta versão. Cada um pode ser desligado em `modules.<id>.enabled`. São reimplementações independentes; nenhuma API interna do Slimefun é necessária.
+
+
 ### Novos módulos 0.6.0-SNAPSHOT
 
 | ID | Conteúdo |

@@ -13,6 +13,8 @@ public final class BuiltinModules {
                 new ExtraGearModule(), new EcoPowerModule(), new SFCalcModule(), new LiquidModule(),
                 new AdvancedTechModule(), new SimpleStorageModule(), new SensibleToolboxModule(),
                 new DankTech2Module(), new ElectricSpawnersModule(), new FastMachinesModule(), new HardcoreSlimefunModule(), new AirFiltrationModule(), new MetallurgyModule(),
-                new PressureEngineeringModule(), new AutomationModule(), new LogisticsModule());
+                new PressureEngineeringModule(), new AutomationModule(), new LogisticsModule(),
+                new GlobalWarmingModule(), new NetworksModule(), new SimpleMaterialGeneratorsModule(),
+                new SlimeCustomizerModule(), new SlimyRepairModule());
     }
 }

@@ -20,7 +20,7 @@
 - [x] Integração do crafting com o motor central de progressão
 - [x] Menu paginado de pesquisas por era
 - [x] Livro-guia entregue automaticamente
-- [ ] Catálogo pesquisável de itens, receitas e tecnologias dentro do jogo
+- [x] Catálogo de fabricação com filtros por tipo/categoria e detalhes das receitas\n- [ ] Busca textual de itens, receitas e tecnologias dentro do jogo
 
 ## Marco 2 — Sistemas econômicos e industriais
 - [x] Prensa mecânica inicial em dispenser
@@ -31,7 +31,7 @@
 - [x] Cofres privados com proprietário e lista de acesso
 - [x] Rede local paginada de armazenamento com até 64 nós adjacentes
 - [x] Cálculo recursivo de lotes e materiais por receita
-- [x] Habilidades utilitárias para ferramentas e kits
+- [x] Habilidades utilitárias para ferramentas e kits\n- [x] Recompensas individuais por primeira descoberta de minério, bioma e conquista\n- [x] Saldo de pontos visível no menu e por comando\n- [x] Fabricação por clique com consumo transacional de ingredientes e retorno de baldes vazios
 - [ ] Framework geral de máquinas com múltiplos tipos de bloco, múltiplos insumos e múltiplos produtos
 - [ ] Filas de produção, múltiplos insumos/produtos e limites configuráveis por tick
 - [ ] Redes de energia extensíveis por cabos e distribuição entre várias máquinas
@@ -50,7 +50,7 @@
 - [x] Kit de manutenção por pesquisa e regras configuráveis de dificuldade hardcore
 - [ ] Agricultura completa: crescimento de culturas customizadas, estufas funcionais e colheita mecanizada
 - [ ] Persistência/reconstrução de máquinas e redes após reinício com teste de servidor
-- [ ] Efeitos ativos para filtros de carbono, reciclagem e recuperação ambiental
+- [x] Célula consumível para reduzir o contador abstrato de impacto industrial\n- [ ] Simulação ambiental mais ampla, efeitos contínuos e recuperação por estrutura
 - [ ] Balanceamento avançado: níveis de desgaste, falhas configuráveis e manutenção escalonada
 
 ## Marco 3 — Portabilidade
@@ -58,7 +58,7 @@
 - [x] Primeiras cadeias independentes de culinária e beneficiamento mineral
 - [x] Hook Towny opcional com UUID da nação exposto pela API
 - [x] Primeiras funcionalidades jogáveis dos domínios ExtraGear, EcoPower, SFCalc, Liquid, AdvancedTech, Simple Storage, SensibleToolbox e ExoticGarden
-- [x] Primeira etapa de ElectricSpawners, FastMachines e HardcoreSlimefun
+- [x] Primeira etapa de ElectricSpawners, FastMachines e HardcoreSlimefun\n- [x] Primeira etapa de GlobalWarming, Networks, SimpleMaterialGenerators, SlimeCustomizer e SlimyRepair
 - [ ] Completar paridade de funcionalidades e sistemas transversais dos addons, incluindo crescimento de culturas exóticas
 - [ ] Auditar individualmente licença, dependências, API e funcionalidades dos 31 projetos
 - [ ] Adaptar sistemas ao contexto histórico-industrial e geopolítico

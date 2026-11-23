@@ -87,6 +87,9 @@ vanilla-recipe-gates:
 research-rewards:
   advancements:
     default: 2
+  # First visit to each biome grants this amount once per player.
+  biomes:
+    default: 1
   blocks:
     COAL_ORE: 1
     DEEPSLATE_COAL_ORE: 1
@@ -162,6 +165,16 @@ modules:
   industrial-automation:
     enabled: true
   industrial-logistics:
+    enabled: true
+  global-warming:
+    enabled: true
+  networks:
+    enabled: true
+  simple-material-generators:
+    enabled: true
+  slime-customizer:
+    enabled: true
+  slimy-repair:
     enabled: true
 
 machines:

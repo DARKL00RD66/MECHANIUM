@@ -15,17 +15,17 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 | SFMobDrops | Recursos de criaturas | Drops equilibrados e configuráveis |
 | SFCalc | Calculadora e utilidades | Utilitário de informação e cálculo |
 | FluffyMachines | Máquinas | Filas, consumo e produção por era |
-| GlobalWarming | Clima e ambiente | Emissões, clima e impacto ambiental |
+| GlobalWarming | Clima e ambiente | Indicador abstrato de impacto industrial e célula consumível de recuperação; não simula clima real |
 | SlimefunWarfare | Sistemas geopolíticos | Somente diplomacia, orçamento e logística civil abstrata |
 | Liquid | Fluidos | Tubulações, tanques e transferência |
-| SlimeCustomizer | Configuração de conteúdo | Ferramentas administrativas internas |
-| SMG | A auditar | Identificar funções, licença e dependências antes de decidir |
+| SlimeCustomizer | Configuração de conteúdo | Projetos de receita/máquina e editor administrativo para alterar receitas registradas; adicionar novos IDs ainda pendente |
+| SMG (SimpleMaterialGenerators) | Processamento de materiais | Peneira e separador com receitas e máquinas próprias; expansão de geradores autônomos pendente |
 | Simple Storage | Armazéns | Capacidade, acesso e logística |
 | Galactifun | Exploração espacial | Módulo de ficção opcional, se mantido |
 | FNAmplifications | Amplificação/produção | Auditar processos concretos antes de incluir |
 | Element Manipulation | Manipulação fantástica | Módulo de fantasia opcional, separado |
 | DankTech2 | Armazenamento portátil | Inventário e armazenamento portáteis |
-| Networks | Redes de itens | Roteamento, capacidade, energia e propriedade |
+| Networks | Redes de itens | Nó de armazenamento incorporado à rede local de até 64 nós; redes remotas e roteamento automático pendentes |
 | MissileWarfare | Conteúdo bélico | Não incorporar mecânicas de armas, ataques ou operação de combate |
 | EMCTech | Transmutação/EMC | Não incorporar geração/transmutação fantástica gratuita de recursos no núcleo |
 | Gastronomicon | Culinária | Receitas, alimentos e cadeia produtiva |
@@ -59,6 +59,17 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 - **ElectricSpawners (parcial / clean-room):** quatro incubadoras construídas sobre o runtime comum de máquinas. Elas consomem sementes, feno, cenouras ou trigo e geram ovos de invocação vanilla de galinha, vaca, porco ou ovelha. Todas exigem a pesquisa `livestock_incubation` e energia de bateria adjacente. O primeiro estágio não cria criaturas hostis, não automatiza abate e não reproduz o comportamento integral do addon original.
 - **FastMachines (parcial / clean-room):** a prensa rápida transforma uma barra de ferro em duas peças mecânicas em um ciclo de 20 ticks; o enrolador transforma cobre em duas bobinas em 40 ticks. Ambos exigem energia e a pesquisa `fast_machinery`. Ainda compartilham o limite do runtime atual: dispenser, uma entrada e uma saída, sem filas nem processamento paralelo.
 - **HardcoreSlimefun (parcial / clean-room):** inclui pesquisas de confiabilidade/manutenção e o item `machine_maintenance_kit`, que restaura o desgaste de uma máquina quando usado agachado sobre ela. O modo opcional `machines.hardcore.enabled` pode multiplicar o desgaste por operação e elevar o custo de reparo com ferro; vem desativado por padrão.
+
+
+## Implementações 0.7.0.00-SNAPSHOT
+
+- **GlobalWarming (primeira etapa):** `carbon_capture_cell` reduz em 10 unidades o contador abstrato de impacto industrial do mundo. O módulo reutiliza o indicador persistente existente; não representa temperatura ou clima.
+- **Networks (primeira etapa):** `network_storage_node` é um barril especial que participa da rede de inventário local, conectada por faces e com controle de proprietário/permissões.
+- **SimpleMaterialGenerators (primeira etapa):** duas máquinas no runtime comum: cascalho → fragmento mineral e areia → pelota de argila. Não há geração de recursos sem insumos.
+- **SlimeCustomizer (primeira etapa):** receitas de projetos e atalho `/mechanium customizer` para o editor administrativo de receitas que já existem. Interface de criação completa de itens, tecnologias e máquinas novas ainda não foi implementada.
+- **SlimyRepair (primeira etapa):** kit consumível repara um item danificado em 50% da durabilidade máxima.
+- **Pontos de pesquisa:** mineração de novos tipos de minério, primeira visita a cada bioma e conquistas elegíveis concedem recompensas individuais, persistidas para impedir farming repetido.
+- **Catálogo:** seleção por tipo e categoria, requisitos de tecnologia, lista de insumos e fabricação por clique com verificação de espaço e consumo seguro.
 
 ## Regras de portabilidade
 

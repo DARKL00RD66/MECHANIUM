@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.5.0-SNAPSHOT  
+**Versão:** 0.7.0.00-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -71,6 +71,19 @@
 - **FastMachines:** prensa rápida (20 ticks) e enrolador de bobinas (40 ticks), com dois produtos por lote e consumo de energia.
 - **HardcoreSlimefun:** kit de manutenção desbloqueado por pesquisa, parâmetros configuráveis de desgaste e modo hardcore opcional (multiplicador de desgaste e reparo com ferro).
 - Os três domínios são reimplementações independentes; nenhum JAR upstream do Slimefun foi adicionado como dependência.
+
+
+## Atualização 0.7.0.00-SNAPSHOT
+
+- Cinco módulos opcionais novos: `global-warming`, `networks`, `simple-material-generators`, `slime-customizer` e `slimy-repair`.
+- GlobalWarming: item consumível reduz 10 unidades do contador abstrato de impacto industrial do mundo.
+- Networks: `network_storage_node` participa da rede local paginada existente de depósitos adjacentes e mantém regras de proprietário/permissões.
+- SMG: duas máquinas de processamento, peneira de cascalho e separador de areia, com um insumo e um produto por ciclo.
+- SlimeCustomizer: projetos de receitas/máquinas; `/mechanium customizer` abre o editor administrativo existente quando o módulo está ativo e o jogador tem permissão. A ferramenta altera receitas registradas; não cria automaticamente novos IDs de itens/máquinas.
+- SlimyRepair: `precision_repair_kit` consome uma unidade e repara um equipamento danificado em 50% da durabilidade máxima.
+- Pontos: saldo aparece na central e existe `/mechanium points`; jogadores podem ganhar pontos uma vez por tipo de minério, uma vez por bioma e uma vez por conquista elegível. A concessão inicial permanece configurável.
+- Fabricação: filtros de tipo e categoria, detalhes das receitas, comparação de ingredientes, verificação de pesquisa e capacidade do inventário antes de consumir. `WATER_BUCKET` é consumido e devolve um `BUCKET` vazio.
+- As cinco integrações são clean-room, sem adicionar os JARs originais como dependências. O runtime de máquinas permanece limitado a dispenser, uma entrada e uma saída.
 
 ## Limitações conhecidas
 

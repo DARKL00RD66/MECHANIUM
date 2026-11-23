@@ -1,18 +1,18 @@
 # Política de versionamento do MECHANIUM
 
-O projeto seguirá a sequência de snapshots definida para chegar à primeira versão estável.
+O desenvolvimento segue snapshots incrementais até a primeira versão estável.
 
 ## Regras
 
-- **Correções pequenas e ajustes localizados:** incrementam o patch da linha atual. Exemplo: `0.3.0-SNAPSHOT`, `0.3.1-SNAPSHOT`, `0.3.2-SNAPSHOT`.
-- **Novos conjuntos de funcionalidades ou integrações de addons:** iniciam o próximo marco de funcionalidades. Exemplo: `0.4.0-SNAPSHOT`, depois `0.5.0-SNAPSHOT`.
-- **Alterações dentro de um marco:** incrementam seu patch sem substituir snapshots anteriores. Exemplo: `0.4.1-SNAPSHOT`, `0.4.2-SNAPSHOT`.
-- **Pré-lançamento final:** a sequência de desenvolvimento avança até `0.9.9-SNAPSHOT`.
-- **Versão oficial:** somente depois da validação dos critérios de aceite e do encerramento da linha de snapshots; a versão estável planejada é `1.0.0`.
+- Correções pequenas usam patch adicional.
+- Novos conjuntos de funcionalidades ou integrações começam um novo marco.
+- O formato de versões do projeto usa quatro blocos numéricos, como `0.7.0.00-SNAPSHOT`.
+- Os domínios integrados permanecem no único JAR oficial; o sufixo de snapshot identifica o estado de desenvolvimento e não significa que cada módulo interno seja um JAR independente.
+- A sequência de snapshots avança até `0.9.9.00-SNAPSHOT`; a versão estável planejada permanece `1.0.0`, após cumprir os critérios de aceite.
 
 ## Marco atual
 
-A linha atual é `0.5.0-SNAPSHOT`, iniciada por um novo conjunto de integrações de referência: ElectricSpawners, FastMachines e HardcoreSlimefun.
+A linha atual é `0.7.0.00-SNAPSHOT`. Este marco acrescenta cinco módulos inspirados em addons de referência, melhorias de fabricação, filtros de catálogo e uma economia mais visível de pontos de pesquisa.
 
 ## Sincronização obrigatória
 
@@ -21,7 +21,7 @@ Ao avançar a versão, atualizar em conjunto:
 1. `pom.xml` raiz e todos os módulos Maven.
 2. A dependência `mechanium.version` do addon de exemplo.
 3. Caminhos de artefatos e instruções no README.
-4. Changelog e estado do projeto.
+4. Changelog, estado do projeto, matriz de módulos e roadmap.
 5. Tag/release de snapshot somente depois do CI construir e publicar o JAR.
 
-Nunca substituir o conteúdo histórico do changelog de versões anteriores. Cada snapshot mantém sua própria seção e o JAR publicado deve corresponder ao commit identificado na release.
+Nunca substituir o conteúdo histórico do changelog. Cada snapshot mantém sua seção e o JAR publicado deve corresponder exatamente ao commit indicado na release.

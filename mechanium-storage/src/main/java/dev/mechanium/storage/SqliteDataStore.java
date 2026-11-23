@@ -91,8 +91,24 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                 seedLegacyContentOwnership();
                 statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (4)");
             }
+            statement.execute("CREATE TABLE IF NOT EXISTS mechanium_server_settings (setting_key TEXT PRIMARY KEY, setting_value TEXT NOT NULL)");
+            if (currentVersion < 5) {
+                boolean hasOverrideFlag = false;
+                try (ResultSet columns = statement.executeQuery("PRAGMA table_info(mechanium_players)")) {
+                    while (columns.next()) {
+                        if ("era_override_enabled".equalsIgnoreCase(columns.getString("name"))) {
+                            hasOverrideFlag = true;
+                            break;
+                        }
+                    }
+                }
+                if (!hasOverrideFlag) {
+                    statement.execute("ALTER TABLE mechanium_players ADD COLUMN era_override_enabled INTEGER NOT NULL DEFAULT 0");
+                }
+                statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (5)");
+            }
         }
-        logger.info("MECHANIUM SQLite schema até a versão 4 pronta.");
+        logger.info("MECHANIUM SQLite schema até a versão 5 pronta.");
     }
 
 
@@ -149,17 +165,62 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
 
     @Override
     public synchronized Optional<String> getPlayerEra(UUID playerId) {
+        return getPlayerEraOverride(playerId);
+    }
+
+    @Override
+    public synchronized Optional<String> getPlayerEraOverride(UUID playerId) {
         try {
             ensurePlayer(playerId);
             try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT era_id FROM mechanium_players WHERE uuid = ?")) {
+                    "SELECT era_id FROM mechanium_players WHERE uuid = ? AND era_override_enabled = 1")) {
                 statement.setString(1, playerId.toString());
                 try (ResultSet result = statement.executeQuery()) {
                     return result.next() ? Optional.ofNullable(result.getString(1)) : Optional.empty();
                 }
             }
         } catch (SQLException exception) {
-            throw failure("read player era", exception);
+            throw failure("read player era override", exception);
+        }
+    }
+
+    @Override
+    public synchronized Optional<String> getServerEra() {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT setting_value FROM mechanium_server_settings WHERE setting_key = 'server-era'");
+             ResultSet result = statement.executeQuery()) {
+            return result.next() ? Optional.ofNullable(result.getString(1)) : Optional.empty();
+        } catch (SQLException exception) {
+            throw failure("read server era", exception);
+        }
+    }
+
+    @Override
+    public synchronized void setServerEra(String eraId) {
+        Objects.requireNonNull(eraId, "eraId");
+        try (PreparedStatement statement = connection.prepareStatement("""
+                INSERT INTO mechanium_server_settings(setting_key, setting_value)
+                VALUES ('server-era', ?)
+                ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value
+                """)) {
+            statement.setString(1, eraId);
+            statement.executeUpdate();
+        } catch (SQLException exception) {
+            throw failure("set server era", exception);
+        }
+    }
+
+    @Override
+    public synchronized void clearPlayerEraOverride(UUID playerId) {
+        try {
+            ensurePlayer(playerId);
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE mechanium_players SET era_override_enabled = 0 WHERE uuid = ?")) {
+                statement.setString(1, playerId.toString());
+                statement.executeUpdate();
+            }
+        } catch (SQLException exception) {
+            throw failure("clear player era override", exception);
         }
     }
 
@@ -168,7 +229,7 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
         try {
             ensurePlayer(playerId);
             try (PreparedStatement statement = connection.prepareStatement(
-                    "UPDATE mechanium_players SET era_id = ? WHERE uuid = ?")) {
+                    "UPDATE mechanium_players SET era_id = ?, era_override_enabled = 1 WHERE uuid = ?")) {
                 statement.setString(1, eraId);
                 statement.setString(2, playerId.toString());
                 statement.executeUpdate();

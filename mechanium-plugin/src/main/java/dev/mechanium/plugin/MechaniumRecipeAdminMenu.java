@@ -112,7 +112,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
                 });
         if (page + 1 < pageCount) button(holder, 53, Material.ARROW, "§ePróxima página", List.of(),
                 p -> openList(p, page + 1));
-        player.openInventory(inventory);
+        animateOpen(player, holder);
     }
 
     private void openEditor(Player player) {
@@ -205,7 +205,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
             drafts.remove(p.getUniqueId());
             p.closeInventory();
         });
-        player.openInventory(inventory);
+        animateOpen(player, holder);
     }
 
     private void openTechnologySelector(Player player, int requestedPage) {
@@ -252,7 +252,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
                 p -> openTechnologySelector(p, page - 1));
         if (page + 1 < pageCount) button(holder, 52, Material.PAPER, "§ePróxima página", List.of(),
                 p -> openTechnologySelector(p, page + 1));
-        player.openInventory(inventory);
+        animateOpen(player, holder);
     }
 
     private void requestInput(Player player, InputPrompt prompt, String message) {
@@ -445,6 +445,11 @@ final class MechaniumRecipeAdminMenu implements Listener {
         return holder;
     }
 
+    private void animateOpen(Player player, MenuHolder holder) {
+        holder.animating = true;
+        MechaniumMenuAnimator.open(plugin, player, holder.inventory, () -> holder.animating = false);
+    }
+
     private void fillFrame(Inventory inventory) {
         ItemStack pane = item(Material.BLACK_STAINED_GLASS_PANE, " ", List.of());
         for (int slot = 0; slot < SIZE; slot++) {
@@ -482,6 +487,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (!(event.getView().getTopInventory().getHolder() instanceof MenuHolder holder)) return;
         event.setCancelled(true);
+        if (holder.animating) return;
         if (!plugin.hasAdminAccess(player)) {
             player.closeInventory();
             player.sendMessage("§cSeu acesso administrativo não está mais ativo.");
@@ -530,6 +536,7 @@ final class MechaniumRecipeAdminMenu implements Listener {
 
     private static final class MenuHolder implements InventoryHolder {
         private Inventory inventory;
+        private boolean animating;
         private final Map<Integer, Consumer<Player>> actions = new HashMap<>();
         private final Map<Integer, Consumer<Player>> rightClickActions = new HashMap<>();
         @Override public Inventory getInventory() { return inventory; }

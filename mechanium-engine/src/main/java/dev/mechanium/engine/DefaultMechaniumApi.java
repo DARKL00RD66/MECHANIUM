@@ -97,15 +97,43 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     }
     @Override public Optional<EraDefinition> getEra(String id) { return Optional.ofNullable(eras.get(normalize(id))); }
     @Override public Collection<EraDefinition> getEras() { return eras.values().stream().sorted(Comparator.comparingInt(EraDefinition::order)).toList(); }
-    @Override public Optional<String> getPlayerEra(UUID id) { return dataStore.getPlayerEra(Objects.requireNonNull(id)); }
+    @Override public Optional<String> getPlayerEra(UUID id) {
+        UUID playerId = Objects.requireNonNull(id);
+        return dataStore.getPlayerEraOverride(playerId).or(() -> dataStore.getServerEra());
+    }
+    @Override public Optional<String> getPlayerEraOverride(UUID id) {
+        return dataStore.getPlayerEraOverride(Objects.requireNonNull(id));
+    }
+    @Override public Optional<String> getServerEra() { return dataStore.getServerEra(); }
+
+    @Override public synchronized void setServerEra(String era) {
+        String id = normalize(era);
+        if (!eras.containsKey(id)) throw new IllegalArgumentException("Unknown era: " + era);
+        String previousEraId = dataStore.getServerEra().orElse(null);
+        dataStore.setServerEra(id);
+        if (!Objects.equals(previousEraId, id) && Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().callEvent(new MechaniumServerEraChangeEvent(previousEraId, id));
+        }
+    }
+
     @Override public synchronized void setPlayerEra(UUID player, String era) {
         String id = normalize(era);
         if (!eras.containsKey(id)) throw new IllegalArgumentException("Unknown era: " + era);
         UUID playerId = Objects.requireNonNull(player);
-        String previousEraId = dataStore.getPlayerEra(playerId).orElse(null);
+        String previousEraId = getPlayerEra(playerId).orElse(null);
         dataStore.setPlayerEra(playerId, id);
         if (!Objects.equals(previousEraId, id) && Bukkit.getServer() != null) {
             Bukkit.getPluginManager().callEvent(new MechaniumPlayerEraChangeEvent(playerId, previousEraId, id));
+        }
+    }
+
+    @Override public synchronized void clearPlayerEraOverride(UUID player) {
+        UUID playerId = Objects.requireNonNull(player);
+        String previousEraId = getPlayerEra(playerId).orElse(null);
+        dataStore.clearPlayerEraOverride(playerId);
+        String newEraId = getPlayerEra(playerId).orElse(null);
+        if (!Objects.equals(previousEraId, newEraId) && newEraId != null && Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().callEvent(new MechaniumPlayerEraChangeEvent(playerId, previousEraId, newEraId));
         }
     }
     @Override public long getResearchPoints(UUID id) { return dataStore.getResearchPoints(Objects.requireNonNull(id)); }
@@ -135,7 +163,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         TechnologyDefinition technology = technologies.get(normalize(technologyId));
         if (technology == null) return UnlockResult.of(UnlockResult.Status.UNKNOWN_TECHNOLOGY, "Tecnologia desconhecida.");
         if (dataStore.hasUnlocked(playerId, technology.id())) return UnlockResult.of(UnlockResult.Status.ALREADY_UNLOCKED, "Tecnologia já desbloqueada.");
-        Optional<String> currentId = dataStore.getPlayerEra(playerId);
+        Optional<String> currentId = getPlayerEra(playerId);
         if (currentId.isEmpty() || !eras.containsKey(currentId.get())) return UnlockResult.of(UnlockResult.Status.UNKNOWN_PLAYER_ERA, "Jogador ainda não possui uma era válida.");
         if (eras.get(currentId.get()).order() < eras.get(technology.requiredEraId()).order())
             return UnlockResult.of(UnlockResult.Status.WRONG_ERA, "Esta tecnologia exige a era " + eras.get(technology.requiredEraId()).displayName() + ".");
@@ -166,7 +194,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public boolean canUseTechnology(UUID player, String id) {
         TechnologyDefinition technology = technologies.get(normalize(id));
         if (technology == null || !hasUnlockedTechnology(player, technology.id())) return false;
-        Optional<String> eraId = dataStore.getPlayerEra(player);
+        Optional<String> eraId = getPlayerEra(player);
         if (eraId.isEmpty()) return false;
         EraDefinition current = eras.get(eraId.get()), required = eras.get(technology.requiredEraId());
         return current != null && required != null && current.order() >= required.order();

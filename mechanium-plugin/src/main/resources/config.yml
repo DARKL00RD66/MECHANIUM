@@ -3,6 +3,9 @@ storage:
 
 progression:
   default-era: ancient
+  server-era: ancient
+  global-era-announcement:
+    revision: 0
   starting-research-points: 40
   eras:
     - id: ancient

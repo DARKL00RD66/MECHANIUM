@@ -9,12 +9,15 @@ Jogadores com a permissão `mechanium.admin` (por padrão, operadores) ou listad
 /mechanium admin hud
 ```
 
-O painel é uma interface de inventário e contém:
+O painel é uma interface de inventário com animação de revelação (moldura primeiro e botões surgindo do centro para fora) e contém:
 
-- **Alterar era de jogadores:** seleciona um jogador conectado ou todos os jogadores conectados.
-- **Era inicial do servidor:** define a era aplicada a novos jogadores; não altera jogadores existentes.
+- **Trocar era GLOBAL:** altera a era histórica do servidor. Jogadores online recebem o título **Nova era** com o nome da era como subtítulo e o som de conclusão de desafio. Jogadores offline recebem o mesmo aviso uma vez ao voltar, desde que ainda não tenham recebido a revisão mais recente.
+- **Eras individuais (testes):** mantém a seleção de era por jogador para testes isolados. Também permite testar todos os conectados de uma vez sem alterar a era global. O botão **Herdar era global** remove a sobrescrita individual e faz o jogador voltar a acompanhar a era do servidor.
+- **Era inicial de configuração:** fallback utilizado apenas quando ainda não existe era global persistida.
 - **Pontos científicos:** concede 50 pontos ao jogador conectado selecionado.
 - **Receitas vanilla por era:** configura requisitos históricos para um conjunto inicial de receitas do Minecraft e permite ativar/desativar o sistema globalmente.
+
+A era global é persistida no SQLite e vale para jogadores online e offline que não possuam uma sobrescrita individual de teste. Alterar a era global não apaga as sobrescritas de teste. O comando /mechanium admin era <era> também altera a era global; para testes individuais use /mechanium admin era <era> <jogador> ou a tela de **Eras individuais (testes)**.
 
 ## Receitas vanilla
 

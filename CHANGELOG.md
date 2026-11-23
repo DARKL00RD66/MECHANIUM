@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.2.00-SNAPSHOT
+- Adicionados cinco módulos oficiais: `aquaculture`, `glassworks`, `rail-freight`, `battery-industry` e `cold-chain`.
+- Aquaculture: ração, redes de criação, reaproveitamento de subprodutos, caixotes e incubadora aquícola.
+- Glassworks: carga de sílica, vidro industrial, painéis temperados, lentes de precisão e forno de vidro.
+- Rail Freight: dormentes, trilhos reforçados, paletes e manifestos para operações de carga e transporte intermodal.
+- Battery Industry: separadores, invólucros, células montadas e bancos de baterias industriais.
+- Cold Chain: fibras isolantes, células de refrigeração, caixotes térmicos e unidade refrigeradora.
+- Os cinco módulos adicionam 5 categorias, 10 tecnologias, 22 itens e 22 receitas; todos foram registrados no catálogo, nos testes e na configuração padrão.
+- As definições de máquinas aquícola, forno de vidro e refrigeração usam o runtime genérico de uma entrada/uma saída; testes em servidor real continuam pendentes.
+- Versão Maven avançada para `0.7.2.00-SNAPSHOT` no reactor e no exemplo de addon.
+
 ## 0.7.1.00-SNAPSHOT
 - Adicionados quatro módulos oficiais opcionais: `water-treatment`, `greenhouse`, `industrial-recycling` e `ore-chunks`.
 - Water Treatment: cartuchos filtrantes, células de água purificada, fluido refrigerante e recuperação hídrica, com progressão de filtragem e recirculação.

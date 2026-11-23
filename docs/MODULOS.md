@@ -157,6 +157,7 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 ## Novos módulos 0.7.0-SNAPSHOT
 
 - industrial-networks: conduítes industriais e caixas de rede com transporte automático de itens MECHANIUM.
+- better-reactor: gerador cristalino fictício de alta potência, conectado à rede de baterias.
 
 - `forestry`: fibras de madeira, resina e estação florestal.
 - `textile-industry`: fibras, tecidos e tear mecanizado.
@@ -164,6 +165,13 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 - `construction-materials`: cerâmica, painéis e estruturas pré-fabricadas.
 
 Todos são opcionais e podem ser configurados individualmente.
+
+### Better Reactor — geração abstrata de energia
+
+- O módulo usa um gerador cristalino fictício colocado como blast furnace.
+- Clique com um cristal energético MECHANIUM na mão para abastecer o gerador; uma unidade dura cinco minutos.
+- Enquanto abastecido, gera 8 unidades de energia por segundo para uma bateria MECHANIUM adjacente do mesmo proprietário.
+- A energia é uma mecânica abstrata do jogo. Não há combustível nuclear real, parâmetros físicos, projeto técnico ou simulação de reator real.
 
 ### Industrial Networks — transporte de itens
 

@@ -28,5 +28,7 @@ final class LogisticsModule extends AbstractBuiltinModule {
                 "cargo_router", 1, List.of(),
                 Map.of('H', "HOPPER", 'C', "COMPARATOR", 'I', "IRON_INGOT"),
                 "industrial_logistics"));
+        registerMachine(api, new MachineDefinition("cargo_router", "Roteador de carga", "cargo_router",
+                "DISPENSER", "IRON_INGOT", 2, "transport_crate", 1, 1200, "industrial_logistics"));
     }
 }

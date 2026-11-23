@@ -75,6 +75,15 @@
 - [ ] Documentação de migração entre versões da API
 - [ ] Publicação da API em registry Maven
 
+## 0.7.0.01-SNAPSHOT — Geradores de materiais
+- [x] Identificar a referência SMG (SimpleMaterialGenerators) e sua licença GPL-3.0
+- [x] Oito geradores passivos com baú superior e produção configurável
+- [x] Persistir progresso de produção no bloco
+- [x] Controle de propriedade e proteção contra desmontagem indevida, explosões e pistões
+- [x] Integrar receitas e desbloqueios ao motor central de tecnologias
+- [ ] Testar produção, reinício, baú duplo, chunks e proteção em Paper/Purpur 1.21.11
+- [ ] Adicionar upgrades de velocidade, melhorias de armazenamento e distribuição logística
+
 ## Critérios de aceite por recurso
 - Teste unitário da regra de negócio
 - Teste de persistência e reinício
@@ -86,7 +95,7 @@
 O projeto só deve ser considerado pronto para produção depois da CI, dos testes funcionais em Paper/Purpur e da validação dos critérios de aceite.
 
 
-## 0.7.0.00-SNAPSHOT — Expansão de addons
+## 0.7.0.01-SNAPSHOT — Expansão de addons
 - Primeira etapa do domínio Networks: conduítes e caixas com transporte local de itens MECHANIUM.
 - Primeira etapa de Better Nuclear Reactor: gerador cristalino abstrato de jogo, sem simulação real.
 - Forestry, Textile Industry, Biofuel e Construction Materials como módulos oficiais opcionais.

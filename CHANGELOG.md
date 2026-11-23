@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.1.00-SNAPSHOT
+- Adicionados quatro módulos oficiais opcionais: `water-treatment`, `greenhouse`, `industrial-recycling` e `ore-chunks`.
+- Water Treatment: cartuchos filtrantes, células de água purificada, fluido refrigerante e recuperação hídrica, com progressão de filtragem e recirculação.
+- Greenhouse: painéis de estufa, solução nutritiva, bandejas hidropônicas e controle climático; depende dos módulos Agriculture e Water Treatment.
+- Industrial Recycling: sucata mista, separação de ferro/cobre, polímero abstrato e módulo de triagem para cadeia de economia circular.
+- Ore Chunks: fragmentos de ferro, cobre e ouro e lotes compactados, integrados à Geologia e ao Beneficiamento Mineral.
+- Os quatro módulos possuem receitas e tecnologias próprias, são registrados no catálogo e podem ser desativados individualmente no `config.yml`.
+- Versão Maven avançada para `0.7.1.00-SNAPSHOT` em todos os módulos e no exemplo de addon.
+
 ## 0.7.0.01-SNAPSHOT
 - Adicionado o módulo opcional `material-generators`, reimplementação independente do domínio SimpleMaterialGenerators (SMG).
 - Oito geradores passivos produzem pedregulho, pedra, cascalho, areia, pedra lisa, vidro, netherrack e areia das almas em um baú colocado diretamente acima.

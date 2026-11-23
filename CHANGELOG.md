@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0.00-SNAPSHOT
+- Cinco novos módulos independentes inspirados em GlobalWarming, Networks, SimpleMaterialGenerators (SMG), SlimeCustomizer e SlimyRepair.
+- GlobalWarming: célula consumível de captura reduz em 10 unidades o indicador abstrato de impacto industrial do mundo; não simula clima real.
+- Networks: novo nó de armazenamento ligado à rede de depósitos adjacentes existente, respeitando proprietário e permissões.
+- SimpleMaterialGenerators: peneira de cascalho e separador de areia processam materiais em fragmentos minerais e pelotas de argila.
+- SlimeCustomizer: projetos de receitas/máquinas e atalho administrativo para o editor MECHANIUM de receitas registradas; não cria automaticamente novos itens/IDs.
+- SlimyRepair: kit consumível de reparo que recupera 50% da durabilidade máxima de um equipamento danificado.
+- Guia de pontos de pesquisa no menu, comando `/mechanium points` e recompensas por primeira descoberta de cada bioma, além das recompensas já existentes por minérios/conquistas.
+- Catálogo de fabricação reorganizado com filtros por máquinas/itens e categoria, mostrando requisitos e ingredientes; clique consome os materiais e entrega o resultado.
+- Fabricação transacional: materiais e espaços de inventário são simulados antes de efetivar a troca. Receitas com baldes devolvem o balde vazio como recipiente restante.
+- Versão Maven atualizada para 0.7.0.00-SNAPSHOT; testes de servidor continuam pendentes até validação funcional em Paper/Purpur 1.21.11.
+
 ## 0.6.0-SNAPSHOT
 - Adicionados cinco módulos oficiais: `air-filtration`, `advanced-metallurgy`, `pressure-engineering`, `industrial-automation` e `industrial-logistics`.
 - Novas categorias, tecnologias, itens e receitas para purificador de ar (inclui balde de água), componentes metalúrgicos, câmara de pressão, circuitos de controle, montadora e roteador de carga.

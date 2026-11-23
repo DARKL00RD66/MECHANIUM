@@ -107,8 +107,22 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                 }
                 statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (5)");
             }
+            if (currentVersion < 6) {
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS mechanium_active_researches (
+                        player_uuid TEXT NOT NULL,
+                        technology_id TEXT NOT NULL,
+                        started_at_ms INTEGER NOT NULL,
+                        completes_at_ms INTEGER NOT NULL CHECK (completes_at_ms > started_at_ms),
+                        PRIMARY KEY (player_uuid, technology_id),
+                        FOREIGN KEY (player_uuid) REFERENCES mechanium_players(uuid) ON DELETE CASCADE
+                    )
+                    """);
+                statement.execute("CREATE INDEX IF NOT EXISTS idx_mechanium_active_researches_due ON mechanium_active_researches(player_uuid, completes_at_ms)");
+                statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (6)");
+            }
         }
-        logger.info("MECHANIUM SQLite schema até a versão 5 pronta.");
+        logger.info("MECHANIUM SQLite schema até a versão 6 pronta.");
     }
 
 
@@ -288,6 +302,156 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
             }
         } catch (SQLException exception) {
             throw failure("read unlocked technology", exception);
+        }
+    }
+
+
+    @Override
+    public synchronized Collection<ResearchProgress> getResearches(UUID playerId) {
+        Objects.requireNonNull(playerId, "playerId");
+        List<ResearchProgress> researches = new ArrayList<>();
+        try {
+            ensurePlayer(playerId);
+            try (PreparedStatement query = connection.prepareStatement("""
+                    SELECT technology_id, started_at_ms, completes_at_ms
+                    FROM mechanium_active_researches
+                    WHERE player_uuid = ?
+                    ORDER BY completes_at_ms, technology_id
+                    """)) {
+                query.setString(1, playerId.toString());
+                try (ResultSet rows = query.executeQuery()) {
+                    while (rows.next()) {
+                        researches.add(new ResearchProgress(rows.getString(1), rows.getLong(2), rows.getLong(3)));
+                    }
+                }
+            }
+            return List.copyOf(researches);
+        } catch (SQLException exception) {
+            throw failure("read active research jobs", exception);
+        }
+    }
+
+    @Override
+    public synchronized boolean beginResearch(UUID playerId, String technologyId, long cost,
+                                               long startedAtEpochMillis, long completesAtEpochMillis) {
+        Objects.requireNonNull(playerId, "playerId");
+        Objects.requireNonNull(technologyId, "technologyId");
+        if (cost < 0L) throw new IllegalArgumentException("Research cost cannot be negative.");
+        if (startedAtEpochMillis < 0L || completesAtEpochMillis <= startedAtEpochMillis) {
+            throw new IllegalArgumentException("Research timestamps are invalid.");
+        }
+
+        try {
+            ensurePlayer(playerId);
+            connection.setAutoCommit(false);
+            try {
+                if (hasUnlocked(playerId, technologyId)) {
+                    connection.commit();
+                    return false;
+                }
+                try (PreparedStatement existing = connection.prepareStatement("""
+                        SELECT 1 FROM mechanium_active_researches
+                        WHERE player_uuid = ? AND technology_id = ?
+                        """)) {
+                    existing.setString(1, playerId.toString());
+                    existing.setString(2, technologyId);
+                    try (ResultSet rows = existing.executeQuery()) {
+                        if (rows.next()) {
+                            connection.commit();
+                            return false;
+                        }
+                    }
+                }
+
+                try (PreparedStatement debit = connection.prepareStatement("""
+                        UPDATE mechanium_players
+                        SET research_points = research_points - ?
+                        WHERE uuid = ? AND research_points >= ?
+                        """)) {
+                    debit.setLong(1, cost);
+                    debit.setString(2, playerId.toString());
+                    debit.setLong(3, cost);
+                    if (debit.executeUpdate() != 1) {
+                        connection.rollback();
+                        return false;
+                    }
+                }
+
+                try (PreparedStatement insert = connection.prepareStatement("""
+                        INSERT INTO mechanium_active_researches(
+                            player_uuid, technology_id, started_at_ms, completes_at_ms
+                        ) VALUES (?, ?, ?, ?)
+                        """)) {
+                    insert.setString(1, playerId.toString());
+                    insert.setString(2, technologyId);
+                    insert.setLong(3, startedAtEpochMillis);
+                    insert.setLong(4, completesAtEpochMillis);
+                    insert.executeUpdate();
+                }
+                connection.commit();
+                return true;
+            } catch (SQLException | RuntimeException exception) {
+                connection.rollback();
+                throw exception;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException exception) {
+            throw failure("start timed research", exception);
+        }
+    }
+
+    @Override
+    public synchronized Collection<String> completeDueResearches(UUID playerId, long nowEpochMillis) {
+        Objects.requireNonNull(playerId, "playerId");
+        List<String> completed = new ArrayList<>();
+        try {
+            ensurePlayer(playerId);
+            connection.setAutoCommit(false);
+            try {
+                List<String> due = new ArrayList<>();
+                try (PreparedStatement query = connection.prepareStatement("""
+                        SELECT technology_id
+                        FROM mechanium_active_researches
+                        WHERE player_uuid = ? AND completes_at_ms <= ?
+                        ORDER BY completes_at_ms, technology_id
+                        """)) {
+                    query.setString(1, playerId.toString());
+                    query.setLong(2, nowEpochMillis);
+                    try (ResultSet rows = query.executeQuery()) {
+                        while (rows.next()) due.add(rows.getString(1));
+                    }
+                }
+
+                try (PreparedStatement unlock = connection.prepareStatement("""
+                        INSERT OR IGNORE INTO mechanium_unlocked_technologies(player_uuid, technology_id)
+                        VALUES (?, ?)
+                        """)) {
+                    for (String technologyId : due) {
+                        unlock.setString(1, playerId.toString());
+                        unlock.setString(2, technologyId);
+                        if (unlock.executeUpdate() == 1) completed.add(technologyId);
+                    }
+                }
+
+                try (PreparedStatement delete = connection.prepareStatement("""
+                        DELETE FROM mechanium_active_researches
+                        WHERE player_uuid = ? AND completes_at_ms <= ?
+                        """)) {
+                    delete.setString(1, playerId.toString());
+                    delete.setLong(2, nowEpochMillis);
+                    delete.executeUpdate();
+                }
+                connection.commit();
+                return List.copyOf(completed);
+            } catch (SQLException | RuntimeException exception) {
+                connection.rollback();
+                throw exception;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException exception) {
+            throw failure("complete timed research", exception);
         }
     }
 

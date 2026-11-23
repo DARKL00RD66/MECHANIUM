@@ -185,6 +185,99 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         }
         return UnlockResult.of(UnlockResult.Status.UNLOCKED, "Tecnologia desbloqueada: " + technology.displayName());
     }
+
+    @Override
+    public synchronized ResearchResult startResearch(UUID playerId, String technologyId, long durationMillis) {
+        Objects.requireNonNull(playerId, "playerId");
+        TechnologyDefinition technology = technologies.get(normalize(technologyId));
+        if (technology == null) {
+            return ResearchResult.of(ResearchResult.Status.UNKNOWN_TECHNOLOGY, "Tecnologia desconhecida.");
+        }
+        if (dataStore.hasUnlocked(playerId, technology.id())) {
+            return ResearchResult.of(ResearchResult.Status.ALREADY_UNLOCKED, "Tecnologia já concluída.");
+        }
+        if (dataStore.getResearches(playerId).stream()
+                .anyMatch(research -> research.technologyId().equals(technology.id()))) {
+            return ResearchResult.of(ResearchResult.Status.ALREADY_RESEARCHING, "Esta pesquisa já está em andamento.");
+        }
+
+        Optional<String> currentId = getPlayerEra(playerId);
+        if (currentId.isEmpty() || !eras.containsKey(currentId.get())) {
+            return ResearchResult.of(ResearchResult.Status.UNKNOWN_PLAYER_ERA,
+                    "Jogador ainda não possui uma era válida.");
+        }
+        if (eras.get(currentId.get()).order() < eras.get(technology.requiredEraId()).order()) {
+            return ResearchResult.of(ResearchResult.Status.WRONG_ERA,
+                    "Esta tecnologia exige a era " + eras.get(technology.requiredEraId()).displayName() + ".");
+        }
+        List<String> missing = technology.prerequisites().stream()
+                .filter(id -> !dataStore.hasUnlocked(playerId, id)).toList();
+        if (!missing.isEmpty()) {
+            return ResearchResult.of(ResearchResult.Status.MISSING_PREREQUISITES,
+                    "Pesquisas necessárias: " + String.join(", ", missing));
+        }
+
+        long safeDuration = Math.max(120_000L, durationMillis);
+        long startedAt = System.currentTimeMillis();
+        long completesAt;
+        try {
+            completesAt = Math.addExact(startedAt, safeDuration);
+        } catch (ArithmeticException exception) {
+            completesAt = Long.MAX_VALUE;
+        }
+        long previousPoints = dataStore.getResearchPoints(playerId);
+        if (previousPoints < technology.researchCost()) {
+            return ResearchResult.of(ResearchResult.Status.INSUFFICIENT_RESEARCH_POINTS,
+                    "Pontos científicos insuficientes. Custo: " + technology.researchCost() + ".");
+        }
+        if (!dataStore.beginResearch(playerId, technology.id(), technology.researchCost(), startedAt, completesAt)) {
+            if (dataStore.hasUnlocked(playerId, technology.id())) {
+                return ResearchResult.of(ResearchResult.Status.ALREADY_UNLOCKED, "Tecnologia já concluída.");
+            }
+            if (dataStore.getResearches(playerId).stream()
+                    .anyMatch(research -> research.technologyId().equals(technology.id()))) {
+                return ResearchResult.of(ResearchResult.Status.ALREADY_RESEARCHING,
+                        "Esta pesquisa já está em andamento.");
+            }
+            if (dataStore.getResearchPoints(playerId) < technology.researchCost()) {
+                return ResearchResult.of(ResearchResult.Status.INSUFFICIENT_RESEARCH_POINTS,
+                        "Pontos científicos insuficientes. Custo: " + technology.researchCost() + ".");
+            }
+            return ResearchResult.of(ResearchResult.Status.CONCURRENT_UPDATE,
+                    "O estado científico mudou simultaneamente. Tente novamente.");
+        }
+
+        long remainingPoints = dataStore.getResearchPoints(playerId);
+        if (previousPoints != remainingPoints && Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().callEvent(new MechaniumResearchPointsChangeEvent(
+                    playerId, previousPoints, remainingPoints));
+        }
+        return ResearchResult.of(ResearchResult.Status.STARTED,
+                "Pesquisa iniciada: " + technology.displayName());
+    }
+
+    @Override
+    public Collection<ResearchProgress> getResearches(UUID playerId) {
+        return dataStore.getResearches(Objects.requireNonNull(playerId, "playerId"));
+    }
+
+    @Override
+    public synchronized Collection<String> completeDueResearches(UUID playerId, long nowEpochMillis) {
+        Objects.requireNonNull(playerId, "playerId");
+        Collection<String> completed = dataStore.completeDueResearches(playerId, nowEpochMillis);
+        if (!completed.isEmpty() && Bukkit.getServer() != null) {
+            long remainingPoints = dataStore.getResearchPoints(playerId);
+            for (String technologyId : completed) {
+                TechnologyDefinition technology = technologies.get(technologyId);
+                if (technology != null) {
+                    Bukkit.getPluginManager().callEvent(new MechaniumTechnologyUnlockedEvent(
+                            playerId, technology, remainingPoints));
+                }
+            }
+        }
+        return completed;
+    }
+
     @Override public boolean hasUnlockedTechnology(UUID player, String id) {
         Objects.requireNonNull(player, "player");
         TechnologyDefinition technology = technologies.get(normalize(id));

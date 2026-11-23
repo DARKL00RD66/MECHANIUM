@@ -16,6 +16,10 @@ import java.util.List;
 
 /** Small server-side reveal animation for MECHANIUM chest menus. */
 final class MechaniumMenuAnimator {
+    private static final int FRAME_BATCH_SIZE = 3;
+    private static final int CONTENT_BATCH_SIZE = 2;
+    private static final long STEP_INTERVAL_TICKS = 2L;
+
     private MechaniumMenuAnimator() { }
 
     static void open(JavaPlugin plugin, Player player, Inventory inventory, Runnable onFinished) {
@@ -54,7 +58,7 @@ final class MechaniumMenuAnimator {
             }
 
             if (frameIndex[0] < frame.size()) {
-                for (int count = 0; count < 7 && frameIndex[0] < frame.size(); count++) {
+                for (int count = 0; count < FRAME_BATCH_SIZE && frameIndex[0] < frame.size(); count++) {
                     int slot = frame.get(frameIndex[0]++);
                     inventory.setItem(slot, layout[slot]);
                 }
@@ -62,7 +66,7 @@ final class MechaniumMenuAnimator {
             }
 
             if (contentIndex[0] < contents.size()) {
-                for (int count = 0; count < 6 && contentIndex[0] < contents.size(); count++) {
+                for (int count = 0; count < CONTENT_BATCH_SIZE && contentIndex[0] < contents.size(); count++) {
                     int slot = contents.get(contentIndex[0]++);
                     inventory.setItem(slot, layout[slot]);
                 }
@@ -72,7 +76,7 @@ final class MechaniumMenuAnimator {
             if (onFinished != null) onFinished.run();
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.45f, 1.25f);
             task[0].cancel();
-        }, 1L, 1L);
+        }, 1L, STEP_INTERVAL_TICKS);
     }
 
     private static boolean isFrameSlot(int slot) {

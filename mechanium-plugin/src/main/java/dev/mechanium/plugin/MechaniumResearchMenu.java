@@ -2,6 +2,7 @@ package dev.mechanium.plugin;
 
 import dev.mechanium.api.MechaniumApi;
 import dev.mechanium.api.model.EraDefinition;
+import dev.mechanium.api.model.ResearchProgress;
 import dev.mechanium.api.model.TechnologyDefinition;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -25,7 +26,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -39,11 +39,11 @@ final class MechaniumResearchMenu implements Listener {
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43
     };
 
-    private final JavaPlugin plugin;
+    private final MechaniumPlugin plugin;
     private final MechaniumApi api;
     private final NamespacedKey guideKey;
 
-    MechaniumResearchMenu(JavaPlugin plugin, MechaniumApi api) {
+    MechaniumResearchMenu(MechaniumPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
         this.api = api;
         this.guideKey = new NamespacedKey(plugin, "guide_book");
@@ -123,6 +123,10 @@ final class MechaniumResearchMenu implements Listener {
         }
         int eraIndex = Math.max(0, Math.min(requestedEra, eras.size() - 1));
         EraDefinition era = eras.get(eraIndex);
+        plugin.processDueResearches(player, System.currentTimeMillis());
+        Map<String, ResearchProgress> activeResearches = new HashMap<>();
+        api.getResearches(player.getUniqueId()).forEach(research ->
+                activeResearches.put(research.technologyId(), research));
         List<TechnologyDefinition> technologies = api.getTechnologies().stream()
                 .filter(t -> t.requiredEraId().equals(era.id()))
                 .sorted(Comparator.comparingInt((TechnologyDefinition t) -> t.prerequisites().size())
@@ -149,30 +153,16 @@ final class MechaniumResearchMenu implements Listener {
         }
 
         int count = Math.min(NODE_SLOTS.length, technologies.size() - start);
+        long now = System.currentTimeMillis();
         for (int i = 0; i < count; i++) {
             TechnologyDefinition technology = technologies.get(start + i);
-            boolean unlocked = api.hasUnlockedTechnology(player.getUniqueId(), technology.id());
-            boolean eraAllowed = api.getPlayerEra(player.getUniqueId()).flatMap(api::getEra)
-                    .map(current -> current.order() >= era.order()).orElse(false);
-            boolean prerequisitesMet = technology.prerequisites().stream()
-                    .allMatch(id -> api.hasUnlockedTechnology(player.getUniqueId(), id));
-            Material icon = unlocked ? Material.LIME_DYE
-                    : (eraAllowed && prerequisitesMet ? Material.YELLOW_DYE : Material.GRAY_DYE);
-            List<String> lore = new ArrayList<>();
-            lore.add("§7ID: §f" + technology.id());
-            lore.add("§7Custo: §b" + technology.researchCost() + " pontos");
-            lore.add("§7Estado: " + (unlocked ? "§aConcluída"
-                    : (eraAllowed && prerequisitesMet ? "§eDisponível" : "§cBloqueada")));
-            if (!technology.prerequisites().isEmpty()) {
-                lore.add("§7Pré-requisitos:");
-                technology.prerequisites().forEach(id -> lore.add(" §8• §f" + id
-                        + (api.hasUnlockedTechnology(player.getUniqueId(), id) ? " §a✓" : " §c✗")));
-            }
-            lore.add(unlocked ? "§aPesquisa concluída." : "§eClique para tentar pesquisar.");
-            button(holder, NODE_SLOTS[i], icon, (unlocked ? "§a" : "§e") + technology.displayName(), lore, p -> {
+            int slot = NODE_SLOTS[i];
+            ResearchProgress active = activeResearches.get(technology.id());
+            holder.technologySlots.put(slot, technology);
+            inv.setItem(slot, technologyItem(player, technology, era, active, now));
+            holder.actions.put(slot, p -> {
                 if (!api.hasUnlockedTechnology(p.getUniqueId(), technology.id())) {
-                    var result = api.unlockTechnology(p.getUniqueId(), technology.id());
-                    p.sendMessage((result.successful() ? "§a" : "§c") + result.message());
+                    plugin.startResearch(p, technology);
                 } else {
                     p.sendMessage("§aPesquisa já concluída: §f" + technology.displayName());
                 }
@@ -192,6 +182,74 @@ final class MechaniumResearchMenu implements Listener {
         if (page + 1 < pageCount) button(holder, 53, Material.PAPER, "§ePróxima página", List.of(),
                 p -> openEraTree(p, eraIndex, page + 1));
         animateOpen(player, holder);
+    }
+
+
+    private ItemStack technologyItem(Player player, TechnologyDefinition technology, EraDefinition era,
+                                     ResearchProgress active, long nowEpochMillis) {
+        boolean unlocked = api.hasUnlockedTechnology(player.getUniqueId(), technology.id());
+        boolean eraAllowed = api.getPlayerEra(player.getUniqueId()).flatMap(api::getEra)
+                .map(current -> current.order() >= era.order()).orElse(false);
+        boolean prerequisitesMet = technology.prerequisites().stream()
+                .allMatch(id -> api.hasUnlockedTechnology(player.getUniqueId(), id));
+
+        List<String> lore = new ArrayList<>();
+        lore.add("§7ID: §f" + technology.id());
+        lore.add("§7Custo: §b" + technology.researchCost() + " pontos");
+        if (unlocked) {
+            lore.add("§7Estado: §aConcluída");
+            lore.add("§aPesquisa concluída.");
+            return item(Material.LIME_DYE, "§a" + technology.displayName(), lore);
+        }
+
+        if (active != null) {
+            double fraction = active.progressFraction(nowEpochMillis);
+            int percent = (int) Math.round(fraction * 100.0d);
+            int filled = (int) Math.round(fraction * 10.0d);
+            StringBuilder bar = new StringBuilder("§a");
+            for (int i = 0; i < 10; i++) bar.append(i < filled ? "▰" : "§8▱");
+            lore.add("§7Estado: §dPesquisando");
+            lore.add("§7Progresso: " + bar + " §f" + percent + "%");
+            lore.add("§7Tempo restante: §b" + plugin.formatResearchDuration(
+                    active.remainingMillis(nowEpochMillis)));
+            lore.add("§8O cronômetro continua offline.");
+            return item(Material.CLOCK, "§d" + technology.displayName(), lore);
+        }
+
+        lore.add("§7Estado: " + (eraAllowed && prerequisitesMet ? "§eDisponível" : "§cBloqueada"));
+        lore.add("§7Duração estimada: §b" + plugin.formatResearchDuration(
+                plugin.researchDurationMillis(technology)));
+        lore.add("§8Mínimo de 2 minutos; conta offline.");
+        if (!technology.prerequisites().isEmpty()) {
+            lore.add("§7Pré-requisitos:");
+            technology.prerequisites().forEach(id -> lore.add(" §8• §f" + id
+                    + (api.hasUnlockedTechnology(player.getUniqueId(), id) ? " §a✓" : " §c✗")));
+        }
+        lore.add(eraAllowed && prerequisitesMet
+                ? "§eClique para iniciar a pesquisa."
+                : "§cAtenda aos requisitos para pesquisar.");
+        Material icon = eraAllowed && prerequisitesMet ? Material.YELLOW_DYE : Material.GRAY_DYE;
+        return item(icon, "§e" + technology.displayName(), lore);
+    }
+
+    /** Refreshes countdowns in an open research-tree inventory without replaying its opening animation. */
+    void refreshProgress(Player player, long nowEpochMillis) {
+        if (!player.isOnline()
+                || !(player.getOpenInventory().getTopInventory().getHolder() instanceof MenuHolder holder)
+                || holder.animating || holder.technologySlots.isEmpty()) return;
+
+        Map<String, ResearchProgress> activeResearches = new HashMap<>();
+        api.getResearches(player.getUniqueId()).forEach(research ->
+                activeResearches.put(research.technologyId(), research));
+        for (Map.Entry<Integer, TechnologyDefinition> entry : holder.technologySlots.entrySet()) {
+            TechnologyDefinition technology = entry.getValue();
+            ResearchProgress active = activeResearches.get(technology.id());
+            EraDefinition era = api.getEra(technology.requiredEraId()).orElse(null);
+            if (era != null) {
+                holder.inventory.setItem(entry.getKey(),
+                        technologyItem(player, technology, era, active, nowEpochMillis));
+            }
+        }
     }
 
     private void openSimpleList(Player player, String section) {
@@ -327,6 +385,7 @@ final class MechaniumResearchMenu implements Listener {
         private Inventory inventory;
         private boolean animating;
         private final Map<Integer, Consumer<Player>> actions = new HashMap<>();
+        private final Map<Integer, TechnologyDefinition> technologySlots = new HashMap<>();
         @Override public Inventory getInventory() { return inventory; }
     }
 }

@@ -35,6 +35,14 @@ public interface MechaniumApi {
     Optional<TechnologyDefinition> getTechnology(String technologyId);
     Collection<TechnologyDefinition> getTechnologies();
     UnlockResult unlockTechnology(UUID playerId, String technologyId);
+    /** Starts a timed research job. Implementations must persist the deadline and charge its cost atomically. */
+    default ResearchResult startResearch(UUID playerId, String technologyId, long durationMillis) {
+        return ResearchResult.of(ResearchResult.Status.UNSUPPORTED, "Pesquisas temporizadas não são suportadas por este armazenamento.");
+    }
+    /** Active research jobs, including jobs whose owners are currently offline. */
+    default Collection<ResearchProgress> getResearches(UUID playerId) { return java.util.List.of(); }
+    /** Completes jobs whose persisted deadline has elapsed. */
+    default Collection<String> completeDueResearches(UUID playerId, long nowEpochMillis) { return java.util.List.of(); }
     boolean canUseTechnology(UUID playerId, String technologyId);
     default boolean hasUnlockedTechnology(UUID playerId, String technologyId) {
         return canUseTechnology(playerId, technologyId);

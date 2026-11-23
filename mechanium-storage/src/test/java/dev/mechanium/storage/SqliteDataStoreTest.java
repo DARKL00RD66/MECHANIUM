@@ -62,6 +62,51 @@ class SqliteDataStoreTest {
         }
     }
 
+
+    @Test
+    void timedResearchPersistsAndCompletesAfterOfflineElapsedTime() throws Exception {
+        Path database = directory.resolve("timed-research.db");
+        UUID player = UUID.randomUUID();
+        long startedAt = 1_000_000L;
+        long completesAt = startedAt + 120_000L;
+
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            store.addResearchPoints(player, 50);
+            assertTrue(store.beginResearch(player, "steam_power", 20, startedAt, completesAt));
+            assertEquals(30L, store.getResearchPoints(player));
+            assertEquals(1, store.getResearches(player).size());
+            assertTrue(store.completeDueResearches(player, completesAt - 1L).isEmpty());
+        }
+
+        try (SqliteDataStore reopened = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            assertEquals(1, reopened.getResearches(player).size(),
+                    "An active research job must survive a server restart.");
+            assertTrue(reopened.completeDueResearches(player, completesAt - 1L).isEmpty(),
+                    "The job must not complete before its deadline.");
+            assertEquals(List.of("steam_power"),
+                    List.copyOf(reopened.completeDueResearches(player, completesAt)),
+                    "Elapsed offline time must count toward the research deadline.");
+            assertTrue(reopened.hasUnlocked(player, "steam_power"));
+            assertTrue(reopened.getResearches(player).isEmpty());
+            assertEquals(30L, reopened.getResearchPoints(player));
+        }
+    }
+
+    @Test
+    void timedResearchDoesNotDebitWhenPointsAreInsufficientOrJobAlreadyExists() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("timed-research-atomic.db"), Logger.getLogger("test"))) {
+            UUID player = UUID.randomUUID();
+            store.addResearchPoints(player, 10);
+            assertFalse(store.beginResearch(player, "steam_power", 11, 1_000L, 121_000L));
+            assertEquals(10L, store.getResearchPoints(player));
+            assertTrue(store.beginResearch(player, "steam_power", 10, 1_000L, 121_000L));
+            assertFalse(store.beginResearch(player, "steam_power", 1, 2_000L, 122_000L));
+            assertEquals(0L, store.getResearchPoints(player));
+            assertEquals(1, store.getResearches(player).size());
+        }
+    }
+
     @Test
     void contentDefinitionsPersistAcrossStoreInstances() throws Exception {
         Path database = directory.resolve("content.db");

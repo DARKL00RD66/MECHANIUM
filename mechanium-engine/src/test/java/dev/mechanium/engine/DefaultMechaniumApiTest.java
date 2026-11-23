@@ -62,6 +62,8 @@ class DefaultMechaniumApiTest {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);
             api.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
             api.registerEra(new EraDefinition("industrial_revolution", "Revolução Industrial", 3));
+            api.registerTechnology(new TechnologyDefinition(
+                    "steam_engine", "Máquina a vapor", "industrial_revolution", 10, List.of()));
 
             UUID regularPlayer = UUID.randomUUID();
             UUID testPlayer = UUID.randomUUID();
@@ -77,6 +79,10 @@ class DefaultMechaniumApiTest {
             assertEquals("industrial_revolution", api.getServerEra().orElseThrow());
             assertEquals("industrial_revolution", api.getPlayerEra(regularPlayer).orElseThrow(),
                     "Players without a test override must inherit the global era immediately.");
+            api.addResearchPoints(regularPlayer, 10);
+            assertEquals(UnlockResult.Status.UNLOCKED,
+                    api.unlockTechnology(regularPlayer, "steam_engine").status(),
+                    "Technology progression must use the global era for players without an override.");
             assertEquals("ancient", api.getPlayerEra(testPlayer).orElseThrow(),
                     "An explicit test override must remain isolated from global changes.");
 

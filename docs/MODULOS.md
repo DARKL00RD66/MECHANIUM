@@ -17,7 +17,7 @@ O módulo `geology` depende de `industry` e adiciona a pesquisa `geological_surv
 
 A ferramenta atual é uma prospecção local. Depósitos regionais, veios minerais, amostras e integração profunda com mineração ainda estão pendentes.
 
-## Módulos adicionais — 0.3.0 e 0.4.0-SNAPSHOT
+## Módulos adicionais — 0.3.0 a 0.5.0-SNAPSHOT
 
 | ID | Funcionalidade jogável |
 |---|---|
@@ -28,6 +28,26 @@ A ferramenta atual é uma prospecção local. Depósitos regionais, veios minera
 | `advanced-tech` | Montadora, britador e refinaria industrial com receitas e processamento. |
 | `simple-storage` | Nós de armazenamento conectados por faces, com inventário virtual paginado e proteção por proprietário/permissões. |
 | `sensible-toolbox` | Kit de campo com efeitos temporários e kit de manutenção que repara equipamentos. |\n| `exotic-garden` | Sementes diversificadas, ervas desidratadas, extrato botânico, conservas tropicais e caixote de pomar. |\n| `dank-tech2` | Upgrade fabricável para um armazém portátil de 54 espaços; o item mantém os conteúdos no PDC. |
+
+## Módulos adicionados em 0.5.0-SNAPSHOT
+
+| ID | Funcionalidade jogável |
+|---|---|
+| `electric-spawners` | Incubadoras elétricas de galinha, vaca, porco e ovelha; exigem insumos, pesquisa e bateria adjacente; produzem spawn eggs vanilla de animais passivos. |
+| `fast-machines` | Prensa rápida (20 ticks) e enrolador de bobinas (40 ticks), ambos acelerados e alimentados pela rede de energia. |
+| `hardcore-slimefun` | Pesquisas de confiabilidade e manutenção, kit reparador desbloqueável e regras hardcore opcionais para desgaste e custo de reparo. |
+
+### ElectricSpawners — incubação pecuária
+
+As quatro incubadoras usam o runtime comum de dispenser: sementes geram ovos de galinha; feno gera ovos de vaca; cenouras geram ovos de porco; trigo gera ovos de ovelha. A produção exige `livestock_incubation` e uma bateria adjacente do mesmo proprietário. O escopo é limitado a animais passivos e não inclui spawners de criaturas hostis.
+
+### FastMachines — produção acelerada
+
+A prensa rápida consome uma barra de ferro e produz duas peças mecânicas em 20 ticks; o enrolador consome cobre e produz duas bobinas em 40 ticks. Ambos exigem energia, propriedade e a pesquisa `fast_machinery`. Ainda não há filas ou paralelismo.
+
+### HardcoreSlimefun — manutenção e dificuldade
+
+O item `machine_maintenance_kit` é desbloqueado por `preventive_maintenance` e restaura o desgaste da máquina quando o proprietário agacha e clica nela com o kit. O modo de dificuldade pode ser ativado em `machines.hardcore.enabled: true`; isso multiplica o desgaste por operação e aumenta o custo da reparação com barras de ferro. A configuração padrão mantém o modo hardcore desligado.
 
 ### DankTech2 — expansão de armazenamento portátil
 
@@ -57,7 +77,7 @@ Esta etapa amplia itens e receitas; não adiciona ainda novas plantas com cresci
 - O gerador solar é colocado como defumador e produz 2 unidades por segundo durante o dia, sem tempestade.
 - Uma bateria é colocada como barril e armazena até 10.000 unidades.
 - Geradores carregam uma bateria adjacente do mesmo proprietário. Baterias adjacentes entre si formam uma rede local; máquinas conectadas a uma bateria dessa rede podem consumir energia.
-- O filtro de água, a montadora, o britador, a refinaria, o moinho e a conservadora exigem energia: cada ciclo concluído consome 1 unidade.
+- O filtro de água, a montadora, o britador, a refinaria, o moinho, a conservadora, as incubadoras e as máquinas rápidas exigem energia: cada ciclo concluído consome 1 unidade.
 - Máquinas acumulam desgaste por ciclo até 100; ao atingir o limite, param. O proprietário pode agachar e clicar com uma barra de ferro para reparar e zerar o desgaste.
 - A rede atual é local, limitada a 64 baterias na busca por consumo e não carrega chunks automaticamente. Quebrar a bateria recupera o item, mas não preserva a carga restante.
 
@@ -120,5 +140,5 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 - Energia e fluidos são redes locais simples, não um simulador genérico de cabos ou líquidos.
 - Armazenamento conectado exige nós face a face; não é uma rede logística de longa distância.
 - Não há integração com economia para calcular preços monetários.
-- Não há filas de produção, manutenção de máquinas ou múltiplas receitas simultâneas.
+- Não há filas de produção, processamento paralelo ou múltiplas receitas simultâneas; manutenção de máquinas já existe via ferro e kit pesquisável.
 - O conteúdo relacionado a armas, ataques, mísseis ou interferência não faz parte do escopo. Sistemas civis e industriais permanecem no escopo.

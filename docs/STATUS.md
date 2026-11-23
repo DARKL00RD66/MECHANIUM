@@ -53,7 +53,7 @@
 - **Painel vanilla:** lista as receitas suportadas em páginas, mostra resultado/tipo/requisito e permite avançar o requisito entre as eras.
 - **Estações cobertas:** crafting de jogador, livro de receitas, autocrafter, processamento em fornalhas, corte de pedra e ferraria.
 - **Mesa de encantamentos:** receita de fabricação exige Era Mítica; valor antigo padrão é migrado sem apagar configurações personalizadas.
-- **ExoticGarden:** primeira cadeia de horticultura com sementes diversificadas, ervas, extrato botânico, conserva tropical e caixote de pomar.
+- **ExoticGarden:** primeira cadeia de horticultura com sementes diversificadas, ervas, extrato botânico, conserva tropical e caixote de pomar.\n- **DankTech2:** primeira expansão de armazenamento portátil com upgrade para 54 espaços, mantendo a persistência no PDC do item.
 
 ## Limitações conhecidas
 

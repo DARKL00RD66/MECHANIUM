@@ -109,3 +109,8 @@ Expansão em revisão: Forestry, Textile Industry, Biofuel e Construction Materi
 ## Snapshot 0.7.1.00-SNAPSHOT
 
 Quatro novos módulos foram registrados no catálogo: Water Treatment, Greenhouse, Industrial Recycling e Ore Chunks. Eles acrescentam 18 itens novos, 4 categorias, 8 tecnologias e 18 receitas de progressão. Os módulos são configuráveis individualmente. A validação Maven/CI e os testes de gameplay Paper/Purpur ainda precisam confirmar o funcionamento integrado.
+
+
+## Snapshot 0.7.2.00-SNAPSHOT
+
+Cinco módulos adicionais foram criados e registrados: Aquaculture, Glassworks, Rail Freight, Battery Industry e Cold Chain. Cada módulo inclui tecnologias de pesquisa, categoria, itens e receitas; as dependências entre módulos foram declaradas e os cinco IDs foram adicionados ao teste do catálogo e à configuração padrão. Aquaculture, Glassworks e Cold Chain também declaram máquinas no runtime genérico de uma entrada/uma saída. Build CI e testes funcionais em Paper/Purpur 1.21.11 ainda precisam ser concluídos antes de considerar o snapshot validado.

@@ -152,6 +152,22 @@ final class MechaniumAdminMenu implements Listener {
                 "§7Clique na era que deseja aplicar."
         )));
         button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openPlayerTargets);
+        button(holder, 45, Material.COMPASS, "§aHerdar era global",
+                List.of("§7Remove a sobrescrita de teste.", "§7O jogador volta a acompanhar a era do servidor."),
+                p -> {
+                    if (targetId == null) {
+                        for (Player online : Bukkit.getOnlinePlayers()) {
+                            api.clearPlayerEraOverride(online.getUniqueId());
+                        }
+                        p.sendMessage("§aSobrescritas removidas. Todos os jogadores online voltaram a herdar a era global.");
+                    } else {
+                        api.clearPlayerEraOverride(targetId);
+                        String globalName = mechanium.serverEraName();
+                        p.sendMessage("§aSobrescrita removida de §f" + targetName
+                                + "§a. Agora herda: §e" + globalName + "§a.");
+                    }
+                    openPlayerTargets(p);
+                });
         int index = 0;
         for (EraDefinition era : eras) {
             if (index >= CONTENT_SLOTS.length) break;

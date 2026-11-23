@@ -163,7 +163,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         TechnologyDefinition technology = technologies.get(normalize(technologyId));
         if (technology == null) return UnlockResult.of(UnlockResult.Status.UNKNOWN_TECHNOLOGY, "Tecnologia desconhecida.");
         if (dataStore.hasUnlocked(playerId, technology.id())) return UnlockResult.of(UnlockResult.Status.ALREADY_UNLOCKED, "Tecnologia já desbloqueada.");
-        Optional<String> currentId = dataStore.getPlayerEra(playerId);
+        Optional<String> currentId = getPlayerEra(playerId);
         if (currentId.isEmpty() || !eras.containsKey(currentId.get())) return UnlockResult.of(UnlockResult.Status.UNKNOWN_PLAYER_ERA, "Jogador ainda não possui uma era válida.");
         if (eras.get(currentId.get()).order() < eras.get(technology.requiredEraId()).order())
             return UnlockResult.of(UnlockResult.Status.WRONG_ERA, "Esta tecnologia exige a era " + eras.get(technology.requiredEraId()).displayName() + ".");
@@ -194,7 +194,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public boolean canUseTechnology(UUID player, String id) {
         TechnologyDefinition technology = technologies.get(normalize(id));
         if (technology == null || !hasUnlockedTechnology(player, technology.id())) return false;
-        Optional<String> eraId = dataStore.getPlayerEra(player);
+        Optional<String> eraId = getPlayerEra(player);
         if (eraId.isEmpty()) return false;
         EraDefinition current = eras.get(eraId.get()), required = eras.get(technology.requiredEraId());
         return current != null && required != null && current.order() >= required.order();

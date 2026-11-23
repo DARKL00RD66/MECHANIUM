@@ -54,6 +54,15 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 - **FastMachines:** prensa rápida (20 ticks por lote) e enrolador de bobinas (40 ticks por lote), ambos conectados à rede de energia e protegidos pela progressão.
 - **HardcoreSlimefun:** kit de manutenção desbloqueável e parâmetros para ativar regras mais exigentes de desgaste e reparo. O modo hardcore é opcional e vem desativado por padrão.
 
+## Expansões 0.7.0-SNAPSHOT
+
+- **Forestry:** fibras de madeira, resina vegetal, tábuas tratadas e estação florestal.
+- **Textile Industry:** fibras, tecidos industriais, tecidos técnicos e tear mecanizado.
+- **Biofuel:** biomassa e células de biocombustível abstratas, sem simulação técnica real.
+- **Construction Materials:** cerâmica industrial, painéis reforçados, estruturas pré-fabricadas e misturador.
+
+Os quatro módulos são opcionais e habilitados por padrão; cada um pode ser desligado em `config.yml`. Suas receitas e tecnologias são registradas na API pública, sem dependência dos addons originais.
+
 ## Regras de portabilidade
 
 1. Cada domínio é implementado como módulo oficial independente e pode ser desativado em `config.yml`.

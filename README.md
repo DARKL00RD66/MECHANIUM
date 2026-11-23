@@ -41,7 +41,7 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.3.0-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.4.0-SNAPSHOT.jar
 ```
 
 ## Instalar
@@ -52,12 +52,12 @@ mechanium-plugin/target/MECHANIUM-0.3.0-SNAPSHOT.jar
 4. Ajuste `plugins/MECHANIUM/config.yml`.
 5. Coloque addons externos em `plugins/MECHANIUM/addons/` e reinicie.
 
-Esta versão amplia sete módulos adicionais com energia, fluidos, armazenamento conectado, máquinas industriais, habilidades de ferramentas e cálculo de materiais. Ainda é experimental e requer validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
+A linha 0.4.0 amplia o catálogo de receitas vanilla e inicia a integração de horticultura ExoticGarden, mantendo os sete domínios adicionais já introduzidos em 0.3.0. Ainda é experimental e requer validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
 
 ## CI e estado
 
 - - [Build Java 21 / Maven verify — run 43352161651](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43352161651) — **BUILD SUCCESS**, 52 testes automatizados sem falhas ou erros.
-- O [pré-release 0.3.0-SNAPSHOT](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot) contém `MECHANIUM-0.3.0-SNAPSHOT.jar`, publicado pelo mesmo workflow.
+- O [pré-release mais recente](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot) contém `MECHANIUM-0.3.0-SNAPSHOT.jar`, publicado pelo mesmo workflow.
 - A versão é experimental. O build automatizado não substitui o teste de gameplay em Paper/Purpur.
 
 ## Documentação

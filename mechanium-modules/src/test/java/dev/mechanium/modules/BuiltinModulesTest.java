@@ -45,7 +45,12 @@ class BuiltinModulesTest {
                 "water-treatment",
                 "greenhouse",
                 "industrial-recycling",
-                "ore-chunks"
+                "ore-chunks",
+                "aquaculture",
+                "glassworks",
+                "rail-freight",
+                "battery-industry",
+                "cold-chain"
         )));
     }
 

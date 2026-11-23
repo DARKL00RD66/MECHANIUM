@@ -21,13 +21,21 @@ A era global é persistida no SQLite e vale para jogadores online e offline que 
 
 ## Receitas vanilla
 
-A tela de receitas permite clicar em cada receita para avançar a era exigida na ordem cadastrada. Após a última era, a regra passa para `off` (sem bloqueio). O estado é salvo no `config.yml`.
+O catálogo é descoberto automaticamente a partir das receitas vanilla registradas no Paper 1.21.11. Na inicialização, cada receita suportada que ainda não possui uma regra recebe uma era histórica sugerida. Regras que já existem no `config.yml` são preservadas, inclusive alterações feitas pela administração.
 
-Também é possível configurar qualquer ID de receita do namespace Minecraft pelo comando:
+A tela agora é paginada e mostra o item de resultado, o ID da receita, o tipo de processo e a era exigida. Clique em uma entrada para avançar pela ordem de eras; depois da última era, o requisito passa para `off`. A sugestão inicial é calculada pelo tipo de item e pelo ID da receita. A administração pode mudar qualquer sugestão pelo painel ou comando.
+
+A mesa de encantamentos foi corrigida: `minecraft:enchanting_table` exige **Era Mítica**. Em servidores atualizados, a migração troca o valor antigo `renaissance` para `mythic_age`, mas preserva uma configuração diferente que já tenha sido escolhida pela administração.
+
+O bloqueio é aplicado a fabricação em bancada, cliques no livro de receitas, descoberta de receitas, autocrafter, processamento em fornalhas, corte de pedra e ferraria. Processos automáticos sem jogador usam a era global do servidor; ações iniciadas por jogadores respeitam a era efetiva do jogador, incluindo uma sobrescrita individual de teste.
+
+O catálogo contém receitas com ID vanilla que o Paper expõe e para as quais o MECHANIUM consegue aplicar um bloqueio confiável. Nem todo item do inventário criativo possui receita; itens sem receita não podem ser liberados por este sistema. Receitas de fogueira são omitidas porque o evento de início de cozimento do Paper não oferece cancelamento confiável associado à chave da receita. O sistema de poções e algumas operações especiais de bancada não usam a mesma registry de receitas e também não entram neste catálogo.
+
+Para alterar uma receita pelo comando:
 
 ```
-/mechanium admin recipe minecraft:iron_pickaxe medieval
-/mechanium admin recipe minecraft:iron_pickaxe off
+/mechanium admin recipe minecraft:enchanting_table mythic_age
+/mechanium admin recipe minecraft:enchanting_table off
 ```
 
 Para abrir diretamente a tela de receitas:
@@ -36,15 +44,14 @@ Para abrir diretamente a tela de receitas:
 /mechanium admin recipes
 ```
 
-O bloqueio atual intercepta a fabricação em bancada (`CraftItemEvent`). Ele não altera as receitas originais e não bloqueia automaticamente processos de fornalha, bigorna, ferraria, corte de pedra ou outros tipos de estação. Cada tipo adicional precisa de tratamento próprio.
-
 O sistema pode ser desativado por completo no painel ou em:
 
 ```yaml
 vanilla-recipe-gates:
   enabled: true
+  auto-register: true
   recipes:
-    'minecraft:iron_pickaxe': medieval
+    'minecraft:enchanting_table': mythic_age
 ```
 
 Ausência de regra ou valor `off` deixa a receita liberada.

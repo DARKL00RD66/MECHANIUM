@@ -178,6 +178,14 @@ modules:
   material-generators:
     enabled: true
     interval-ticks: 200
+  water-treatment:
+    enabled: true
+  greenhouse:
+    enabled: true
+  industrial-recycling:
+    enabled: true
+  ore-chunks:
+    enabled: true
 
 machines:
   wear:

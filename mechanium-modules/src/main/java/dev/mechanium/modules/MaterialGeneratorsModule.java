@@ -24,26 +24,18 @@ final class MaterialGeneratorsModule extends AbstractBuiltinModule {
         var api = context.api();
         registerCategory(api, new ContentCategory("material_generators", "Geradores de materiais",
                 "Máquinas passivas que produzem materiais em um baú posicionado acima delas"));
-        registerGenerator(api, "material_generator_cobblestone", "Gerador de pedregulho", "COBBLESTONE",
-                "basic_material_generation", "COBBLESTONE", 8);
-        registerGenerator(api, "material_generator_stone", "Gerador de pedra", "STONE",
-                "basic_material_generation", "STONE", 12);
-        registerGenerator(api, "material_generator_gravel", "Gerador de cascalho", "GRAVEL",
-                "basic_material_generation", "GRAVEL", 16);
-        registerGenerator(api, "material_generator_sand", "Gerador de areia", "SAND",
-                "basic_material_generation", "SAND", 16);
-        registerGenerator(api, "material_generator_smooth_stone", "Gerador de pedra lisa", "SMOOTH_STONE",
-                "advanced_material_generation", "SMOOTH_STONE", 20);
-        registerGenerator(api, "material_generator_glass", "Gerador de vidro", "GLASS",
-                "advanced_material_generation", "GLASS", 24);
-        registerGenerator(api, "material_generator_netherrack", "Gerador de netherrack", "NETHERRACK",
-                "advanced_material_generation", "NETHERRACK", 28);
-        registerGenerator(api, "material_generator_soul_sand", "Gerador de areia das almas", "SOUL_SAND",
-                "advanced_material_generation", "SOUL_SAND", 32);
+        registerGenerator(api, "material_generator_cobblestone", "Gerador de pedregulho", "basic_material_generation", "COBBLESTONE");
+        registerGenerator(api, "material_generator_stone", "Gerador de pedra", "basic_material_generation", "STONE");
+        registerGenerator(api, "material_generator_gravel", "Gerador de cascalho", "basic_material_generation", "GRAVEL");
+        registerGenerator(api, "material_generator_sand", "Gerador de areia", "basic_material_generation", "SAND");
+        registerGenerator(api, "material_generator_smooth_stone", "Gerador de pedra lisa", "advanced_material_generation", "SMOOTH_STONE");
+        registerGenerator(api, "material_generator_glass", "Gerador de vidro", "advanced_material_generation", "GLASS");
+        registerGenerator(api, "material_generator_netherrack", "Gerador de netherrack", "advanced_material_generation", "NETHERRACK");
+        registerGenerator(api, "material_generator_soul_sand", "Gerador de areia das almas", "advanced_material_generation", "SOUL_SAND");
     }
 
     private void registerGenerator(dev.mechanium.api.MechaniumApi api, String id, String name,
-                                   String material, String technology, String output, int cost) {
+                                   String technology, String output) {
         registerItem(api, new ItemDefinition(id, "&e" + name, "DISPENSER",
                 List.of("&8Gerador passivo de materiais", "&7Coloque um baú diretamente acima", "&7Produz 1 " + output.toLowerCase().replace('_', ' ') + " por ciclo"),
                 0, 1, "material_generators", technology));

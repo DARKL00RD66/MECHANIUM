@@ -83,3 +83,8 @@
 - Proveniência e licença registradas para qualquer código externo
 
 O projeto só deve ser considerado pronto para produção depois da CI, dos testes funcionais em Paper/Purpur e da validação dos critérios de aceite.
+
+
+## 0.7.0-SNAPSHOT — Expansão de addons
+- Forestry, Textile Industry, Biofuel e Construction Materials como módulos oficiais opcionais.
+- Próximos alvos de auditoria: Networks, Better Nuclear Reactor (somente abstração de jogo), GeyserHeads (compatibilidade de apresentação) e referências cuja identidade/licença ainda precisa ser confirmada.

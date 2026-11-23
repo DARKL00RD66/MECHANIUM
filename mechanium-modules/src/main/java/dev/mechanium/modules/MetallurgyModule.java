@@ -6,6 +6,7 @@ import java.util.Map;
 
 final class MetallurgyModule extends AbstractBuiltinModule {
     @Override public String id() { return "advanced-metallurgy"; }
+    @Override public java.util.Set<String> dependencies() { return java.util.Set.of("industry"); }
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(new TechnologyDefinition("advanced_metallurgy", "Metalurgia avançada",
                 "industrial_revolution", 34, List.of("steam_power")));

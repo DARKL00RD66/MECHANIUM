@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.5.0-SNAPSHOT  
+**Versão:** 0.7.2.01-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -123,3 +123,8 @@ Cinco módulos adicionais foram criados e registrados: Aquaculture, Glassworks, 
 - Geradores de materiais agora conseguem adicionar unidades a pilhas existentes mesmo quando o inventário do baú não possui slots vazios.
 - Testes automatizados verificam que todos os pré-requisitos tecnológicos entre módulos possuem dependências declaradas e que módulos dependentes de módulos opcionais também são opcionais.
 - Java 21 / Maven `verify` passou no workflow 45262585480. Testes reais de gameplay em Paper/Purpur 1.21.11 ainda estão pendentes.
+
+
+## Snapshot 0.7.2.01-SNAPSHOT
+
+Versão de manutenção que incorpora a auditoria de consistência documentada acima e atualiza o versionamento em todos os oito POMs Maven, incluindo o exemplo de addon. O workflow Java 21/Maven `clean verify` está sendo executado para esta revisão. O JAR distribuível deve ser obtido do artefato do workflow após conclusão bem-sucedida; ainda não há confirmação de teste em servidor Paper/Purpur 1.21.11.

@@ -11,6 +11,7 @@ public final class BuiltinModules {
                 new StorageModule(), new EnvironmentModule(),
                 new OptionalFantasyModule(), new OptionalFuturisticModule(), new CulinaryModule(), new OreProcessingModule(),
                 new ExtraGearModule(), new EcoPowerModule(), new SFCalcModule(), new LiquidModule(),
-                new AdvancedTechModule(), new SimpleStorageModule(), new SensibleToolboxModule());
+                new AdvancedTechModule(), new SimpleStorageModule(), new SensibleToolboxModule(),
+                new DankTech2Module());
     }
 }

@@ -140,16 +140,29 @@ final class MechaniumMachineManager implements Listener {
         if (machineBlockState instanceof Dispenser dispenser) {
             int wear = dispenser.getPersistentDataContainer().getOrDefault(wearKey, PersistentDataType.INTEGER, 0);
             ItemStack hand = player.getInventory().getItemInMainHand();
-            if (player.isSneaking() && hand.getType() == Material.IRON_INGOT && wear > 0) {
-                if (hand.getAmount() == 1) player.getInventory().setItemInMainHand(null);
-                else hand.setAmount(hand.getAmount() - 1);
+            String heldItemId = itemId(hand);
+            boolean maintenanceKit = "machine_maintenance_kit".equals(heldItemId)
+                    && api.canUseItem(player.getUniqueId(), "machine_maintenance_kit");
+            boolean ironRepair = hand.getType() == Material.IRON_INGOT;
+            int ironCost = ironRepairCost();
+            if (player.isSneaking() && wear > 0
+                    && (maintenanceKit || (ironRepair && hand.getAmount() >= ironCost))) {
+                int consumed = maintenanceKit ? 1 : ironCost;
+                if (hand.getAmount() <= consumed) player.getInventory().setItemInMainHand(null);
+                else hand.setAmount(hand.getAmount() - consumed);
                 dispenser.getPersistentDataContainer().set(wearKey, PersistentDataType.INTEGER, 0);
                 dispenser.update(true, false);
                 event.setCancelled(true);
                 player.sendMessage(Component.text("Manutenção concluída. Desgaste zerado.", NamedTextColor.GREEN));
                 return;
             }
-            player.sendMessage(Component.text("Desgaste da máquina: " + wear + "/100. Agache com uma barra de ferro para fazer manutenção.", NamedTextColor.GRAY));
+            if (!wearEnabled()) {
+                player.sendMessage(Component.text("Desgaste de máquinas desativado na configuração.", NamedTextColor.GRAY));
+            } else {
+                player.sendMessage(Component.text("Desgaste da máquina: " + wear + "/" + maximumWear()
+                        + ". Agache com " + ironRepairCost() + " barra(s) de ferro ou um kit de manutenção desbloqueado.",
+                        NamedTextColor.GRAY));
+            }
         }
     }
 
@@ -321,7 +334,7 @@ final class MechaniumMachineManager implements Listener {
                 || !api.canUseItem(owner, definition.outputItemId())) return;
 
         int wear = dispenser.getPersistentDataContainer().getOrDefault(wearKey, PersistentDataType.INTEGER, 0);
-        if (wear >= 100) return;
+        if (wearEnabled() && wear >= maximumWear()) return;
 
         Inventory inventory = dispenser.getInventory();
         ItemStack input = inventory.getItem(INPUT_SLOT);
@@ -375,8 +388,31 @@ final class MechaniumMachineManager implements Listener {
         }
         setProgress(dispenser, 0);
         recordIndustrialImpact(dispenser.getWorld(), owner);
-        dispenser.getPersistentDataContainer().set(wearKey, PersistentDataType.INTEGER, Math.min(100, wear + 1));
+        if (wearEnabled()) {
+            dispenser.getPersistentDataContainer().set(wearKey, PersistentDataType.INTEGER,
+                    Math.min(maximumWear(), wear + wearPerOperation()));
+        }
         dispenser.update(true, false);
+    }
+
+    private boolean wearEnabled() {
+        return plugin.getConfig().getBoolean("machines.wear.enabled", true);
+    }
+
+    private int maximumWear() {
+        return Math.max(1, plugin.getConfig().getInt("machines.wear.max-cycles", 100));
+    }
+
+    private int wearPerOperation() {
+        int base = Math.max(0, plugin.getConfig().getInt("machines.wear.cycles-per-operation", 1));
+        int multiplier = plugin.getConfig().getBoolean("machines.hardcore.enabled", false)
+                ? Math.max(1, plugin.getConfig().getInt("machines.hardcore.wear-multiplier", 2)) : 1;
+        return Math.max(0, base * multiplier);
+    }
+
+    private int ironRepairCost() {
+        return plugin.getConfig().getBoolean("machines.hardcore.enabled", false)
+                ? Math.max(1, plugin.getConfig().getInt("machines.hardcore.repair-iron-ingots", 2)) : 1;
     }
 
     private void recordIndustrialImpact(World world, UUID owner) {

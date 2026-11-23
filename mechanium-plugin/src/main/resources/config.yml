@@ -186,6 +186,16 @@ modules:
     enabled: true
   ore-chunks:
     enabled: true
+  aquaculture:
+    enabled: true
+  glassworks:
+    enabled: true
+  rail-freight:
+    enabled: true
+  battery-industry:
+    enabled: true
+  cold-chain:
+    enabled: true
 
 machines:
   wear:

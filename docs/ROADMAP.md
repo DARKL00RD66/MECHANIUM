@@ -36,6 +36,7 @@
 - [ ] Filas de produção, múltiplos insumos/produtos e limites configuráveis por tick
 - [ ] Redes de energia extensíveis por cabos e distribuição entre várias máquinas
 - [ ] Sistema geral de fluidos com líquidos adicionais e válvulas
+- [x] Primeira rede local de conduítes e caixas para transporte de itens MECHANIUM (limite 128 conduítes)
 - [ ] Rede de armazéns entre locais distantes e logística automatizada
 - [ ] Ampliar armazenamento portátil com mais tiers, filtros e upgrades adicionais (primeiro upgrade de 54 espaços implementado)
 - [ ] Economia monetária, preços e integração com plugin de economia
@@ -86,5 +87,6 @@ O projeto só deve ser considerado pronto para produção depois da CI, dos test
 
 
 ## 0.7.0-SNAPSHOT — Expansão de addons
+- Primeira etapa do domínio Networks: conduítes e caixas com transporte local de itens MECHANIUM.
 - Forestry, Textile Industry, Biofuel e Construction Materials como módulos oficiais opcionais.
 - Próximos alvos de auditoria: Networks, Better Nuclear Reactor (somente abstração de jogo), GeyserHeads (compatibilidade de apresentação) e referências cuja identidade/licença ainda precisa ser confirmada.

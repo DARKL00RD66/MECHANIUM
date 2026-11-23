@@ -96,3 +96,14 @@ Os quatro módulos são opcionais e habilitados por padrão; cada um pode ser de
 - **Ore Chunks:** fragmentos de minério e lotes compactados integrados à Geologia e ao Beneficiamento Mineral.
 
 Implementações nativas e independentes; não carregam JARs de terceiros. Os quatro módulos incluem tecnologias, itens e receitas, mas ainda não possuem máquinas runtime dedicadas.
+
+
+## Expansão nativa 0.7.3.00-SNAPSHOT
+
+- **FN Amplifications:** componentes de amplificação e estação de processamento; primeira etapa de conteúdo, sem upgrades dinâmicos de velocidade/energia nas máquinas existentes.
+- **Geyser Heads:** catálogo cosmético local e expositores. Não declarar compatibilidade de skins com Geyser/Bedrock até existir teste específico.
+- **SlimeCustomizer:** modelos, projetos e catálogo inicial; editor administrativo visual ainda pendente.
+- **Industrial Chemistry:** cadeia fictícia de reagentes e polímeros para progressão industrial.
+- **Mining Automation:** componentes de prospecção e montagem de módulos; mineração automática de mundo não está incluída.
+
+A contagem do plano consolidado permanece em 31 referências; esta rodada acrescenta cinco módulos internos e amplia a cobertura funcional. As referências explicitamente excluídas por escopo (combate, mísseis e interferência) não são tratadas como trabalho pendente.

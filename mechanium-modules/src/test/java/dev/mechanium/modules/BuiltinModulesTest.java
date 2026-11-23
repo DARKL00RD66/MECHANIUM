@@ -52,7 +52,8 @@ class BuiltinModulesTest {
                 "glassworks",
                 "rail-freight",
                 "battery-industry",
-                "cold-chain"
+                "cold-chain",
+                "fn-amplifications", "geyser-heads", "slime-customizer", "industrial-chemistry", "mining-automation"
         )));
     }
 

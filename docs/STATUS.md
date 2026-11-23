@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.7.2.01-SNAPSHOT  
+**Versão:** 0.7.3.00-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -128,3 +128,14 @@ Cinco módulos adicionais foram criados e registrados: Aquaculture, Glassworks, 
 ## Snapshot 0.7.2.01-SNAPSHOT
 
 Versão de manutenção que incorpora a auditoria de consistência documentada acima e atualiza o versionamento em todos os oito POMs Maven, incluindo o exemplo de addon. O workflow Java 21/Maven `clean verify` está sendo executado para esta revisão. O JAR distribuível deve ser obtido do artefato do workflow após conclusão bem-sucedida; ainda não há confirmação de teste em servidor Paper/Purpur 1.21.11.
+
+
+## Expansão 0.7.3.00-SNAPSHOT
+
+- **FN Amplifications:** núcleos, bobinas, módulos e estação de amplificação; a estação usa o runtime genérico de uma entrada/uma saída.
+- **Geyser Heads:** fichas cosméticas, cabeça de coleção e expositores locais. Não inclui sincronização de skins ou integração específica com Geyser/Bedrock.
+- **Slime Customizer:** páginas de modelo, projetos em branco, ferramenta e catálogo de conteúdo; a interface administrativa completa de criação/edição permanece pendente.
+- **Industrial Chemistry:** reagentes abstratos, resina, fibra sintética e misturador industrial; não simula processos químicos reais.
+- **Mining Automation:** componentes fictícios de prospecção e módulo minerador com montadora; não implementa extração autônoma de blocos nesta etapa.
+- Os cinco módulos são opcionais, ativados por padrão e podem ser desligados individualmente em `config.yml`. Cada um registra duas tecnologias, uma categoria, quatro itens e quatro receitas. Três declaram máquinas no runtime genérico.
+- Build Maven/CI e testes reais em Paper/Purpur 1.21.11 ainda precisam ser confirmados.

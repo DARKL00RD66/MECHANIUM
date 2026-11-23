@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.3.00-SNAPSHOT
+- Adicionados cinco módulos nativos opcionais: FN Amplifications, Geyser Heads (catálogo cosmético local), Slime Customizer, Industrial Chemistry e Mining Automation.
+- Cada módulo registra duas tecnologias, uma categoria, quatro itens e quatro receitas; FN Amplifications, Industrial Chemistry e Mining Automation também declaram máquinas no runtime genérico.
+- Os módulos foram registrados no catálogo oficial, nos testes de presença e na configuração padrão.
+- Geyser Heads ainda não implementa sincronização de skins nem integração específica com Geyser/Bedrock; Slime Customizer ainda não possui editor administrativo visual completo.
+- Atualizado o reactor Maven para 0.7.3.00-SNAPSHOT. Build/CI e validação em Paper/Purpur 1.21.11 ainda precisam concluir.
+
+
 ## 0.7.2.01-SNAPSHOT
 - Incremento de manutenção após 0.7.2.00: incorpora a auditoria de consistência, correções de dependências entre módulos, IDs exclusivos para Water Treatment e correção de inserção em pilhas dos Material Generators.
 - Mantidos os cinco módulos adicionados em 0.7.2.00: Aquaculture, Glassworks, Rail Freight, Battery Industry e Cold Chain.

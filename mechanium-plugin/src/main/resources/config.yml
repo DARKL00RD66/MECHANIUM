@@ -196,6 +196,16 @@ modules:
     enabled: true
   cold-chain:
     enabled: true
+  fn-amplifications:
+    enabled: true
+  geyser-heads:
+    enabled: true
+  slime-customizer:
+    enabled: true
+  industrial-chemistry:
+    enabled: true
+  mining-automation:
+    enabled: true
 
 machines:
   wear:

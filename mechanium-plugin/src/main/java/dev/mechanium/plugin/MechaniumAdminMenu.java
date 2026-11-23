@@ -176,7 +176,7 @@ final class MechaniumAdminMenu implements Listener {
                         openHome(p);
                     });
         }
-        admin.openInventory(inv);
+        animateOpen(admin, holder);
     }
 
     private void openGlobalEraSelector(Player admin) {
@@ -234,7 +234,7 @@ final class MechaniumAdminMenu implements Listener {
                         openHome(p);
                     });
         }
-        admin.openInventory(inv);
+        animateOpen(admin, holder);
     }
 
     private void openResearchPointTargets(Player admin) {
@@ -258,7 +258,7 @@ final class MechaniumAdminMenu implements Listener {
                         openResearchPointTargets(p);
                     });
         }
-        admin.openInventory(inv);
+        animateOpen(admin, holder);
     }
 
     void openRecipes(Player player) {
@@ -295,7 +295,7 @@ final class MechaniumAdminMenu implements Listener {
                         openVanillaRecipes(p);
                     });
         }
-        admin.openInventory(inv);
+        animateOpen(admin, holder);
     }
 
     private void cycleRecipeRequirement(String path) {

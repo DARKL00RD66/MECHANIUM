@@ -171,6 +171,8 @@ modules:
     enabled: true
   construction-materials:
     enabled: true
+  industrial-networks:
+    enabled: true
 
 machines:
   wear:

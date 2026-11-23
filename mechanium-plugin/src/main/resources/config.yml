@@ -134,6 +134,8 @@ modules:
     enabled: true
   sensible-toolbox:
     enabled: true
+  dank-tech2:
+    enabled: true
 
 addons:
   directory: addons

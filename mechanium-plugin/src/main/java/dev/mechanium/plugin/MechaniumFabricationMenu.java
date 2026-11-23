@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -200,6 +201,11 @@ final class MechaniumFabricationMenu implements Listener {
         if (event.getClickedInventory() != event.getView().getTopInventory()) return;
         Consumer<Player> action = holder.actions.get(event.getSlot());
         if (action != null) action.accept(player);
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent event) {
+        if (event.getView().getTopInventory().getHolder() instanceof Holder) event.setCancelled(true);
     }
 
     private static final class Holder implements InventoryHolder {

@@ -114,3 +114,12 @@ Quatro novos módulos foram registrados no catálogo: Water Treatment, Greenhous
 ## Snapshot 0.7.2.00-SNAPSHOT
 
 Cinco módulos adicionais foram criados e registrados: Aquaculture, Glassworks, Rail Freight, Battery Industry e Cold Chain. Cada módulo inclui tecnologias de pesquisa, categoria, itens e receitas; as dependências entre módulos foram declaradas e os cinco IDs foram adicionados ao teste do catálogo e à configuração padrão. Aquaculture, Glassworks e Cold Chain também declaram máquinas no runtime genérico de uma entrada/uma saída. Build CI e testes funcionais em Paper/Purpur 1.21.11 ainda precisam ser concluídos antes de considerar o snapshot validado.
+
+
+## Auditoria de consistência — correções aplicadas
+- Corrigidas dependências internas ausentes em Culinary, Air Filtration, Advanced Metallurgy, Pressure Engineering, Industrial Automation e Industrial Logistics, evitando falha de inicialização quando o módulo Industry estiver desativado.
+- Battery Industry agora declara também a dependência direta de Energy, exigida por `electrical_grid`.
+- Removida a colisão de `filter_cartridge` e `filter_cartridge_recipe` entre Liquid e Water Treatment por meio dos IDs exclusivos `water_filter_cartridge` e `water_filter_cartridge_recipe`.
+- Geradores de materiais agora conseguem adicionar unidades a pilhas existentes mesmo quando o inventário do baú não possui slots vazios.
+- Testes automatizados verificam que todos os pré-requisitos tecnológicos entre módulos possuem dependências declaradas e que módulos dependentes de módulos opcionais também são opcionais.
+- Java 21 / Maven `verify` passou no workflow 45262585480. Testes reais de gameplay em Paper/Purpur 1.21.11 ainda estão pendentes.

@@ -145,6 +145,23 @@ modules:
     enabled: true
   dank-tech2:
     enabled: true
+  electric-spawners:
+    enabled: true
+  fast-machines:
+    enabled: true
+  hardcore-slimefun:
+    enabled: true
+
+machines:
+  wear:
+    enabled: true
+    max-cycles: 100
+    cycles-per-operation: 1
+  # Optional harder rules: more wear per production cycle and more iron for manual repairs.
+  hardcore:
+    enabled: false
+    wear-multiplier: 2
+    repair-iron-ingots: 2
 
 addons:
   directory: addons

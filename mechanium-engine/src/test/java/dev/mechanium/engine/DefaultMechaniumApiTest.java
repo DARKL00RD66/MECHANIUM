@@ -55,6 +55,40 @@ class DefaultMechaniumApiTest {
         }
     }
 
+
+    @Test
+    void timedResearchDebitsAtStartAndUnlocksOnlyAfterPersistedDeadline() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("timed-research-engine.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            api.registerTechnology(new TechnologyDefinition(
+                    "steam_power", "Energia a vapor", "ancient", 20, List.of()));
+
+            UUID player = UUID.randomUUID();
+            api.setPlayerEra(player, "ancient");
+            api.addResearchPoints(player, 40);
+
+            var result = api.startResearch(player, "steam_power", 120_000L);
+            assertEquals(dev.mechanium.api.model.ResearchResult.Status.STARTED, result.status());
+            assertEquals(20L, api.getResearchPoints(player));
+            assertFalse(api.hasUnlockedTechnology(player, "steam_power"));
+
+            var active = api.getResearches(player).stream().findFirst().orElseThrow();
+            assertEquals("steam_power", active.technologyId());
+            assertEquals(120_000L, active.durationMillis());
+            assertEquals(dev.mechanium.api.model.ResearchResult.Status.ALREADY_RESEARCHING,
+                    api.startResearch(player, "steam_power", 120_000L).status());
+
+            assertTrue(api.completeDueResearches(player, active.completesAtEpochMillis() - 1L).isEmpty());
+            assertFalse(api.hasUnlockedTechnology(player, "steam_power"));
+            assertEquals(List.of("steam_power"),
+                    List.copyOf(api.completeDueResearches(player, active.completesAtEpochMillis())));
+            assertTrue(api.hasUnlockedTechnology(player, "steam_power"));
+            assertTrue(api.getResearches(player).isEmpty());
+        }
+    }
+
     @Test
     void serverEraAppliesToPlayersWithoutOverridesAndPersistsAcrossReloads() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(

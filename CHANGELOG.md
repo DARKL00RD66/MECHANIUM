@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0-SNAPSHOT
+- Adicionados quatro módulos oficiais opcionais: `forestry`, `textile-industry`, `biofuel` e `construction-materials`.
+- Forestry: fibras de madeira, resina vegetal, tábuas tratadas e estação florestal.
+- Textile Industry: fibras, tecidos industriais, tecido reforçado e tear mecanizado.
+- Biofuel: biomassa e células de biocombustível abstratas para progressão dentro do jogo.
+- Construction Materials: cerâmica, painéis reforçados, estruturas pré-fabricadas e misturador industrial.
+- Cada módulo possui categoria, tecnologias, receitas e máquinas quando aplicável; ativação individual por `config.yml`.
+
+
 ## 0.6.0-SNAPSHOT
 - Adicionados cinco módulos oficiais: `air-filtration`, `advanced-metallurgy`, `pressure-engineering`, `industrial-automation` e `industrial-logistics`.
 - Novas categorias, tecnologias, itens e receitas para purificador de ar (inclui balde de água), componentes metalúrgicos, câmara de pressão, circuitos de controle, montadora e roteador de carga.

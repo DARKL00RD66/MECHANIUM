@@ -181,3 +181,13 @@ Todos são opcionais e podem ser configurados individualmente.
 - Apenas itens com identidade persistente MECHANIUM são transportados; itens vanilla permanecem nos depósitos.
 - Somente chunks carregados são examinados. A rede não atravessa distâncias sem conduítes nem conecta depósitos remotamente.
 - As caixas são protegidas pelo proprietário e seus conteúdos são devolvidos ao desmontar o bloco. O transporte por funis externos é bloqueado nas caixas e conduítes.
+
+
+## Expansão 0.7.1.00-SNAPSHOT — quatro novos addons
+
+- `water-treatment`: filtragem básica, células de água purificada, fluido refrigerante e recirculação industrial.
+- `greenhouse`: cultivo protegido, painéis de estufa, solução nutritiva e bandejas hidropônicas; depende de Agriculture e Water Treatment.
+- `industrial-recycling`: sucata mista, materiais separados e triagem de resíduos para cadeias circulares.
+- `ore-chunks`: fragmentos minerais de ferro, cobre e ouro e lotes compactados; depende de Geology e Ore Processing.
+
+Todos possuem receitas e pesquisas próprias e podem ser ativados ou desativados individualmente em `config.yml`.

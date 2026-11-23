@@ -155,7 +155,7 @@ final class MaterialGeneratorManager implements Listener {
                     int progress = tile.getPersistentDataContainer().getOrDefault(progressKey, PersistentDataType.INTEGER, 0) + 20;
                     if (progress >= interval) {
                         if (inventory.addItem(new ItemStack(output, 1)).isEmpty()) progress = 0;
-                        else progress = 0;
+                        else progress = Math.max(0, interval - 20);
                     }
                     tile.getPersistentDataContainer().set(progressKey, PersistentDataType.INTEGER, progress);
                     tile.update(true, false);

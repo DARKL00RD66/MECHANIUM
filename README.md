@@ -41,7 +41,7 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.4.1-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.5.0-SNAPSHOT.jar
 ```
 
 ## Instalar
@@ -56,7 +56,7 @@ A linha 0.4.1 aprimora a abertura animada dos menus e adiciona pesquisas tempori
 
 ## CI e estado
 
-- - [Build Java 21 / Maven verify — run 43352161651](https://github.com/davitremea1-ops/MECHANIUM/actions/runs/43352161651) — **BUILD SUCCESS**, 52 testes automatizados sem falhas ou erros.
+- O CI da linha 0.5.0 deve validar Java 21 / Maven verify antes de considerar o snapshot pronto.
 - O [pré-release mais recente](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot) deve conter o JAR correspondente ao snapshot após o CI desta atualização.
 - A versão é experimental. O build automatizado não substitui o teste de gameplay em Paper/Purpur.
 

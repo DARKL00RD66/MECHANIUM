@@ -41,7 +41,7 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.6.0-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.7.0-SNAPSHOT.jar
 ```
 
 ## Instalar

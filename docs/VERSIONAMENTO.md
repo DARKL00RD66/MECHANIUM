@@ -6,13 +6,13 @@ O projeto seguirá a sequência de snapshots definida para chegar à primeira ve
 
 - **Correções pequenas e ajustes localizados:** incrementam o patch da linha atual. Exemplo: `0.3.0-SNAPSHOT`, `0.3.1-SNAPSHOT`, `0.3.2-SNAPSHOT`.
 - **Novos conjuntos de funcionalidades ou integrações de addons:** iniciam o próximo marco de funcionalidades. Exemplo: `0.4.0-SNAPSHOT`, depois `0.5.0-SNAPSHOT`.
-- **Alterações dentro de um marco:** incrementam seu patch sem substituir snapshots anteriores. Exemplo: `0.4.1-SNAPSHOT`, `0.4.2-SNAPSHOT`. Para snapshots numerados dentro do mesmo patch, usar dois dígitos finais: `0.7.0.01-SNAPSHOT`, `0.7.0.01-SNAPSHOT`, `0.7.0.02-SNAPSHOT`.
+- **Alterações dentro de um marco:** incrementam seu patch sem substituir snapshots anteriores. Exemplo: `0.4.1-SNAPSHOT`, `0.4.2-SNAPSHOT`. Para snapshots numerados dentro do mesmo patch, usar dois dígitos finais: `0.7.1.00-SNAPSHOT`, `0.7.1.01-SNAPSHOT`, `0.7.1.02-SNAPSHOT`.
 - **Pré-lançamento final:** a sequência de desenvolvimento avança até `0.9.9-SNAPSHOT`.
 - **Versão oficial:** somente depois da validação dos critérios de aceite e do encerramento da linha de snapshots; a versão estável planejada é `1.0.0`.
 
 ## Marco atual
 
-A linha atual é `0.7.0.01-SNAPSHOT`. O sufixo `.00` identifica o primeiro snapshot numerado do marco 0.7.0; cada rodada incremental avança para `.01`, `.02` e assim por diante, sem sobrescrever snapshots anteriores.
+A linha atual é `0.7.1.00-SNAPSHOT`. Cada novo conjunto de funcionalidades avança o patch (por exemplo, `0.7.2.00-SNAPSHOT`); snapshots incrementais dentro do mesmo patch avançam o último bloco (`0.7.1.01-SNAPSHOT`, `0.7.1.02-SNAPSHOT`) sem sobrescrever artefatos anteriores.
 
 ## Sincronização obrigatória
 

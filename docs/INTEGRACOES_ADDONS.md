@@ -54,7 +54,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 - **FastMachines:** prensa rápida (20 ticks por lote) e enrolador de bobinas (40 ticks por lote), ambos conectados à rede de energia e protegidos pela progressão.
 - **HardcoreSlimefun:** kit de manutenção desbloqueável e parâmetros para ativar regras mais exigentes de desgaste e reparo. O modo hardcore é opcional e vem desativado por padrão.
 
-## Expansões 0.7.0-SNAPSHOT
+## Expansões 0.7.0.00-SNAPSHOT
 
 - **Forestry:** fibras de madeira, resina vegetal, tábuas tratadas e estação florestal.
 - **Textile Industry:** fibras, tecidos industriais, tecidos técnicos e tear mecanizado.
@@ -63,7 +63,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 
 Os quatro módulos são opcionais e habilitados por padrão; cada um pode ser desligado em `config.yml`. Suas receitas e tecnologias são registradas na API pública, sem dependência dos addons originais.
 
-## Expansões adicionais 0.7.0 — Networks e geração avançada
+## Expansões adicionais 0.7.0.00 — Networks e geração avançada
 
 - Better Nuclear Reactor (abstração): gerador cristalino fictício que fornece 8 unidades/s por cinco minutos por cristal e carrega uma bateria adjacente do mesmo proprietário. Não representa um reator real.
 

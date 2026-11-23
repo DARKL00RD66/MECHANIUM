@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/** Portable 27-slot storage; contents are serialized into the unique item PDC. */
+/** Portable storage tiers; contents are serialized into the unique item PDC. */
 final class PortableStorageListener implements Listener {
     private final NamespacedKey itemIdKey = NamespacedKey.fromString("mechanium:item_id");
     private final NamespacedKey contentsKey;
@@ -51,7 +51,10 @@ final class PortableStorageListener implements Listener {
         if (sessions.containsKey(player.getUniqueId())) return;
         int slot = player.getInventory().getHeldItemSlot();
         PortableHolder holder = new PortableHolder(player.getUniqueId(), slot);
-        Inventory inventory = Bukkit.createInventory(holder, 27, "MECHANIUM • Armazém portátil");
+        int capacity = storageCapacity(held);
+        Inventory inventory = Bukkit.createInventory(holder, capacity,
+                capacity > 27 ? "MECHANIUM • Armazém portátil avançado"
+                        : "MECHANIUM • Armazém portátil");
         holder.inventory = inventory;
         load(held, inventory);
         sessions.put(player.getUniqueId(), holder);
@@ -122,7 +125,11 @@ final class PortableStorageListener implements Listener {
         if (bytes == null || bytes.length == 0) return;
         try (BukkitObjectInputStream input = new BukkitObjectInputStream(new ByteArrayInputStream(bytes))) {
             Object value = input.readObject();
-            if (value instanceof ItemStack[] contents && contents.length == target.getSize()) target.setContents(contents);
+            if (value instanceof ItemStack[] contents) {
+                ItemStack[] restored = new ItemStack[target.getSize()];
+                System.arraycopy(contents, 0, restored, 0, Math.min(contents.length, restored.length));
+                target.setContents(restored);
+            }
         } catch (IOException | ClassNotFoundException exception) {
             Bukkit.getLogger().warning("Não foi possível carregar um armazém portátil: " + exception.getMessage());
         }
@@ -140,9 +147,17 @@ final class PortableStorageListener implements Listener {
     }
 
     private boolean isPortable(ItemStack item) {
-        return item != null && item.hasItemMeta()
-                && "portable_storage".equals(item.getItemMeta().getPersistentDataContainer()
-                    .get(itemIdKey, PersistentDataType.STRING));
+        if (item == null || !item.hasItemMeta()) return false;
+        String id = item.getItemMeta().getPersistentDataContainer()
+                .get(itemIdKey, PersistentDataType.STRING);
+        return "portable_storage".equals(id) || "portable_storage_advanced".equals(id);
+    }
+
+    private int storageCapacity(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return 27;
+        String id = item.getItemMeta().getPersistentDataContainer()
+                .get(itemIdKey, PersistentDataType.STRING);
+        return "portable_storage_advanced".equals(id) ? 54 : 27;
     }
 
     private static final class PortableHolder implements InventoryHolder {

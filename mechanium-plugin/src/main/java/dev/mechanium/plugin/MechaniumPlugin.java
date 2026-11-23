@@ -60,6 +60,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             api = new DefaultMechaniumApi(dataStore);
             registerConfiguredEras();
             initializeServerEra();
+            migrateVanillaRecipeGateSettings();
+            seedMissingVanillaRecipeGates();
             Bukkit.getServicesManager().register(MechaniumApi.class, api, this, ServicePriority.Normal);
 
             moduleManager = new ModuleManager();
@@ -166,6 +168,39 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             merged.add(Map.of("id", id, "name", name, "order", order));
         }
         getConfig().set("progression.eras", merged);
+    }
+
+    private void migrateVanillaRecipeGateSettings() {
+        String migrationPath = "vanilla-recipe-gates.migrations.enchanting-table-mythic-era";
+        if (getConfig().getBoolean(migrationPath, false)) return;
+
+        String enchantingTablePath = "vanilla-recipe-gates.recipes.minecraft:enchanting_table";
+        String configuredEra = getConfig().getString(enchantingTablePath, "");
+        // Previous packaged defaults placed the enchanting table in the Renaissance.
+        // Move only that old default; preserve any deliberate custom setting or "off".
+        if ("renaissance".equalsIgnoreCase(configuredEra)) {
+            getConfig().set(enchantingTablePath, "mythic_age");
+            getLogger().info("Receita minecraft:enchanting_table corrigida para a Era Mítica.");
+        }
+        getConfig().set(migrationPath, true);
+        saveConfig();
+    }
+
+    private void seedMissingVanillaRecipeGates() {
+        if (!getConfig().getBoolean("vanilla-recipe-gates.auto-register", true)) return;
+
+        int added = 0;
+        for (VanillaRecipeCatalog.Entry recipe : VanillaRecipeCatalog.discover()) {
+            String path = "vanilla-recipe-gates.recipes." + recipe.key();
+            if (getConfig().contains(path)) continue;
+            getConfig().set(path, recipe.suggestedEraId());
+            added++;
+        }
+        if (added > 0) {
+            saveConfig();
+            getLogger().info("Catálogo vanilla atualizado: " + added
+                    + " novas receitas receberam eras históricas sugeridas.");
+        }
     }
 
     private void initializeServerEra() {

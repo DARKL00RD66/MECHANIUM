@@ -6,7 +6,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 
 | Referência | Direção no MECHANIUM | Situação |
 |---|---|---|
-| ExoticGarden | Horticultura, cultivo e cadeias agrícolas | Primeira base agrícola existente; expansão pendente |
+| ExoticGarden | Horticultura, cultivo e cadeias agrícolas | Primeira expansão funcional: sementes, ervas, extratos botânicos, conservas e caixote de colheita; cultivo customizado pendente |
 | ElectricSpawners | Manejo de criação e produção animal | Planejado |
 | PrivateStorage | Armazéns privados, proprietário e permissões | Base funcional implementada |
 | ExtraGear | Ferramentas e equipamentos de utilidade | Picareta reforçada e bússola de levantamento com habilidades utilitárias |
@@ -26,7 +26,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | Galactifun | Conteúdo de exploração espacial | Apenas módulo futurista opcional, desativado por padrão |
 | FNAmplifications | Extensões de conteúdo e amplificação | Aguardando validação funcional e de licença |
 | Element Manipulation | Conteúdo fantástico | Apenas módulo de fantasia opcional, desativado por padrão |
-| DankTech2 | Armazenamento portátil | Planejado |
+| DankTech2 | Armazenamento portátil | Primeira expansão: upgrade para armazém portátil persistente de 54 espaços; outras tiers e filtros pendentes |
 | Networks | Redes logísticas entre máquinas e depósitos | Planejado; redes atuais são locais e específicas por domínio |
 | MissileWarfare | Não serão portadas armas, mísseis ou mecânicas de ataque | Excluído do escopo operacional |
 | EMCTech | Processamento e conversão de recursos | Aguardando confirmação da referência e da licença |
@@ -38,9 +38,9 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | SensibleToolbox | Ferramentas utilitárias e qualidade de vida | Kit de campo e kit de manutenção com habilidades próprias |
 | GeyserHeads | Compatibilidade de apresentação com clientes Bedrock/Geyser | Planejado |
 
-## Funcionalidades ampliadas nesta etapa
+## Funcionalidades ampliadas nesta etapa (0.3.0–0.4.0)
 
-- **ExtraGear:** picareta reforçada aplica Haste breve após mineração; bússola apresenta coordenadas, biome, direção e bloco observado.
+- **ExoticGarden:** cadeia inicial de horticultura com mistura de sementes, ervas desidratadas, extrato botânico, conserva tropical e caixote de pomar; ainda sem crescimento de culturas customizadas.\n- **DankTech2:** upgrade de armazém portátil que amplia o inventário persistente de 27 para 54 espaços; tiers adicionais e filtros continuam pendentes.\n- **ExtraGear:** picareta reforçada aplica Haste breve após mineração; bússola apresenta coordenadas, biome, direção e bloco observado.
 - **EcoPower:** gerador eólico (1 unidade/s), gerador solar (2 unidades/s de dia sem tempestade), baterias até 10.000 unidades e consumo por máquinas industriais.
 - **SFCalc:** `/mechanium calc <receita> [quantidade]`, com cálculo de lotes e expansão de ingredientes MECHANIUM até oito níveis.
 - **Liquid:** filtro de água, tanques e tubulações adjacentes que transportam água purificada entre tanques do mesmo proprietário.
@@ -55,4 +55,4 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 3. Uma entrada nesta matriz não equivale à paridade integral com o projeto de referência.
 4. Conteúdo fantástico/futurista permanece opcional e desativado por padrão.
 5. Sistemas de combate, armas, ataques, mísseis e interferência não fazem parte da implementação operacional.
-6. A versão 0.3.0-SNAPSHOT ainda depende de CI e testes funcionais em Paper/Purpur 1.21.11.
+6. A versão 0.4.0-SNAPSHOT ainda depende de CI e testes funcionais em Paper/Purpur 1.21.11.

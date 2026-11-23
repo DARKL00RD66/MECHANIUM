@@ -6,7 +6,7 @@
 |---|---|---|
 | `industry` | Máquinas e processos industriais | Ativado |
 | `geology` | Prospecção e conhecimento mineral | Ativado |
-| `agriculture` | Agricultura e produção alimentar | Ativado |
+| `agriculture` | Agricultura e produção alimentar | Ativado |\n| `exotic-garden` | Horticultura exótica, ervas, extratos e conservas | Ativado |\n| `dank-tech2` | Upgrade de armazém portátil para 54 espaços | Ativado |
 | `energy` | Progressão energética | Ativado |
 | `storage` | Armazéns e logística de estoque | Ativado |
 | `environment` | Gestão ambiental e resíduos | Ativado |
@@ -17,7 +17,7 @@ O módulo `geology` depende de `industry` e adiciona a pesquisa `geological_surv
 
 A ferramenta atual é uma prospecção local. Depósitos regionais, veios minerais, amostras e integração profunda com mineração ainda estão pendentes.
 
-## Sete módulos adicionais — 0.3.0-SNAPSHOT
+## Módulos adicionais — 0.3.0 e 0.4.0-SNAPSHOT
 
 | ID | Funcionalidade jogável |
 |---|---|
@@ -27,7 +27,29 @@ A ferramenta atual é uma prospecção local. Depósitos regionais, veios minera
 | `liquid` | Filtro de água, tanques e tubulações conectadas que transferem água purificada. |
 | `advanced-tech` | Montadora, britador e refinaria industrial com receitas e processamento. |
 | `simple-storage` | Nós de armazenamento conectados por faces, com inventário virtual paginado e proteção por proprietário/permissões. |
-| `sensible-toolbox` | Kit de campo com efeitos temporários e kit de manutenção que repara equipamentos. |
+| `sensible-toolbox` | Kit de campo com efeitos temporários e kit de manutenção que repara equipamentos. |\n| `exotic-garden` | Sementes diversificadas, ervas desidratadas, extrato botânico, conservas tropicais e caixote de pomar. |\n| `dank-tech2` | Upgrade fabricável para um armazém portátil de 54 espaços; o item mantém os conteúdos no PDC. |
+
+### DankTech2 — expansão de armazenamento portátil
+
+O módulo `dank-tech2` depende de `simple-storage` e adiciona uma tecnologia de Era da Informação e um upgrade de armazém portátil:
+
+- O armazém original `portable_storage` continua com 27 espaços.
+- O novo `portable_storage_advanced` abre um inventário de 54 espaços.
+- A receita de upgrade consome o armazém original e materiais de armazenamento avançado.
+- Os dois níveis continuam salvando seus conteúdos no próprio item, sem banco externo por jogador.
+
+Esta é a primeira etapa da referência DankTech2. Outras capacidades, filtros e tiers permanecem pendentes.
+
+### ExoticGarden — horticultura exótica
+
+O módulo depende de `agriculture` e adiciona uma primeira cadeia de horticultura inspirada na referência ExoticGarden:
+
+- Mistura de sementes diversificadas, ervas desidratadas e extrato botânico.
+- Conserva tropical produzida a partir de frutas e insumos agrícolas.
+- Caixote de pomar para embalar a conserva.
+- Tecnologias distribuídas entre Renascimento, Era Moderna e Era da Informação.
+
+Esta etapa amplia itens e receitas; não adiciona ainda novas plantas com crescimento próprio, estufas funcionais ou colheita automática. Esses sistemas permanecem no roadmap.
 
 ### EcoPower — geração e rede de energia
 

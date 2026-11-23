@@ -85,6 +85,8 @@ vanilla-recipe-gates:
 
 # Reward is granted once per player for the first discovered block of each listed ore type.
 research-rewards:
+  advancements:
+    default: 2
   blocks:
     COAL_ORE: 1
     DEEPSLATE_COAL_ORE: 1
@@ -150,6 +152,16 @@ modules:
   fast-machines:
     enabled: true
   hardcore-slimefun:
+    enabled: true
+  air-filtration:
+    enabled: true
+  advanced-metallurgy:
+    enabled: true
+  pressure-engineering:
+    enabled: true
+  industrial-automation:
+    enabled: true
+  industrial-logistics:
     enabled: true
 
 machines:

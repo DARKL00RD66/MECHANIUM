@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0-SNAPSHOT
+- Adicionados cinco módulos oficiais: `air-filtration`, `advanced-metallurgy`, `pressure-engineering`, `industrial-automation` e `industrial-logistics`.
+- Novas categorias, tecnologias, itens e receitas para purificador de ar (inclui balde de água), componentes metalúrgicos, câmara de pressão, circuitos de controle, montadora e roteador de carga.
+- Os cinco módulos são ativados por padrão e podem ser desativados individualmente em `config.yml`.
+- Novo catálogo de fabricação por clique: mostra itens e máquinas por categoria, requisitos, tecnologia e ingredientes; valida o inventário, consome os materiais e entrega o resultado sem abrir a bancada. Máquinas também exibem seus processos e continuam instaláveis como blocos dispenser.
+
+
 ## 0.5.0-SNAPSHOT
 - Adicionados os módulos opcionais `electric-spawners`, `fast-machines` e `hardcore-slimefun`.
 - ElectricSpawners: incubadoras elétricas de galinha, vaca, porco e ovelha; usam sementes, feno, cenouras ou trigo e geram spawn eggs vanilla após processamento e consumo de energia.

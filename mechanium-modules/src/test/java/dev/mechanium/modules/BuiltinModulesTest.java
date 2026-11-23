@@ -29,7 +29,12 @@ class BuiltinModulesTest {
                 "environment",
                 "electric-spawners",
                 "fast-machines",
-                "hardcore-slimefun"
+                "hardcore-slimefun",
+                "air-filtration",
+                "advanced-metallurgy",
+                "pressure-engineering",
+                "industrial-automation",
+                "industrial-logistics"
         )));
     }
 

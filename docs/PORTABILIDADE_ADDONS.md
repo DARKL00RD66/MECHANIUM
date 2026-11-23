@@ -5,13 +5,13 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 | Projeto | Domínio candidato | Direção MECHANIUM |
 |---|---|---|
 | ExoticGarden | Agricultura, cultivo e alimentos | Safras, cultivo e processamento coerentes com o mundo |
-| ElectricSpawners | Fauna e produção controlada | Auditar; priorizar manejo e pecuária com limites ecológicos |
+| ElectricSpawners | Fauna e produção controlada | Quatro incubadoras elétricas para animais passivos, com spawn eggs e consumo de energia; sem criaturas hostis |
 | PrivateStorage | Armazenamento privado | Cofres, propriedade UUID, permissões e auditoria |
 | ExtraGear | Ferramentas e equipamentos | Ferramentas utilitárias por era |
 | SlimefunOreChunks | Mineração e geologia | Prospecção e recursos regionais |
 | LiteXpansion | Máquinas e indústria | Processamento industrial e automação |
 | EcoPower | Energia renovável | Geração, armazenamento e redes |
-| HardcoreSlimefun | Balanceamento | Custos, desgaste e dificuldade configuráveis |
+| HardcoreSlimefun | Balanceamento | Modo hardcore opcional, desgaste configurável e kit de manutenção por pesquisa |
 | SFMobDrops | Recursos de criaturas | Drops equilibrados e configuráveis |
 | SFCalc | Calculadora e utilidades | Utilitário de informação e cálculo |
 | FluffyMachines | Máquinas | Filas, consumo e produção por era |
@@ -31,7 +31,7 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 | Gastronomicon | Culinária | Receitas, alimentos e cadeia produtiva |
 | Better Nuclear Reactor | Energia nuclear | Avaliar somente conceitos energéticos abstratos e não operacionais |
 | AdvancedTech | Tecnologia avançada | Processos industriais plausíveis e escalonados |
-| FastMachines | Eficiência de máquinas | Otimização com custos e limites |
+| FastMachines | Eficiência de máquinas | Prensa e enrolador acelerados ligados à rede energética; filas e paralelismo pendentes |
 | MapJammers | Interferência eletrônica | Não portar jamming; cartografia e informação geográfica são candidatas |
 | SensibleToolbox | Ferramentas | Ferramentas utilitárias não redundantes |
 | GeyserHeads | Cosméticos Bedrock/Geyser | Compatibilidade visual opcional |
@@ -47,13 +47,19 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 - **SlimefunOreChunks (parcial / reimplementação independente):** o módulo `geology` adiciona a pesquisa `geological_surveying`, o item `geological_survey_kit` e uma receita. Ao usar o kit em um bloco, o scanner conta os tipos de minério em um cubo local de 9×9×9, ignora chunks descarregados e apresenta os cinco tipos mais frequentes. Há cooldown e testes unitários da agregação.
 - Esta primeira entrega não gera depósitos ou veios minerais, não altera a distribuição de minério do mundo e não implementa amostras, mapas geológicos ou integração com mineração. É uma ferramenta de prospecção inicial, não uma paridade completa com o addon de referência.
 
-## Implementações adicionais nesta etapa
+## Implementações adicionais anteriores
 - **ExoticGarden/Gastronomicon (parcial):** expansão clean-room de agricultura e culinária com sementes, substrato, embalagens de colheita, queijo, ensopado, carne conservada e rações. Ainda não há plantas customizadas, estufas funcionais ou árvore completa de alimentos.
 - **FluffyMachines/LiteXpansion (parcial):** moinho industrial e conservadora de frutas usam o runtime de máquinas MECHANIUM e consomem energia; o runtime permanece limitado a um insumo e um produto por ciclo.
 - **Networks (parcial):** rede local de depósitos face a face existente, com limite de 64 nós e paginação.
 - **DankTech2 (parcial):** armazém portátil único com inventário de 27 espaços salvo no próprio item. Não há upgrades, filtros, compressão ou busca global.
 - **GlobalWarming (parcial):** contador persistente abstrato por mundo; ciclos industriais somam impacto, e a tecnologia emissions_control interrompe novas contagens para máquinas daquele proprietário. Não simula temperatura, clima ou eventos ambientais.
-- **HardcoreSlimefun/FastMachines (parcial):** máquinas acumulam desgaste até 100 ciclos e podem ser reparadas pelo proprietário com uma barra de ferro; a pesquisa industrial_efficiency dobra o avanço de processamento por atualização. Ainda não existem desgaste configurável, falhas aleatórias, filas, paralelismo ou multiplicadores configuráveis.
+- **HardcoreSlimefun/FastMachines (base anterior):** o runtime já aplicava desgaste e bônus de eficiência; os módulos 0.5.0 acrescentam manutenção desbloqueável, regras opcionais de dificuldade e duas máquinas rápidas dedicadas.
+## Implementações 0.5.0-SNAPSHOT
+
+- **ElectricSpawners (parcial / clean-room):** quatro incubadoras construídas sobre o runtime comum de máquinas. Elas consomem sementes, feno, cenouras ou trigo e geram ovos de invocação vanilla de galinha, vaca, porco ou ovelha. Todas exigem a pesquisa `livestock_incubation` e energia de bateria adjacente. O primeiro estágio não cria criaturas hostis, não automatiza abate e não reproduz o comportamento integral do addon original.
+- **FastMachines (parcial / clean-room):** a prensa rápida transforma uma barra de ferro em duas peças mecânicas em um ciclo de 20 ticks; o enrolador transforma cobre em duas bobinas em 40 ticks. Ambos exigem energia e a pesquisa `fast_machinery`. Ainda compartilham o limite do runtime atual: dispenser, uma entrada e uma saída, sem filas nem processamento paralelo.
+- **HardcoreSlimefun (parcial / clean-room):** inclui pesquisas de confiabilidade/manutenção e o item `machine_maintenance_kit`, que restaura o desgaste de uma máquina quando usado agachado sobre ela. O modo opcional `machines.hardcore.enabled` pode multiplicar o desgaste por operação e elevar o custo de reparo com ferro; vem desativado por padrão.
+
 ## Regras de portabilidade
 
 1. Auditar repositório, commit, licença, dependências e funcionalidades antes de copiar código.

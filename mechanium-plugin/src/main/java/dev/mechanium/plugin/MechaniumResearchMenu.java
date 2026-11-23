@@ -161,19 +161,14 @@ final class MechaniumResearchMenu implements Listener {
             ResearchProgress active = activeResearches.get(technology.id());
             holder.technologySlots.put(slot, technology);
             inv.setItem(slot, technologyItem(player, technology, era, active, now));
-            button(holder, slot, active == null
-                            ? (api.hasUnlockedTechnology(player.getUniqueId(), technology.id())
-                                ? Material.LIME_DYE : Material.YELLOW_DYE)
-                            : Material.CLOCK,
-                    technologyTitle(player, technology, active),
-                    List.of(), p -> {
-                        if (!api.hasUnlockedTechnology(p.getUniqueId(), technology.id())) {
-                            plugin.startResearch(p, technology);
-                        } else {
-                            p.sendMessage("§aPesquisa já concluída: §f" + technology.displayName());
-                        }
-                        openEraTree(p, eraIndex, page);
-                    });
+            holder.actions.put(slot, p -> {
+                if (!api.hasUnlockedTechnology(p.getUniqueId(), technology.id())) {
+                    plugin.startResearch(p, technology);
+                } else {
+                    p.sendMessage("§aPesquisa já concluída: §f" + technology.displayName());
+                }
+                openEraTree(p, eraIndex, page);
+            });
         }
 
         if (page > 0) button(holder, 45, Material.PAPER, "§ePágina anterior", List.of(),
@@ -190,13 +185,6 @@ final class MechaniumResearchMenu implements Listener {
         animateOpen(player, holder);
     }
 
-
-    private String technologyTitle(Player player, TechnologyDefinition technology, ResearchProgress active) {
-        if (api.hasUnlockedTechnology(player.getUniqueId(), technology.id())) {
-            return "§a" + technology.displayName();
-        }
-        return (active == null ? "§e" : "§d") + technology.displayName();
-    }
 
     private ItemStack technologyItem(Player player, TechnologyDefinition technology, EraDefinition era,
                                      ResearchProgress active, long nowEpochMillis) {

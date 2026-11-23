@@ -24,6 +24,7 @@ class BuiltinModulesTest {
                 "sensible-toolbox",
                 "agriculture",
                 "exotic-garden",
+                "dank-tech2",
                 "culinary",
                 "environment"
         )));

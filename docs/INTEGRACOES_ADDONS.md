@@ -17,17 +17,17 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | SFMobDrops | Subprodutos de criaturas | Base funcional implementada |
 | SFCalc | Consulta e cálculo de receitas/custos | Comando com lotes e materiais recursivos; sem preços monetários |
 | FluffyMachines | Máquinas industriais e automação | Prensa, britador, refinaria, montadora e filtro com runtime inicial |
-| GlobalWarming | Emissões e impacto ambiental | Tecnologias ambientais iniciais; simulação pendente |
+| GlobalWarming | Emissões e impacto ambiental | Contador abstrato por mundo e célula consumível que reduz o indicador; clima real não simulado |
 | SlimefunWarfare | Não serão portadas mecânicas de combate | Excluído do escopo operacional |
 | Liquid | Redes de fluidos e armazenamento | Filtro, tanques e transporte de água purificada por tubulações |
-| SlimeCustomizer | Ferramentas de configuração de conteúdo | API e addons externos formam a fundação; interface administrativa pendente |
-| SMG | Identidade e comportamento da referência ainda precisam ser confirmados | Aguardando validação |
+| SlimeCustomizer | Ferramentas de configuração de conteúdo | Projetos de receita/máquina e atalho para editor administrativo de receitas registradas; criação integral de conteúdo pendente |
+| SMG (SimpleMaterialGenerators) | Processamento simples de materiais | Peneira de cascalho e separador de areia com runtime compartilhado; geração autônoma pendente |
 | Simple Storage | Armazenamento compartilhado e logística | Rede local paginada de até 64 nós adjacentes, com propriedade e acesso |
 | Galactifun | Conteúdo de exploração espacial | Apenas módulo futurista opcional, desativado por padrão |
 | FNAmplifications | Extensões de conteúdo e amplificação | Aguardando validação funcional e de licença |
 | Element Manipulation | Conteúdo fantástico | Apenas módulo de fantasia opcional, desativado por padrão |
 | DankTech2 | Armazenamento portátil | Primeira expansão: upgrade para armazém portátil persistente de 54 espaços; outras tiers e filtros pendentes |
-| Networks | Redes logísticas entre máquinas e depósitos | Planejado; redes atuais são locais e específicas por domínio |
+| Networks | Redes logísticas entre máquinas e depósitos | Nó de armazenamento adicional integrado à rede local paginada; roteamento distante pendente |
 | MissileWarfare | Não serão portadas armas, mísseis ou mecânicas de ataque | Excluído do escopo operacional |
 | EMCTech | Processamento e conversão de recursos | Aguardando confirmação da referência e da licença |
 | Gastronomicon | Culinária e conservação de alimentos | Primeira cadeia de culinária adicionada |
@@ -54,6 +54,17 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 - **FastMachines:** prensa rápida (20 ticks por lote) e enrolador de bobinas (40 ticks por lote), ambos conectados à rede de energia e protegidos pela progressão.
 - **HardcoreSlimefun:** kit de manutenção desbloqueável e parâmetros para ativar regras mais exigentes de desgaste e reparo. O modo hardcore é opcional e vem desativado por padrão.
 
+
+## Expansões 0.7.0.00-SNAPSHOT
+
+- **GlobalWarming:** célula de captura ambiental consome um item e reduz 10 unidades do indicador abstrato acumulado do mundo. Não simula temperatura, clima nem eventos reais.
+- **Networks:** `network_storage_node` pode ser conectado pelas faces aos nós de armazenamento existentes; proprietário e permissões são preservados.
+- **SimpleMaterialGenerators:** `gravel_sifter` processa cascalho em fragmentos minerais; `sand_separator` processa areia em pelotas de argila. Ambos usam o runtime comum de dispenser.
+- **SlimeCustomizer:** projetos de receitas e máquinas foram acrescentados. O comando `/mechanium customizer` abre o editor administrativo de receitas existentes; a criação de novos itens e máquinas via interface permanece pendente.
+- **SlimyRepair:** `precision_repair_kit` é consumido no uso e repara 50% da durabilidade máxima de uma ferramenta/armadura danificada no inventário.
+- **Pesquisa:** saldo consultável por `/mechanium points`; pontos são obtidos por descobertas de minérios, primeira visita a biomas e conquistas elegíveis.
+- **Fabricação:** catálogo com filtros de máquinas/itens e categoria; o clique executa uma troca validada no servidor e retorna recipiente vazio quando a receita utiliza baldes.
+
 ## Regras de portabilidade
 
 1. Cada domínio é implementado como módulo oficial independente e pode ser desativado em `config.yml`.
@@ -61,4 +72,4 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 3. Uma entrada nesta matriz não equivale à paridade integral com o projeto de referência.
 4. Conteúdo fantástico/futurista permanece opcional e desativado por padrão.
 5. Sistemas de combate, armas, ataques, mísseis e interferência não fazem parte da implementação operacional.
-6. A versão 0.5.0-SNAPSHOT ainda depende de CI e testes funcionais em Paper/Purpur 1.21.11.
+6. A versão 0.7.0.00-SNAPSHOT ainda depende de CI e testes funcionais em Paper/Purpur 1.21.11.

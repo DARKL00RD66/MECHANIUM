@@ -41,7 +41,7 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.5.0-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.6.0-SNAPSHOT.jar
 ```
 
 ## Instalar
@@ -52,7 +52,7 @@ mechanium-plugin/target/MECHANIUM-0.5.0-SNAPSHOT.jar
 4. Ajuste `plugins/MECHANIUM/config.yml`.
 5. Coloque addons externos em `plugins/MECHANIUM/addons/` e reinicie.
 
-A linha 0.5.0 adiciona três módulos opcionais inspirados em addons Slimefun: incubadoras elétricas para animais passivos (ElectricSpawners), máquinas aceleradas (FastMachines) e manutenção industrial com regras hardcore configuráveis (HardcoreSlimefun). A linha 0.4.1 também traz pesquisas temporizadas com duração dinâmica e progresso offline, e 0.4.0 ampliou o catálogo vanilla e trouxe as primeiras cadeias ExoticGarden/DankTech2. O projeto segue experimental e precisa de validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
+A linha 0.6.0 adiciona cinco domínios industriais: filtragem do ar, metalurgia avançada, engenharia de pressão, automação industrial e logística. A linha 0.5.0 acrescentou ElectricSpawners, FastMachines e HardcoreSlimefun. A linha 0.4.1 também traz pesquisas temporizadas com duração dinâmica e progresso offline, e 0.4.0 ampliou o catálogo vanilla e trouxe as primeiras cadeias ExoticGarden/DankTech2. O projeto segue experimental e precisa de validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
 
 ## CI e estado
 

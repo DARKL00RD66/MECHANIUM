@@ -86,7 +86,7 @@
 O projeto só deve ser considerado pronto para produção depois da CI, dos testes funcionais em Paper/Purpur e da validação dos critérios de aceite.
 
 
-## 0.7.0-SNAPSHOT — Expansão de addons
+## 0.7.0.00-SNAPSHOT — Expansão de addons
 - Primeira etapa do domínio Networks: conduítes e caixas com transporte local de itens MECHANIUM.
 - Primeira etapa de Better Nuclear Reactor: gerador cristalino abstrato de jogo, sem simulação real.
 - Forestry, Textile Industry, Biofuel e Construction Materials como módulos oficiais opcionais.

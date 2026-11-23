@@ -86,3 +86,13 @@ Os quatro módulos são opcionais e habilitados por padrão; cada um pode ser de
 4. Conteúdo fantástico/futurista permanece opcional e desativado por padrão.
 5. Sistemas de combate, armas, ataques, mísseis e interferência não fazem parte da implementação operacional.
 6. A versão 0.5.0-SNAPSHOT ainda depende de CI e testes funcionais em Paper/Purpur 1.21.11.
+
+
+## Snapshot 0.7.1.00 — novos domínios
+
+- **Water Treatment:** filtragem, recirculação e insumos hídricos industriais.
+- **Greenhouse:** cultivo controlado e hidroponia, dependente de Agriculture e Water Treatment.
+- **Industrial Recycling:** recuperação e triagem de materiais em cadeia circular.
+- **Ore Chunks:** fragmentos de minério e lotes compactados integrados à Geologia e ao Beneficiamento Mineral.
+
+Implementações nativas e independentes; não carregam JARs de terceiros. Os quatro módulos incluem tecnologias, itens e receitas, mas ainda não possuem máquinas runtime dedicadas.

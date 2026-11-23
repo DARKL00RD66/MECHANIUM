@@ -8,6 +8,7 @@ import java.util.Set;
 /** Manufacturing chain for durable energy-storage components. */
 final class BatteryIndustryModule extends AbstractBuiltinModule {
     @Override public String id() { return "battery-industry"; }
+    @Override public boolean optional() { return true; }
     @Override public Set<String> dependencies() { return Set.of("eco-power"); }
 
     @Override protected List<TechnologyDefinition> technologies() {

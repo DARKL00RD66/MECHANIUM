@@ -11,7 +11,7 @@ import java.util.Set;
 /** Controlled-environment agriculture and hydroponic supplies. */
 final class GreenhouseModule extends AbstractBuiltinModule {
     @Override public String id() { return "greenhouse"; }
-    @Override public Set<String> dependencies() { return Set.of("agriculture"); }
+    @Override public Set<String> dependencies() { return Set.of("agriculture", "water-treatment"); }
 
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(

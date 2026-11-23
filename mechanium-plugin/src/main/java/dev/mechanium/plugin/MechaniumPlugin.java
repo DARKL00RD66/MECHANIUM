@@ -15,6 +15,7 @@ import dev.mechanium.storage.SqliteDataStore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.command.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.block.Block;
@@ -58,6 +59,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             dataStore = new SqliteDataStore(database, getLogger());
             api = new DefaultMechaniumApi(dataStore);
             registerConfiguredEras();
+            initializeServerEra();
             Bukkit.getServicesManager().register(MechaniumApi.class, api, this, ServicePriority.Normal);
 
             moduleManager = new ModuleManager();
@@ -166,6 +168,76 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         getConfig().set("progression.eras", merged);
     }
 
+    private void initializeServerEra() {
+        String fallback = getConfig().getString("progression.server-era",
+                getConfig().getString("progression.default-era", "ancient"));
+        String selected = api.getServerEra().orElse(fallback);
+        if (api.getEra(selected).isEmpty()) {
+            getLogger().warning("Era global persistida inválida: " + selected + ". Usando fallback.");
+            selected = getConfig().getString("progression.default-era", "ancient");
+        }
+        if (api.getEra(selected).isEmpty()) {
+            selected = api.getEras().stream()
+                    .min(Comparator.comparingInt(EraDefinition::order))
+                    .orElseThrow(() -> new IllegalStateException("Nenhuma era disponível para inicializar o servidor."))
+                    .id();
+        }
+        api.setServerEra(selected);
+        getConfig().set("progression.server-era", selected);
+        saveConfig();
+        getLogger().info("Era global do servidor: "
+                + api.getEra(selected).map(EraDefinition::displayName).orElse(selected));
+    }
+
+    String serverEraName() {
+        return api.getServerEra().flatMap(api::getEra)
+                .map(EraDefinition::displayName).orElse("Não definida");
+    }
+
+    void changeServerEra(String eraId) {
+        EraDefinition era = api.getEra(eraId)
+                .orElseThrow(() -> new IllegalArgumentException("Era inexistente: " + eraId));
+        String current = api.getServerEra().orElse(null);
+        if (era.id().equalsIgnoreCase(Objects.toString(current, ""))) return;
+
+        api.setServerEra(era.id());
+        getConfig().set("progression.server-era", era.id());
+        long revision = Math.max(0L,
+                getConfig().getLong("progression.global-era-announcement.revision", 0L)) + 1L;
+        getConfig().set("progression.global-era-announcement.revision", revision);
+        getConfig().set("progression.global-era-announcement.era-id", era.id());
+        getConfig().set("progression.global-era-announcement.display-name", era.displayName());
+
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            showEraAnnouncement(online, era.displayName());
+            getConfig().set("progression.global-era-announcement.seen."
+                    + online.getUniqueId(), revision);
+        }
+        saveConfig();
+    }
+
+    private void deliverPendingGlobalEraAnnouncement(Player player) {
+        Bukkit.getScheduler().runTask(this, () -> {
+            if (!player.isOnline()) return;
+            long revision = getConfig().getLong("progression.global-era-announcement.revision", 0L);
+            if (revision <= 0L) return;
+            String seenPath = "progression.global-era-announcement.seen." + player.getUniqueId();
+            if (getConfig().getLong(seenPath, 0L) >= revision) return;
+            String eraId = getConfig().getString("progression.global-era-announcement.era-id",
+                    api.getServerEra().orElse("ancient"));
+            String displayName = getConfig().getString("progression.global-era-announcement.display-name",
+                    api.getEra(eraId).map(EraDefinition::displayName).orElse(eraId));
+            showEraAnnouncement(player, displayName);
+            getConfig().set(seenPath, revision);
+            saveConfig();
+        });
+    }
+
+    private void showEraAnnouncement(Player player, String displayName) {
+        player.sendTitle("§6§lNova era", "§e" + displayName, 10, 80, 20);
+        player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+    }
+
     /** Applies administrator-managed recipe definitions after modules and addons register their canonical content. */
     private void applyConfiguredRecipeOverrides() {
         ConfigurationSection overrides = getConfig().getConfigurationSection("admin-recipe-overrides");
@@ -265,14 +337,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
-        if (api.getPlayerEra(playerId).isEmpty()) {
-            String defaultEra = getConfig().getString("progression.default-era", "ancient");
-            try {
-                api.setPlayerEra(playerId, defaultEra);
-            } catch (IllegalArgumentException exception) {
-                getLogger().severe("Era inicial inválida em config.yml: " + defaultEra);
-            }
-        }
+        // Players without a test override automatically inherit the current server-wide era.
+        deliverPendingGlobalEraAnnouncement(event.getPlayer());
         long startingPoints = Math.max(0L, getConfig().getLong("progression.starting-research-points", 40L));
         boolean hasResearch = api.getTechnologies().stream()
                 .anyMatch(technology -> api.hasUnlockedTechnology(playerId, technology.id()));
@@ -584,11 +650,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                 return true;
             }
             if (args.length == 3) {
-                getConfig().set("progression.default-era", eraId);
-                saveConfig();
-                for (Player online : Bukkit.getOnlinePlayers()) api.setPlayerEra(online.getUniqueId(), eraId);
-                sender.sendMessage(ChatColor.GREEN + "Era padrão do servidor alterada para " + eraId
-                        + ". Jogadores online atualizados; novos jogadores também começarão nela.");
+                changeServerEra(eraId);
+                String displayName = api.getEra(eraId).orElseThrow().displayName();
+                sender.sendMessage(ChatColor.GREEN + "Era GLOBAL do servidor alterada para "
+                        + displayName + ". Todos os jogadores herdam essa era; os avisos pendentes serão exibidos no próximo login.");
             } else if (args[3].equalsIgnoreCase("todos") || args[3].equalsIgnoreCase("all")) {
                 for (Player online : Bukkit.getOnlinePlayers()) api.setPlayerEra(online.getUniqueId(), eraId);
                 sender.sendMessage(ChatColor.GREEN + "Era de todos os jogadores online alterada para " + eraId + ".");
@@ -624,7 +689,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipes — configurar receitas vanilla");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin custom-recipes — editar receitas MECHANIUM");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipe <minecraft:id> <era|off>");
-        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin era <era> [jogador|todos]");
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin era <era> [jogador|todos] — sem alvo altera a era global");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin staff <add|remove|list> [jogador]");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin points <jogador> <quantidade>");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin setera <jogador> <era>");
@@ -651,7 +716,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipes" + ChatColor.GRAY + " — configurar bloqueios de receitas vanilla");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin custom-recipes" + ChatColor.GRAY + " — editar receitas MECHANIUM");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipe <minecraft:id> <era|off>");
-            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos]");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos] — sem alvo altera a era global");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin points <jogador> <quantidade>");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin setera <jogador> <era>");

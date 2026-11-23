@@ -1,6 +1,10 @@
 # Changelog
 
 ## 0.7.2.00-SNAPSHOT
+- Auditoria de consistência corrigiu dependências de tecnologias entre módulos (Culinary, Air Filtration, Metallurgy, Pressure Engineering, Automation e Logistics), e explicitou a dependência Energy no Battery Industry.
+- Corrigida colisão de IDs com o módulo Liquid: o cartucho de tratamento de água agora usa `water_filter_cartridge` e `water_filter_cartridge_recipe`.
+- Corrigida a produção dos geradores de materiais para permitir completar pilhas existentes em baús sem espaços vazios.
+- Adicionados testes de regressão para pré-requisitos tecnológicos entre módulos, IDs duplicados de tecnologias e dependências opcionais.
 - Adicionados cinco módulos oficiais: `aquaculture`, `glassworks`, `rail-freight`, `battery-industry` e `cold-chain`.
 - Aquaculture: ração, redes de criação, reaproveitamento de subprodutos, caixotes e incubadora aquícola.
 - Glassworks: carga de sílica, vidro industrial, painéis temperados, lentes de precisão e forno de vidro.

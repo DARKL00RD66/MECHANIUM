@@ -17,6 +17,8 @@ import java.util.Set;
 final class ExoticGardenModule extends AbstractBuiltinModule {
     @Override public String id() { return "exotic-garden"; }
 
+    @Override public boolean optional() { return true; }
+
     @Override public Set<String> dependencies() { return Set.of("agriculture"); }
 
     @Override protected List<TechnologyDefinition> technologies() {

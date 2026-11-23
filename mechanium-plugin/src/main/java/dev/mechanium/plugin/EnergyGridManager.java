@@ -41,12 +41,12 @@ final class EnergyGridManager implements Listener {
     private static final BlockFace[] FACES = {
             BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
-    private static final Set<String> ENERGY_ITEMS = Set.of("wind_rotor", "solar_cell", "energy_cell");
+    private static final Set<String> ENERGY_ITEMS = Set.of("wind_rotor", "solar_cell", "energy_cell", "atomic_reactor");
     private static final Set<String> POWERED_MACHINES = Set.of(
             "water_filter_machine", "advanced_assembly_machine",
             "industrial_crusher_machine", "industrial_smelter_machine", "industrial_mill_machine", "industrial_canner_machine",
             "chicken_incubator_machine", "cow_incubator_machine", "pig_incubator_machine", "sheep_incubator_machine",
-            "rapid_press_machine", "rapid_coil_winder_machine");
+            "rapid_press_machine", "rapid_coil_winder_machine", "air_purifier_machine");
     private static final int BATTERY_CAPACITY = 10_000;
 
     private final JavaPlugin plugin;
@@ -54,6 +54,7 @@ final class EnergyGridManager implements Listener {
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
     private final NamespacedKey chargeKey;
+    private final NamespacedKey reactorFuelSecondsKey;
     private BukkitTask task;
 
     EnergyGridManager(JavaPlugin plugin, MechaniumApi api) {
@@ -62,6 +63,7 @@ final class EnergyGridManager implements Listener {
         this.itemIdKey = NamespacedKey.fromString("mechanium:item_id");
         this.ownerKey = new NamespacedKey(plugin, "energy_owner");
         this.chargeKey = new NamespacedKey(plugin, "energy_charge");
+        this.reactorFuelSecondsKey = new NamespacedKey(plugin, "reactor_fuel_seconds");
     }
 
     void start() {
@@ -118,6 +120,8 @@ final class EnergyGridManager implements Listener {
             case "wind_rotor" -> Material.FURNACE;
             case "solar_cell" -> Material.SMOKER;
             case "energy_cell" -> Material.BARREL;
+            case "atomic_reactor" -> Material.BLAST_FURNACE;
+            case "atomic_reactor" -> Material.BLAST_FURNACE;
             default -> Material.AIR;
         };
         Block block = event.getBlockPlaced();
@@ -131,6 +135,9 @@ final class EnergyGridManager implements Listener {
                 event.getPlayer().getUniqueId().toString());
         if (id.equals("energy_cell")) {
             tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, 0);
+        }
+        if (id.equals("atomic_reactor")) {
+            tile.getPersistentDataContainer().set(reactorFuelSecondsKey, PersistentDataType.INTEGER, 0);
         }
         if (!tile.update(true, false)) {
             event.setCancelled(true);
@@ -152,6 +159,11 @@ final class EnergyGridManager implements Listener {
         } else if ("wind_rotor".equals(id) || "solar_cell".equals(id)) {
             event.getPlayer().sendMessage("§eGerador MECHANIUM: §f" + (id.equals("wind_rotor") ? "eólico" : "solar")
                     + " §7— conecte uma bateria por uma face.");
+        } else if ("atomic_reactor".equals(id) && state instanceof org.bukkit.block.TileState tile) {
+            int seconds = tile.getPersistentDataContainer().getOrDefault(
+                    reactorFuelSecondsKey, PersistentDataType.INTEGER, 0);
+            event.getPlayer().sendMessage("§eGerador atômico civil: §f" + seconds
+                    + "s de combustível restante §7— coloque uma Célula energética selada no espaço de combustível.");
         }
     }
 
@@ -169,12 +181,19 @@ final class EnergyGridManager implements Listener {
             return;
         }
         ItemStack recovered = api.createItemStack(id, 1).orElseGet(() -> new ItemStack(event.getBlock().getType()));
+        ItemStack remainingFuel = null;
+        if ("atomic_reactor".equals(id) && state instanceof org.bukkit.block.Container container) {
+            ItemStack fuel = container.getInventory().getItem(1);
+            if (isReactorFuel(fuel)) remainingFuel = fuel.clone();
+        }
+        final ItemStack fuelToDrop = remainingFuel;
         Location drop = event.getBlock().getLocation().add(0.5, 0.5, 0.5);
         Block block = event.getBlock();
         event.setDropItems(false);
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (!event.isCancelled() && block.getType().isAir()) {
                 block.getWorld().dropItemNaturally(drop, recovered);
+                if (fuelToDrop != null) block.getWorld().dropItemNaturally(drop, fuelToDrop);
             }
         });
     }
@@ -211,9 +230,13 @@ final class EnergyGridManager implements Listener {
                 for (BlockState state : chunk.getTileEntities()) {
                     if (!(state instanceof TileState tile)) continue;
                     String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
-                    if (!"wind_rotor".equals(id) && !"solar_cell".equals(id)) continue;
                     String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
                     if (owner == null) continue;
+                    if ("atomic_reactor".equals(id)) {
+                        generateReactor(state, tile, owner);
+                        continue;
+                    }
+                    if (!"wind_rotor".equals(id) && !"solar_cell".equals(id)) continue;
                     int production = "wind_rotor".equals(id) ? 1
                             : (world.getTime() < 12_000 && !world.hasStorm() ? 2 : 0);
                     if (production > 0) chargeAdjacentBattery(state.getBlock(), owner, production);
@@ -222,7 +245,35 @@ final class EnergyGridManager implements Listener {
         }
     }
 
-    private void chargeAdjacentBattery(Block generator, String owner, int production) {
+    private void generateReactor(BlockState state, TileState tile, String owner) {
+        if (!(state instanceof org.bukkit.block.Container container)) return;
+        int remaining = tile.getPersistentDataContainer().getOrDefault(
+                reactorFuelSecondsKey, PersistentDataType.INTEGER, 0);
+        if (remaining <= 0) {
+            ItemStack fuel = container.getInventory().getItem(1);
+            if (!isReactorFuel(fuel)) return;
+            if (fuel.getAmount() <= 1) container.getInventory().setItem(1, null);
+            else {
+                fuel.setAmount(fuel.getAmount() - 1);
+                container.getInventory().setItem(1, fuel);
+            }
+            remaining = Math.max(1, plugin.getConfig().getInt("energy.atomic-reactor.fuel-seconds", 600));
+        }
+        int output = Math.max(1, plugin.getConfig().getInt("energy.atomic-reactor.output-per-second", 12));
+        if (chargeAdjacentBattery(state.getBlock(), owner, output)) {
+            tile.getPersistentDataContainer().set(reactorFuelSecondsKey, PersistentDataType.INTEGER,
+                    Math.max(0, remaining - 1));
+            tile.update(true, false);
+        }
+    }
+
+    private boolean isReactorFuel(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return false;
+        return "reactor_fuel_cell".equals(item.getItemMeta().getPersistentDataContainer()
+                .get(itemIdKey, PersistentDataType.STRING));
+    }
+
+    private boolean chargeAdjacentBattery(Block generator, String owner, int production) {
         for (BlockFace face : FACES) {
             Block adjacent = adjacentLoaded(generator, face);
             if (adjacent == null || !isBattery(adjacent, owner)) continue;
@@ -233,8 +284,9 @@ final class EnergyGridManager implements Listener {
             int updated = Math.min(BATTERY_CAPACITY, charge + production);
             tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, updated);
             tile.update(true, false);
-            return;
+            return true;
         }
+        return false;
     }
 
     private boolean isBattery(Block block, String owner) {

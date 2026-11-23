@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.1-SNAPSHOT
+- Animação de abertura dos menus mais cadenciada: moldura revelada em grupos de 3 itens e conteúdo em grupos de 2, com intervalo de 2 ticks por etapa.
+- Pesquisas agora possuem tempo individual; duração padrão calculada pelo custo científico e pela era, com mínimo obrigatório de 120 segundos.
+- Sobrescritas por tecnologia em `progression.research.overrides`, mantendo o mínimo de dois minutos.
+- Pesquisas em andamento persistidas no SQLite (schema 6); o prazo continua correndo enquanto o jogador está offline e após reinicializações.
+- Pontos científicos são debitados ao iniciar a pesquisa; a tecnologia só é desbloqueada quando o prazo termina.
+- Menu mostra estado, porcentagem, barra de progresso, duração estimada e tempo restante; contador atualiza sem reabrir a tela.
+- Comando `/mechanium unlock` passa a iniciar a pesquisa temporizada; método de desbloqueio instantâneo da API é preservado para compatibilidade.
+- Testes para persistência após reinicialização, conclusão após tempo offline, débito atômico e cálculo de duração.
+- Versão patch avançada para 0.4.1-SNAPSHOT.
+
 ## 0.4.0-SNAPSHOT
 - Catálogo vanilla ampliado por descoberta automática do registro de receitas do Paper 1.21.11, com paginação no painel administrativo.
 - Novas receitas suportadas recebem uma era histórica sugerida automaticamente; regras existentes e alterações administrativas são preservadas.

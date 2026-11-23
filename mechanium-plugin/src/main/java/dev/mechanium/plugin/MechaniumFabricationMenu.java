@@ -1,9 +1,11 @@
 package dev.mechanium.plugin;
 
 import dev.mechanium.api.MechaniumApi;
+import dev.mechanium.api.model.ContentCategory;
 import dev.mechanium.api.model.ItemDefinition;
-import dev.mechanium.api.model.RecipeDefinition;
 import dev.mechanium.api.model.MachineDefinition;
+import dev.mechanium.api.model.RecipeDefinition;
+import dev.mechanium.api.model.TechnologyDefinition;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -18,38 +20,64 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Click-to-fabricate catalog. Ingredient checks and consumption are performed server-side,
- * including exact MECHANIUM item IDs stored in the item's PDC.
+ * Categorized click-to-fabricate catalog. It validates all ingredients and inventory capacity
+ * against a temporary inventory before committing consumption and output in one operation.
  */
 final class MechaniumFabricationMenu implements Listener {
-    private static final int[] SLOTS = {10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34,37,38,39,40,41,42,43};
+    private static final int[] SLOTS = {
+            10,11,12,13,14,15,16,19,20,21,22,23,24,25,
+            28,29,30,31,32,33,34,37,38,39,40,41,42,43
+    };
     private static final NamespacedKey ITEM_ID = new NamespacedKey("mechanium", "item_id");
-    private final MechaniumPlugin plugin;
+
+    private final JavaPlugin plugin;
     private final MechaniumApi api;
 
-    MechaniumFabricationMenu(MechaniumPlugin plugin, MechaniumApi api) {
+    MechaniumFabricationMenu(JavaPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
         this.api = api;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    void open(Player player) { open(player, 0); }
+    void open(Player player) {
+        open(player, 0, ItemFilter.ALL, 0);
+    }
 
-    private void open(Player player, int requestedPage) {
+    private void open(Player player, int requestedPage, ItemFilter filter, int requestedCategory) {
+        List<ContentCategory> categories = api.getCategories().stream()
+                .sorted(Comparator.comparing(ContentCategory::displayName, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+        int categoryIndex = Math.max(0, Math.min(requestedCategory, categories.size()));
+        String categoryId = categoryIndex == 0 ? null : categories.get(categoryIndex - 1).id();
+        Map<String, MachineDefinition> machineByItem = new HashMap<>();
+        api.getMachines().forEach(machine -> machineByItem.put(machine.machineItemId(), machine));
+
         List<RecipeDefinition> recipes = api.getRecipes().stream()
                 .filter(recipe -> api.getItem(recipe.resultItemId()).isPresent())
+                .filter(recipe -> {
+                    boolean machine = machineByItem.containsKey(recipe.resultItemId());
+                    return switch (filter) {
+                        case ALL -> true;
+                        case MACHINES -> machine;
+                        case ITEMS -> !machine;
+                    };
+                })
+                .filter(recipe -> categoryId == null || api.getItem(recipe.resultItemId())
+                        .map(item -> categoryId.equals(item.categoryId())).orElse(false))
                 .sorted(Comparator
-                        .comparing((RecipeDefinition r) -> api.getItem(r.resultItemId())
+                        .comparing((RecipeDefinition recipe) -> api.getItem(recipe.resultItemId())
                                 .map(ItemDefinition::categoryId).orElse("misc"))
-                        .thenComparing(r -> api.getItem(r.resultItemId())
-                                .map(ItemDefinition::displayName).orElse(r.resultItemId()),
+                        .thenComparing(recipe -> api.getItem(recipe.resultItemId())
+                                .map(ItemDefinition::displayName).orElse(recipe.resultItemId()),
                                 String.CASE_INSENSITIVE_ORDER))
                 .toList();
+
         int pages = Math.max(1, (recipes.size() + SLOTS.length - 1) / SLOTS.length);
         int page = Math.max(0, Math.min(requestedPage, pages - 1));
         Holder holder = new Holder();
@@ -59,53 +87,127 @@ final class MechaniumFabricationMenu implements Listener {
         for (int slot = 0; slot < 54; slot++) {
             if (slot < 9 || slot >= 45 || slot % 9 == 0 || slot % 9 == 8) inv.setItem(slot, frame);
         }
-        inv.setItem(4, named(Material.KNOWLEDGE_BOOK, "§6§lCATÁLOGO DE FABRICAÇÃO",
-                List.of("§7Pontos de pesquisa: §b" + api.getResearchPoints(player.getUniqueId()),
-                        "§7Página: §f" + (page + 1) + "/" + pages,
-                        "§8Clique em um item para fabricar.",
-                        "§8Os ingredientes são consumidos do inventário.")));
+
+        String categoryName = categoryId == null ? "Todas" : categories.get(categoryIndex - 1).displayName();
+        inv.setItem(4, named(Material.KNOWLEDGE_BOOK, "§6§lCATÁLOGO DE FABRICAÇÃO", List.of(
+                "§7Pontos de pesquisa: §b" + api.getResearchPoints(player.getUniqueId()),
+                "§7Tipo: §f" + filter.label,
+                "§7Categoria: §f" + categoryName,
+                "§7Resultados: §f" + recipes.size(),
+                "§7Página: §f" + (page + 1) + "/" + pages,
+                "§8Clique no resultado para fabricar.",
+                "§8Os ingredientes são consumidos do inventário."
+        )));
+
         int start = page * SLOTS.length;
         int count = Math.min(SLOTS.length, recipes.size() - start);
         for (int i = 0; i < count; i++) {
             RecipeDefinition recipe = recipes.get(start + i);
             ItemDefinition item = api.getItem(recipe.resultItemId()).orElseThrow();
-            MachineDefinition machineDefinition = api.getMachines().stream()
-                    .filter(m -> m.machineItemId().equals(item.id())).findFirst().orElse(null);
-            boolean machine = machineDefinition != null;
+            MachineDefinition machine = machineByItem.get(item.id());
+            boolean unlocked = api.canCraft(player.getUniqueId(), recipe.id())
+                    && api.canUseItem(player.getUniqueId(), item.id());
+            boolean ingredientsAvailable = hasIngredients(player, recipe);
             Material icon = Material.matchMaterial(item.material());
             if (icon == null || !icon.isItem()) icon = Material.BARRIER;
+
             List<String> lore = new ArrayList<>();
-            lore.add("§7Categoria: §f" + api.getCategory(item.categoryId())
-                    .map(category -> category.displayName()).orElse(item.categoryId()));
-            lore.add("§7Tipo: " + (machine ? "§6Máquina" : "§bComponente/item"));
-            lore.add("§7Receita: §f" + recipe.id());
-            lore.add("§7Tecnologia: §f" + Objects.toString(recipe.requiredTechnologyId(), "Nenhuma"));
-            if (machineDefinition != null) {
-                lore.add("§7Processo: §f" + ingredientLabel(machineDefinition.inputId()) + " → "
-                        + api.getItem(machineDefinition.outputItemId())
-                        .map(ItemDefinition::displayName).orElse(machineDefinition.outputItemId()));
-                lore.add("§7Duração: §f" + (machineDefinition.processingTicks() / 20) + "s por ciclo");
+            String displayCategory = api.getCategory(item.categoryId())
+                    .map(ContentCategory::displayName).orElse(item.categoryId());
+            lore.add("§7Categoria: §f" + displayCategory);
+            lore.add("§7Classificação: " + (machine == null ? "§bItem / componente" : "§6Máquina"));
+            lore.add("§7ID: §8" + item.id());
+            lore.add("§7Receita: §8" + recipe.id());
+
+            String requiredTech = recipe.requiredTechnologyId() != null
+                    ? recipe.requiredTechnologyId() : item.requiredTechnologyId();
+            if (requiredTech != null) {
+                TechnologyDefinition technology = api.getTechnology(requiredTech).orElse(null);
+                lore.add("§7Pesquisa: §d" + (technology == null ? requiredTech : technology.displayName()));
+            } else {
+                lore.add("§7Pesquisa: §aNenhuma");
             }
-            lore.add("§7Ingredientes:");
-            ingredientCounts(recipe).forEach((ingredient, amount) ->
-                    lore.add(" §8• §f" + ingredientLabel(ingredient) + " x" + amount));
-            lore.add(api.canCraft(player.getUniqueId(), recipe.id())
-                    && api.canUseItem(player.getUniqueId(), item.id())
-                    ? "§aClique para fabricar."
-                    : "§cTecnologia ainda bloqueada.");
+
+            if (machine != null) {
+                lore.add("§7Processo: §f" + ingredientLabel(machine.inputId()) + " x" + machine.inputAmount()
+                        + " → " + api.getItem(machine.outputItemId())
+                        .map(ItemDefinition::displayName).orElse(machine.outputItemId()));
+                lore.add("§7Duração: §f" + (machine.processingTicks() / 20) + " segundos por ciclo");
+            }
+
+            lore.add("§7Ingredientes necessários:");
+            ingredientCounts(recipe).entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> lore.add(" §8• §f" + ingredientLabel(entry.getKey()) + " x" + entry.getValue()));
+
+            if (!unlocked) lore.add("§cBloqueado: conclua a pesquisa indicada.");
+            else if (!ingredientsAvailable) lore.add("§eFaltam ingredientes no seu inventário.");
+            else lore.add("§aClique para fabricar e consumir os ingredientes.");
+
             int slot = SLOTS[i];
-            inv.setItem(slot, named(icon, "§e" + item.displayName(), lore));
+            inv.setItem(slot, named(icon, (machine == null ? "§b" : "§6") + item.displayName(), lore));
             holder.actions.put(slot, p -> {
                 craft(p, recipe);
-                open(p, page);
+                open(p, page, filter, categoryIndex);
             });
         }
-        if (page > 0) holder.actions.put(45, p -> open(p, page - 1));
-        if (page > 0) inv.setItem(45, named(Material.ARROW, "§ePágina anterior", List.of()));
-        if (page + 1 < pages) holder.actions.put(53, p -> open(p, page + 1));
-        if (page + 1 < pages) inv.setItem(53, named(Material.ARROW, "§ePróxima página", List.of()));
-        holder.actions.put(49, Player::closeInventory);
+
+        if (recipes.isEmpty()) {
+            inv.setItem(22, named(Material.BARRIER, "§cNenhum resultado nesta seleção", List.of(
+                    "§7Mude o tipo de conteúdo ou a categoria.",
+                    "§7Alguns conteúdos podem estar em módulos desativados."
+            )));
+        }
+
+        if (page > 0) {
+            inv.setItem(45, named(Material.ARROW, "§ePágina anterior", List.of()));
+            holder.actions.put(45, p -> open(p, page - 1, filter, categoryIndex));
+        }
+        inv.setItem(46, named(Material.HOPPER, "§eFiltro de tipo: " + filter.label,
+                List.of("§7Clique para alternar:", "§fTodos → Máquinas → Itens")));
+        holder.actions.put(46, p -> open(p, 0, filter.next(), categoryIndex));
+
+        inv.setItem(47, named(Material.ARROW, "§eCategoria anterior", List.of(
+                "§7Atual: §f" + categoryName
+        )));
+        holder.actions.put(47, p -> open(p, 0, filter,
+                categoryIndex == 0 ? categories.size() : categoryIndex - 1));
+
+        inv.setItem(48, named(Material.BOOK, "§bCategoria: " + categoryName, List.of(
+                "§7Clique para avançar para a próxima categoria.",
+                "§7Categorias disponíveis: §f" + categories.size()
+        )));
+        holder.actions.put(48, p -> open(p, 0, filter,
+                categoryIndex >= categories.size() ? 0 : categoryIndex + 1));
+
         inv.setItem(49, named(Material.BARRIER, "§cFechar", List.of()));
+        holder.actions.put(49, Player::closeInventory);
+
+        inv.setItem(50, named(Material.NETHER_STAR, "§bSeus pontos: "
+                + api.getResearchPoints(player.getUniqueId()), List.of(
+                "§7Ganhe pontos minerando novos minérios,",
+                "§7explorando novos biomas e concluindo conquistas.",
+                "§7Use /mechanium points para consultar."
+        )));
+        holder.actions.put(50, p -> {
+            p.sendMessage("§bPontos de pesquisa disponíveis: §f" + api.getResearchPoints(p.getUniqueId()));
+            p.sendMessage("§7Minere novos tipos de minério, explore biomas inéditos e conclua conquistas.");
+        });
+
+        inv.setItem(51, named(Material.CRAFTING_TABLE, "§aComo fabricar", List.of(
+                "§71. Escolha a categoria e o tipo.",
+                "§72. Passe o mouse para ver os ingredientes.",
+                "§73. Clique no resultado para fabricar.",
+                "§7Os itens necessários serão consumidos."
+        )));
+        if (categoryIndex != 0 || filter != ItemFilter.ALL) {
+            inv.setItem(52, named(Material.MILK_BUCKET, "§eLimpar filtros", List.of("§7Mostrar todos os itens e máquinas.")));
+            holder.actions.put(52, p -> open(p, 0, ItemFilter.ALL, 0));
+        }
+        if (page + 1 < pages) {
+            inv.setItem(53, named(Material.ARROW, "§ePróxima página", List.of()));
+            holder.actions.put(53, p -> open(p, page + 1, filter, categoryIndex));
+        }
         player.openInventory(inv);
     }
 
@@ -114,31 +216,53 @@ final class MechaniumFabricationMenu implements Listener {
         if (resultDefinition == null) return;
         if (!api.canCraft(player.getUniqueId(), recipe.id())
                 || !api.canUseItem(player.getUniqueId(), resultDefinition.id())) {
-            player.sendMessage("§cVocê ainda não desbloqueou a tecnologia necessária para fabricar isso.");
+            player.sendMessage("§cTecnologia bloqueada. Abra a árvore de pesquisas para verificar os pré-requisitos.");
             return;
         }
+
         Map<String, Integer> required = ingredientCounts(recipe);
-        for (var entry : required.entrySet()) {
-            if (count(player, entry.getKey()) < entry.getValue()) {
+        ItemStack[] simulatedContents = cloneContents(player.getInventory().getStorageContents());
+        for (Map.Entry<String, Integer> entry : required.entrySet()) {
+            int available = count(simulatedContents, entry.getKey());
+            if (available < entry.getValue()) {
                 player.sendMessage("§cFaltam ingredientes: §f" + ingredientLabel(entry.getKey())
-                        + " x" + entry.getValue() + "§c.");
+                        + " x" + (entry.getValue() - available) + "§c.");
                 return;
             }
+            consume(simulatedContents, entry.getKey(), entry.getValue());
         }
+
         ItemStack result = api.createItemStack(recipe.resultItemId(), recipe.resultAmount()).orElse(null);
         if (result == null) {
             player.sendMessage("§cO resultado desta receita não pôde ser criado.");
             return;
         }
+
         Inventory simulation = Bukkit.createInventory(null, 36);
-        simulation.setStorageContents(player.getInventory().getStorageContents());
-        if (!simulation.addItem(result.clone()).isEmpty()) {
+        simulation.setStorageContents(simulatedContents);
+        for (Map.Entry<String, Integer> entry : required.entrySet()) {
+            Material remainder = craftingRemainder(entry.getKey());
+            if (remainder != null) {
+                Map<Integer, ItemStack> leftovers = simulation.addItem(new ItemStack(remainder, entry.getValue()));
+                if (!leftovers.isEmpty()) {
+                    player.sendMessage("§cLibere espaço no inventário para receber o recipiente vazio e o resultado.");
+                    return;
+                }
+            }
+        }
+        if (!simulation.addItem(result).isEmpty()) {
             player.sendMessage("§cLibere espaço no inventário antes de fabricar.");
             return;
         }
-        for (var entry : required.entrySet()) remove(player, entry.getKey(), entry.getValue());
-        player.getInventory().addItem(result);
-        player.sendMessage("§aFabricado: §f" + resultDefinition.displayName() + " §7x" + recipe.resultAmount());
+
+        player.getInventory().setStorageContents(simulation.getStorageContents());
+        player.sendMessage("§aFabricado: §f" + resultDefinition.displayName()
+                + " §7x" + recipe.resultAmount() + "§a. Ingredientes consumidos.");
+    }
+
+    private boolean hasIngredients(Player player, RecipeDefinition recipe) {
+        return ingredientCounts(recipe).entrySet().stream()
+                .allMatch(entry -> count(player.getInventory().getStorageContents(), entry.getKey()) >= entry.getValue());
     }
 
     private Map<String, Integer> ingredientCounts(RecipeDefinition recipe) {
@@ -146,22 +270,25 @@ final class MechaniumFabricationMenu implements Listener {
         if (recipe.type() == RecipeDefinition.Type.SHAPELESS) {
             recipe.ingredients().values().forEach(value -> counts.merge(value, 1, Integer::sum));
         } else {
-            recipe.shape().forEach(row -> row.chars().filter(c -> c != ' ').forEach(c ->
-                    counts.merge(recipe.ingredients().get((char)c), 1, Integer::sum)));
+            recipe.shape().forEach(row -> row.chars().filter(character -> character != ' ').forEach(character ->
+                    counts.merge(recipe.ingredients().get((char) character), 1, Integer::sum)));
         }
         return counts;
     }
 
     private int count(Player player, String ingredient) {
+        return count(player.getInventory().getStorageContents(), ingredient);
+    }
+
+    private int count(ItemStack[] contents, String ingredient) {
         int total = 0;
-        for (ItemStack stack : player.getInventory().getStorageContents()) {
+        for (ItemStack stack : contents) {
             if (matches(stack, ingredient)) total += stack.getAmount();
         }
         return total;
     }
 
-    private void remove(Player player, String ingredient, int amount) {
-        ItemStack[] contents = player.getInventory().getStorageContents();
+    private void consume(ItemStack[] contents, String ingredient, int amount) {
         int remaining = amount;
         for (int i = 0; i < contents.length && remaining > 0; i++) {
             ItemStack stack = contents[i];
@@ -171,7 +298,19 @@ final class MechaniumFabricationMenu implements Listener {
             if (stack.getAmount() <= 0) contents[i] = null;
             remaining -= take;
         }
-        player.getInventory().setStorageContents(contents);
+    }
+
+    private ItemStack[] cloneContents(ItemStack[] source) {
+        ItemStack[] clone = new ItemStack[source.length];
+        for (int i = 0; i < source.length; i++) clone[i] = source[i] == null ? null : source[i].clone();
+        return clone;
+    }
+
+    private Material craftingRemainder(String ingredient) {
+        return switch (ingredient) {
+            case "WATER_BUCKET", "LAVA_BUCKET", "MILK_BUCKET", "POWDER_SNOW_BUCKET" -> Material.BUCKET;
+            default -> null;
+        };
     }
 
     private boolean matches(ItemStack stack, String ingredient) {
@@ -215,6 +354,20 @@ final class MechaniumFabricationMenu implements Listener {
     @EventHandler
     public void onDrag(InventoryDragEvent event) {
         if (event.getView().getTopInventory().getHolder() instanceof Holder) event.setCancelled(true);
+    }
+
+    private enum ItemFilter {
+        ALL("Todos"), MACHINES("Máquinas"), ITEMS("Itens / componentes");
+
+        private final String label;
+        ItemFilter(String label) { this.label = label; }
+        private ItemFilter next() {
+            return switch (this) {
+                case ALL -> MACHINES;
+                case MACHINES -> ITEMS;
+                case ITEMS -> ALL;
+            };
+        }
     }
 
     private static final class Holder implements InventoryHolder {

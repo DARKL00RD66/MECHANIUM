@@ -12,7 +12,7 @@ O projeto seguirá a sequência de snapshots definida para chegar à primeira ve
 
 ## Marco atual
 
-A linha atual é `0.4.0-SNAPSHOT`, iniciada pela ampliação do catálogo de receitas vanilla e pela primeira expansão do módulo ExoticGarden.
+A linha atual é `0.4.1-SNAPSHOT`, iniciada pela ampliação do catálogo vanilla (0.4.0) e refinada com animações e pesquisas temporizadas (0.4.1).
 
 ## Sincronização obrigatória
 

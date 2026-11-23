@@ -72,6 +72,13 @@
 - **HardcoreSlimefun:** kit de manutenção desbloqueado por pesquisa, parâmetros configuráveis de desgaste e modo hardcore opcional (multiplicador de desgaste e reparo com ferro).
 - Os três domínios são reimplementações independentes; nenhum JAR upstream do Slimefun foi adicionado como dependência.
 
+## Expansão 0.7.0.01-SNAPSHOT
+
+- **Material Generators (SMG):** oito geradores passivos; baú diretamente acima; um item a cada 200 ticks por padrão; progresso persistido no bloco; propriedade e proteção contra desmontagem por terceiros, explosões e pistões.
+- **Progressão:** quatro geradores básicos exigem `basic_material_generation`; quatro geradores avançados exigem `advanced_material_generation`.
+- **Configuração:** `modules.material-generators.enabled` e `modules.material-generators.interval-ticks`.
+- **Limite:** produção em um único baú superior, sem rede de distribuição, filtros ou upgrades de velocidade nesta etapa.
+
 ## Limitações conhecidas
 
 - O runtime de máquinas ainda suporta apenas dispenser, uma entrada e uma saída; não há filas de produção nem múltiplos insumos/produtos. As incubadoras e máquinas rápidas herdam esse limite.
@@ -94,3 +101,11 @@
 ## Classificação
 
 **Fundação em desenvolvimento; funcionalidades 0.5.0-SNAPSHOT aguardam CI e validação no servidor real.**
+
+
+Expansão em revisão: Forestry, Textile Industry, Biofuel e Construction Materials foram adicionados como módulos opcionais. PR #10 aguarda CI Java 21/Maven.
+
+
+## Snapshot 0.7.1.00-SNAPSHOT
+
+Quatro novos módulos foram registrados no catálogo: Water Treatment, Greenhouse, Industrial Recycling e Ore Chunks. Eles acrescentam 18 itens novos, 4 categorias, 8 tecnologias e 18 receitas de progressão. Os módulos são configuráveis individualmente. A validação Maven/CI e os testes de gameplay Paper/Purpur ainda precisam confirmar o funcionamento integrado.

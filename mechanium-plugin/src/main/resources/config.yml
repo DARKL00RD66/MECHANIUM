@@ -163,6 +163,39 @@ modules:
     enabled: true
   industrial-logistics:
     enabled: true
+  forestry:
+    enabled: true
+  textile-industry:
+    enabled: true
+  biofuel:
+    enabled: true
+  construction-materials:
+    enabled: true
+  industrial-networks:
+    enabled: true
+  better-reactor:
+    enabled: true
+  material-generators:
+    enabled: true
+    interval-ticks: 200
+  water-treatment:
+    enabled: true
+  greenhouse:
+    enabled: true
+  industrial-recycling:
+    enabled: true
+  ore-chunks:
+    enabled: true
+  aquaculture:
+    enabled: true
+  glassworks:
+    enabled: true
+  rail-freight:
+    enabled: true
+  battery-industry:
+    enabled: true
+  cold-chain:
+    enabled: true
 
 machines:
   wear:

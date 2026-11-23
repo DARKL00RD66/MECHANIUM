@@ -36,6 +36,7 @@
 - [ ] Filas de produção, múltiplos insumos/produtos e limites configuráveis por tick
 - [ ] Redes de energia extensíveis por cabos e distribuição entre várias máquinas
 - [ ] Sistema geral de fluidos com líquidos adicionais e válvulas
+- [x] Primeira rede local de conduítes e caixas para transporte de itens MECHANIUM (limite 128 conduítes)
 - [ ] Rede de armazéns entre locais distantes e logística automatizada
 - [ ] Ampliar armazenamento portátil com mais tiers, filtros e upgrades adicionais (primeiro upgrade de 54 espaços implementado)
 - [ ] Economia monetária, preços e integração com plugin de economia
@@ -74,6 +75,15 @@
 - [ ] Documentação de migração entre versões da API
 - [ ] Publicação da API em registry Maven
 
+## 0.7.0.01-SNAPSHOT — Geradores de materiais
+- [x] Identificar a referência SMG (SimpleMaterialGenerators) e sua licença GPL-3.0
+- [x] Oito geradores passivos com baú superior e produção configurável
+- [x] Persistir progresso de produção no bloco
+- [x] Controle de propriedade e proteção contra desmontagem indevida, explosões e pistões
+- [x] Integrar receitas e desbloqueios ao motor central de tecnologias
+- [ ] Testar produção, reinício, baú duplo, chunks e proteção em Paper/Purpur 1.21.11
+- [ ] Adicionar upgrades de velocidade, melhorias de armazenamento e distribuição logística
+
 ## Critérios de aceite por recurso
 - Teste unitário da regra de negócio
 - Teste de persistência e reinício
@@ -83,3 +93,20 @@
 - Proveniência e licença registradas para qualquer código externo
 
 O projeto só deve ser considerado pronto para produção depois da CI, dos testes funcionais em Paper/Purpur e da validação dos critérios de aceite.
+
+
+## 0.7.0.01-SNAPSHOT — Expansão de addons
+- Primeira etapa do domínio Networks: conduítes e caixas com transporte local de itens MECHANIUM.
+- Primeira etapa de Better Nuclear Reactor: gerador cristalino abstrato de jogo, sem simulação real.
+- Forestry, Textile Industry, Biofuel e Construction Materials como módulos oficiais opcionais.
+- Próximos alvos de auditoria: Networks, Better Nuclear Reactor (somente abstração de jogo), GeyserHeads (compatibilidade de apresentação) e referências cuja identidade/licença ainda precisa ser confirmada.
+
+
+## 0.7.1.00-SNAPSHOT — expansão de addons
+- [x] Water Treatment: cadeia de filtragem e recirculação hídrica
+- [x] Greenhouse: cultivo protegido e hidroponia
+- [x] Industrial Recycling: reciclagem e triagem de materiais
+- [x] Ore Chunks: fragmentação e compactação de minérios
+- [x] Registrar os quatro módulos no catálogo, testes de catálogo e configuração
+- [ ] Validar receitas e pré-requisitos de pesquisa em Paper/Purpur 1.21.11
+- [ ] Implementar máquinas runtime específicas para estas quatro cadeias

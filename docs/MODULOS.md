@@ -152,3 +152,42 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 - Não há integração com economia para calcular preços monetários.
 - Não há filas de produção, processamento paralelo ou múltiplas receitas simultâneas; manutenção de máquinas já existe via ferro e kit pesquisável.
 - O conteúdo relacionado a armas, ataques, mísseis ou interferência não faz parte do escopo. Sistemas civis e industriais permanecem no escopo.
+
+
+## Novos módulos 0.7.0-SNAPSHOT
+
+- industrial-networks: conduítes industriais e caixas de rede com transporte automático de itens MECHANIUM.
+- better-reactor: gerador cristalino fictício de alta potência, conectado à rede de baterias.
+
+- `forestry`: fibras de madeira, resina e estação florestal.
+- `textile-industry`: fibras, tecidos e tear mecanizado.
+- `biofuel`: biomassa e célula de biocombustível abstrata.
+- `construction-materials`: cerâmica, painéis e estruturas pré-fabricadas.
+
+Todos são opcionais e podem ser configurados individualmente.
+
+### Better Reactor — geração abstrata de energia
+
+- O módulo usa um gerador cristalino fictício colocado como blast furnace.
+- Clique com um cristal energético MECHANIUM na mão para abastecer o gerador; uma unidade dura cinco minutos.
+- Enquanto abastecido, gera 8 unidades de energia por segundo para uma bateria MECHANIUM adjacente do mesmo proprietário.
+- A energia é uma mecânica abstrata do jogo. Não há combustível nuclear real, parâmetros físicos, projeto técnico ou simulação de reator real.
+
+### Industrial Networks — transporte de itens
+
+- industrial_conduit é instalado como dispenser e network_crate como barril.
+- Conduítes adjacentes formam uma rede de até 128 blocos; caixas adjacentes aos conduítes entram na rede se tiverem o mesmo proprietário.
+- A cada 2 segundos, a rede tenta mover um item MECHANIUM de uma caixa para outra com espaço.
+- Apenas itens com identidade persistente MECHANIUM são transportados; itens vanilla permanecem nos depósitos.
+- Somente chunks carregados são examinados. A rede não atravessa distâncias sem conduítes nem conecta depósitos remotamente.
+- As caixas são protegidas pelo proprietário e seus conteúdos são devolvidos ao desmontar o bloco. O transporte por funis externos é bloqueado nas caixas e conduítes.
+
+
+## Expansão 0.7.1.00-SNAPSHOT — quatro novos addons
+
+- `water-treatment`: filtragem básica, células de água purificada, fluido refrigerante e recirculação industrial.
+- `greenhouse`: cultivo protegido, painéis de estufa, solução nutritiva e bandejas hidropônicas; depende de Agriculture e Water Treatment.
+- `industrial-recycling`: sucata mista, materiais separados e triagem de resíduos para cadeias circulares.
+- `ore-chunks`: fragmentos minerais de ferro, cobre e ouro e lotes compactados; depende de Geology e Ore Processing.
+
+Todos possuem receitas e pesquisas próprias e podem ser ativados ou desativados individualmente em `config.yml`.

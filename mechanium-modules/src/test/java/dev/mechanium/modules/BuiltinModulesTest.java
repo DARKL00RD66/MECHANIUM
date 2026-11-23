@@ -34,7 +34,23 @@ class BuiltinModulesTest {
                 "advanced-metallurgy",
                 "pressure-engineering",
                 "industrial-automation",
-                "industrial-logistics"
+                "industrial-logistics",
+                "forestry",
+                "textile-industry",
+                "biofuel",
+                "construction-materials",
+                "industrial-networks",
+                "better-reactor",
+                "material-generators",
+                "water-treatment",
+                "greenhouse",
+                "industrial-recycling",
+                "ore-chunks",
+                "aquaculture",
+                "glassworks",
+                "rail-freight",
+                "battery-industry",
+                "cold-chain"
         )));
     }
 

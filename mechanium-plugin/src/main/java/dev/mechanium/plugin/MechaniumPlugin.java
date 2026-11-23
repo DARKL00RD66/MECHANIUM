@@ -47,6 +47,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumMachineManager machineManager;
     private EnergyGridManager energyGridManager;
     private FluidPipeManager fluidPipeManager;
+    private IndustrialNetworkManager industrialNetworkManager;
+    private MaterialGeneratorManager materialGeneratorManager;
     private SpecialEquipmentListener specialEquipmentListener;
     private SimpleStorageNetworkListener simpleStorageNetworkListener;
     private TownyNationHook townyNationHook;
@@ -102,8 +104,18 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             fluidPipeManager = new FluidPipeManager(this, api);
             Bukkit.getPluginManager().registerEvents(fluidPipeManager, this);
             fluidPipeManager.start();
+            if (moduleManager.enabledModuleIds().contains("industrial-networks")) {
+                industrialNetworkManager = new IndustrialNetworkManager(this, api);
+                Bukkit.getPluginManager().registerEvents(industrialNetworkManager, this);
+                industrialNetworkManager.start();
+            }
             specialEquipmentListener = new SpecialEquipmentListener(this);
             Bukkit.getPluginManager().registerEvents(specialEquipmentListener, this);
+            if (moduleManager.enabledModuleIds().contains("material-generators")) {
+                materialGeneratorManager = new MaterialGeneratorManager(this, api);
+                Bukkit.getPluginManager().registerEvents(materialGeneratorManager, this);
+                materialGeneratorManager.start();
+            }
             machineManager = new MechaniumMachineManager(this, api, energyGridManager);
             Bukkit.getPluginManager().registerEvents(machineManager, this);
             machineManager.start();
@@ -913,6 +925,14 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         if (fluidPipeManager != null) {
             fluidPipeManager.stop();
             fluidPipeManager = null;
+        }
+        if (materialGeneratorManager != null) {
+            materialGeneratorManager.stop();
+            materialGeneratorManager = null;
+        }
+        if (industrialNetworkManager != null) {
+            industrialNetworkManager.stop();
+            industrialNetworkManager = null;
         }
         if (energyGridManager != null) {
             energyGridManager.stop();

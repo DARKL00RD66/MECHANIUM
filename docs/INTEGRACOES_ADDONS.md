@@ -21,17 +21,17 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | SlimefunWarfare | Não serão portadas mecânicas de combate | Excluído do escopo operacional |
 | Liquid | Redes de fluidos e armazenamento | Filtro, tanques e transporte de água purificada por tubulações |
 | SlimeCustomizer | Ferramentas de configuração de conteúdo | API e addons externos formam a fundação; interface administrativa pendente |
-| SMG | Identidade e comportamento da referência ainda precisam ser confirmados | Aguardando validação |
+| SMG (SimpleMaterialGenerators) | Geradores passivos de materiais com baú superior | Primeira etapa implementada: oito geradores com progresso persistente, propriedade, baú superior e desbloqueios por pesquisa; upgrades e distribuição pendentes |
 | Simple Storage | Armazenamento compartilhado e logística | Rede local paginada de até 64 nós adjacentes, com propriedade e acesso |
 | Galactifun | Conteúdo de exploração espacial | Apenas módulo futurista opcional, desativado por padrão |
 | FNAmplifications | Extensões de conteúdo e amplificação | Aguardando validação funcional e de licença |
 | Element Manipulation | Conteúdo fantástico | Apenas módulo de fantasia opcional, desativado por padrão |
 | DankTech2 | Armazenamento portátil | Primeira expansão: upgrade para armazém portátil persistente de 54 espaços; outras tiers e filtros pendentes |
-| Networks | Redes logísticas entre máquinas e depósitos | Planejado; redes atuais são locais e específicas por domínio |
+| Networks | Redes logísticas entre máquinas e depósitos | Primeira etapa: conduítes e caixas protegidas transportam itens MECHANIUM em redes locais de até 128 conduítes; logística remota pendente |
 | MissileWarfare | Não serão portadas armas, mísseis ou mecânicas de ataque | Excluído do escopo operacional |
 | EMCTech | Processamento e conversão de recursos | Aguardando confirmação da referência e da licença |
 | Gastronomicon | Culinária e conservação de alimentos | Primeira cadeia de culinária adicionada |
-| Better Nuclear Reactor | Modelagem abstrata de geração e eficiência energética | Planejado; sem instruções ou simulação técnica do mundo real |
+| Better Nuclear Reactor | Modelagem abstrata de geração e eficiência energética | Primeira etapa: gerador cristalino fictício com 8 unidades/s por cinco minutos por cristal; sem combustível ou engenharia nuclear real |
 | AdvancedTech | Processos industriais avançados | Britador, refinaria e montadora com energia |
 | FastMachines | Filas, desempenho e limites de processamento | Prensa e enrolador acelerados usando o runtime compartilhado; filas e paralelismo pendentes |
 | MapJammers | Interferência/jamming não será implementada; cartografia civil pode ser avaliada separadamente | Excluído o mecanismo de interferência |
@@ -54,6 +54,30 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 - **FastMachines:** prensa rápida (20 ticks por lote) e enrolador de bobinas (40 ticks por lote), ambos conectados à rede de energia e protegidos pela progressão.
 - **HardcoreSlimefun:** kit de manutenção desbloqueável e parâmetros para ativar regras mais exigentes de desgaste e reparo. O modo hardcore é opcional e vem desativado por padrão.
 
+## Expansões 0.7.0.01-SNAPSHOT
+
+- **Forestry:** fibras de madeira, resina vegetal, tábuas tratadas e estação florestal.
+- **Textile Industry:** fibras, tecidos industriais, tecidos técnicos e tear mecanizado.
+- **Biofuel:** biomassa e células de biocombustível abstratas, sem simulação técnica real.
+- **Construction Materials:** cerâmica industrial, painéis reforçados, estruturas pré-fabricadas e misturador.
+
+Os quatro módulos são opcionais e habilitados por padrão; cada um pode ser desligado em `config.yml`. Suas receitas e tecnologias são registradas na API pública, sem dependência dos addons originais.
+
+## Expansões adicionais 0.7.0.00 — Networks e geração avançada
+
+- Better Nuclear Reactor (abstração): gerador cristalino fictício que fornece 8 unidades/s por cinco minutos por cristal e carrega uma bateria adjacente do mesmo proprietário. Não representa um reator real.
+
+
+- Networks: conduítes conectam caixas de rede do mesmo proprietário; um item MECHANIUM é transferido por ciclo de 2 segundos. Limite de 128 conduítes e somente chunks carregados. Não há roteamento remoto, filtros por item ou transporte de itens vanilla nesta etapa.
+
+## Expansões 0.7.0.01-SNAPSHOT — SMG
+
+- **Material Generators:** oito geradores para pedregulho, pedra, cascalho, areia, pedra lisa, vidro, netherrack e areia das almas.
+- Cada gerador produz um item por ciclo em um baú colocado diretamente acima; intervalo padrão de 200 ticks, configurável.
+- O progresso é persistido no bloco; produção pausa quando não existe baú superior ou quando o baú não tem espaço.
+- Propriedade, proteção contra desmontagem indevida, explosões e pistões.
+- Progressão separada entre geração básica (Revolução Industrial) e geração avançada (Era Moderna).
+
 ## Regras de portabilidade
 
 1. Cada domínio é implementado como módulo oficial independente e pode ser desativado em `config.yml`.
@@ -62,3 +86,13 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 4. Conteúdo fantástico/futurista permanece opcional e desativado por padrão.
 5. Sistemas de combate, armas, ataques, mísseis e interferência não fazem parte da implementação operacional.
 6. A versão 0.5.0-SNAPSHOT ainda depende de CI e testes funcionais em Paper/Purpur 1.21.11.
+
+
+## Snapshot 0.7.1.00 — novos domínios
+
+- **Water Treatment:** filtragem, recirculação e insumos hídricos industriais.
+- **Greenhouse:** cultivo controlado e hidroponia, dependente de Agriculture e Water Treatment.
+- **Industrial Recycling:** recuperação e triagem de materiais em cadeia circular.
+- **Ore Chunks:** fragmentos de minério e lotes compactados integrados à Geologia e ao Beneficiamento Mineral.
+
+Implementações nativas e independentes; não carregam JARs de terceiros. Os quatro módulos incluem tecnologias, itens e receitas, mas ainda não possuem máquinas runtime dedicadas.

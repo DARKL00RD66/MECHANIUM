@@ -41,12 +41,14 @@ final class EnergyGridManager implements Listener {
     private static final BlockFace[] FACES = {
             BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
-    private static final Set<String> ENERGY_ITEMS = Set.of("wind_rotor", "solar_cell", "energy_cell");
+    private static final Set<String> ENERGY_ITEMS = Set.of("wind_rotor", "solar_cell", "energy_cell", "abstract_reactor");
     private static final Set<String> POWERED_MACHINES = Set.of(
             "water_filter_machine", "advanced_assembly_machine",
             "industrial_crusher_machine", "industrial_smelter_machine", "industrial_mill_machine", "industrial_canner_machine",
             "chicken_incubator_machine", "cow_incubator_machine", "pig_incubator_machine", "sheep_incubator_machine",
-            "rapid_press_machine", "rapid_coil_winder_machine", "air_purifier", "metallurgy_furnace",\n            "pressure_chamber", "auto_assembler", "cargo_router");
+            "rapid_press_machine", "rapid_coil_winder_machine", "air_purifier", "metallurgy_furnace",
+            "pressure_chamber", "auto_assembler", "cargo_router",
+            "forestry_station", "textile_loom", "biomass_processor", "industrial_mixer");
     private static final int BATTERY_CAPACITY = 10_000;
 
     private final JavaPlugin plugin;
@@ -54,6 +56,7 @@ final class EnergyGridManager implements Listener {
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
     private final NamespacedKey chargeKey;
+    private final NamespacedKey reactorFuelUntilKey;
     private BukkitTask task;
 
     EnergyGridManager(JavaPlugin plugin, MechaniumApi api) {
@@ -62,6 +65,7 @@ final class EnergyGridManager implements Listener {
         this.itemIdKey = NamespacedKey.fromString("mechanium:item_id");
         this.ownerKey = new NamespacedKey(plugin, "energy_owner");
         this.chargeKey = new NamespacedKey(plugin, "energy_charge");
+        this.reactorFuelUntilKey = new NamespacedKey(plugin, "reactor_fuel_until");
     }
 
     void start() {
@@ -118,6 +122,7 @@ final class EnergyGridManager implements Listener {
             case "wind_rotor" -> Material.FURNACE;
             case "solar_cell" -> Material.SMOKER;
             case "energy_cell" -> Material.BARREL;
+            case "abstract_reactor" -> Material.BLAST_FURNACE;
             default -> Material.AIR;
         };
         Block block = event.getBlockPlaced();
@@ -149,6 +154,28 @@ final class EnergyGridManager implements Listener {
         if (state instanceof TileState tile && "energy_cell".equals(id)) {
             int charge = tile.getPersistentDataContainer().getOrDefault(chargeKey, PersistentDataType.INTEGER, 0);
             event.getPlayer().sendMessage("§eBateria MECHANIUM: §f" + charge + "§7 / " + BATTERY_CAPACITY + " unidades");
+        } else if (state instanceof TileState reactorTile && "abstract_reactor".equals(id)) {
+            ItemStack hand = event.getPlayer().getInventory().getItemInMainHand();
+            if ("reactor_crystal".equals(itemId(hand))) {
+                String owner = reactorTile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+                if (owner != null && !owner.equals(event.getPlayer().getUniqueId().toString())
+                        && !event.getPlayer().hasPermission("mechanium.admin")) {
+                    event.getPlayer().sendMessage("§cEste gerador pertence a outro jogador.");
+                    return;
+                }
+                if (hand.getAmount() <= 1) event.getPlayer().getInventory().setItemInMainHand(null);
+                else hand.setAmount(hand.getAmount() - 1);
+                reactorTile.getPersistentDataContainer().set(reactorFuelUntilKey, PersistentDataType.LONG,
+                        System.currentTimeMillis() + 300_000L);
+                reactorTile.update(true, false);
+                event.getPlayer().sendMessage("§dCristal energético inserido. O gerador produzirá energia por cinco minutos.");
+            } else {
+                long until = reactorTile.getPersistentDataContainer().getOrDefault(reactorFuelUntilKey,
+                        PersistentDataType.LONG, 0L);
+                long remaining = Math.max(0L, (until - System.currentTimeMillis()) / 1000L);
+                event.getPlayer().sendMessage("§dGerador cristalino: §f" + remaining
+                        + "s de combustível restante. §7Use um cristal energético para recarregar.");
+            }
         } else if ("wind_rotor".equals(id) || "solar_cell".equals(id)) {
             event.getPlayer().sendMessage("§eGerador MECHANIUM: §f" + (id.equals("wind_rotor") ? "eólico" : "solar")
                     + " §7— conecte uma bateria por uma face.");
@@ -211,11 +238,19 @@ final class EnergyGridManager implements Listener {
                 for (BlockState state : chunk.getTileEntities()) {
                     if (!(state instanceof TileState tile)) continue;
                     String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
-                    if (!"wind_rotor".equals(id) && !"solar_cell".equals(id)) continue;
+                    if (!"wind_rotor".equals(id) && !"solar_cell".equals(id) && !"abstract_reactor".equals(id)) continue;
                     String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
                     if (owner == null) continue;
-                    int production = "wind_rotor".equals(id) ? 1
-                            : (world.getTime() < 12_000 && !world.hasStorm() ? 2 : 0);
+                    int production;
+                    if ("wind_rotor".equals(id)) {
+                        production = 1;
+                    } else if ("solar_cell".equals(id)) {
+                        production = world.getTime() < 12_000 && !world.hasStorm() ? 2 : 0;
+                    } else {
+                        long fuelUntil = tile.getPersistentDataContainer().getOrDefault(
+                                reactorFuelUntilKey, PersistentDataType.LONG, 0L);
+                        production = fuelUntil > System.currentTimeMillis() ? 8 : 0;
+                    }
                     if (production > 0) chargeAdjacentBattery(state.getBlock(), owner, production);
                 }
             }

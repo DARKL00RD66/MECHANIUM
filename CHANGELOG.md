@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.7.1.00-SNAPSHOT
+- Adicionados quatro módulos oficiais opcionais: `water-treatment`, `greenhouse`, `industrial-recycling` e `ore-chunks`.
+- Water Treatment: cartuchos filtrantes, células de água purificada, fluido refrigerante e recuperação hídrica, com progressão de filtragem e recirculação.
+- Greenhouse: painéis de estufa, solução nutritiva, bandejas hidropônicas e controle climático; depende dos módulos Agriculture e Water Treatment.
+- Industrial Recycling: sucata mista, separação de ferro/cobre, polímero abstrato e módulo de triagem para cadeia de economia circular.
+- Ore Chunks: fragmentos de ferro, cobre e ouro e lotes compactados, integrados à Geologia e ao Beneficiamento Mineral.
+- Os quatro módulos possuem receitas e tecnologias próprias, são registrados no catálogo e podem ser desativados individualmente no `config.yml`.
+- Versão Maven avançada para `0.7.1.00-SNAPSHOT` em todos os módulos e no exemplo de addon.
+
+## 0.7.0.01-SNAPSHOT
+- Adicionado o módulo opcional `material-generators`, reimplementação independente do domínio SimpleMaterialGenerators (SMG).
+- Oito geradores passivos produzem pedregulho, pedra, cascalho, areia, pedra lisa, vidro, netherrack e areia das almas em um baú colocado diretamente acima.
+- Produção padrão de um item a cada 200 ticks, configurável em `modules.material-generators.interval-ticks`; progresso fica persistido no bloco e pausa quando não há baú ou espaço.
+- Geradores possuem proprietário, bloqueio contra desmontagem por terceiros, proteção contra explosões/pistões e recuperação do item ao quebrar.
+- Geração básica exige `basic_material_generation`; materiais avançados exigem `advanced_material_generation`. Módulo pode ser desativado em `config.yml`.
+
+## 0.7.0.01-SNAPSHOT
+- Adicionado o módulo opcional better-reactor com gerador cristalino abstrato, sem simulação de engenharia nuclear real.
+- O gerador usa cristais fictícios como combustível: uma unidade mantém a produção de 8 unidades de energia por segundo durante cinco minutos, carregando baterias MECHANIUM adjacentes.
+- Adicionado o módulo opcional industrial-networks: conduítes e caixas protegidas para transporte automático de itens MECHANIUM.
+- Redes conectam até 128 conduítes adjacentes do mesmo proprietário; transferem um item personalizado por ciclo entre caixas conectadas, apenas em chunks carregados.
+- Caixas preservam o conteúdo ao serem desmontadas; a rede não transporta itens vanilla nem conecta depósitos à distância.
+- Adicionados quatro módulos oficiais opcionais: `forestry`, `textile-industry`, `biofuel` e `construction-materials`.
+- Forestry: fibras de madeira, resina vegetal, tábuas tratadas e estação florestal.
+- Textile Industry: fibras, tecidos industriais, tecido reforçado e tear mecanizado.
+- Biofuel: biomassa e células de biocombustível abstratas para progressão dentro do jogo.
+- Construction Materials: cerâmica, painéis reforçados, estruturas pré-fabricadas e misturador industrial.
+- Cada módulo possui categoria, tecnologias, receitas e máquinas quando aplicável; ativação individual por `config.yml`.
+
+
 ## 0.6.0-SNAPSHOT
 - Adicionados cinco módulos oficiais: `air-filtration`, `advanced-metallurgy`, `pressure-engineering`, `industrial-automation` e `industrial-logistics`.
 - Novas categorias, tecnologias, itens e receitas para purificador de ar (inclui balde de água), componentes metalúrgicos, câmara de pressão, circuitos de controle, montadora e roteador de carga.

@@ -41,7 +41,11 @@ class BuiltinModulesTest {
                 "construction-materials",
                 "industrial-networks",
                 "better-reactor",
-                "material-generators"
+                "material-generators",
+                "water-treatment",
+                "greenhouse",
+                "industrial-recycling",
+                "ore-chunks"
         )));
     }
 

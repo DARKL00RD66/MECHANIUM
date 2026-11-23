@@ -94,3 +94,6 @@
 ## Classificação
 
 **Fundação em desenvolvimento; funcionalidades 0.5.0-SNAPSHOT aguardam CI e validação no servidor real.**
+
+
+Expansão em revisão: Forestry, Textile Industry, Biofuel e Construction Materials foram adicionados como módulos opcionais. PR #10 aguarda CI Java 21/Maven.

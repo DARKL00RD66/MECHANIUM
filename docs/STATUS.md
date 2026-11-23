@@ -108,4 +108,4 @@ Expansão em revisão: Forestry, Textile Industry, Biofuel e Construction Materi
 
 ## Snapshot 0.7.1.00-SNAPSHOT
 
-Quatro novos módulos foram registrados no catálogo: Water Treatment, Greenhouse, Industrial Recycling e Ore Chunks. Eles acrescentam 16 itens novos, 4 categorias, 8 tecnologias e receitas de progressão. Os módulos são configuráveis individualmente. A validação Maven/CI e os testes de gameplay Paper/Purpur ainda precisam confirmar o funcionamento integrado.
+Quatro novos módulos foram registrados no catálogo: Water Treatment, Greenhouse, Industrial Recycling e Ore Chunks. Eles acrescentam 18 itens novos, 4 categorias, 8 tecnologias e 18 receitas de progressão. Os módulos são configuráveis individualmente. A validação Maven/CI e os testes de gameplay Paper/Purpur ainda precisam confirmar o funcionamento integrado.

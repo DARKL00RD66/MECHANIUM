@@ -43,13 +43,13 @@ final class MaterialGeneratorsModule extends AbstractBuiltinModule {
     }
 
     private void registerGenerator(dev.mechanium.api.MechaniumApi api, String id, String name,
-                                   String loreMaterial, String technology, String output, int cost) {
+                                   String material, String technology, String output, int cost) {
         registerItem(api, new ItemDefinition(id, "&e" + name, "DISPENSER",
                 List.of("&8Gerador passivo de materiais", "&7Coloque um baú diretamente acima", "&7Produz 1 " + output.toLowerCase().replace('_', ' ') + " por ciclo"),
                 0, 1, "material_generators", technology));
         registerRecipe(api, new RecipeDefinition(id + "_recipe", RecipeDefinition.Type.SHAPED,
-                id, 1, List.of("IRI", "DCD", "IRI"),
-                Map.of('I', "IRON_INGOT", 'R', "REDSTONE", 'D', "DROPPER", 'C', "CHEST"),
+                id, 1, List.of("IRI", "DCD", "IMI"),
+                Map.of('I', "IRON_INGOT", 'R', "REDSTONE", 'D', "DROPPER", 'C', "CHEST", 'M', output),
                 technology));
     }
 }

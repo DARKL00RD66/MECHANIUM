@@ -34,6 +34,13 @@ jobs:
           mvn --batch-mode --no-transfer-progress clean verify
           mvn --batch-mode --no-transfer-progress -DskipTests -pl mechanium-api -am install
           mvn --batch-mode --no-transfer-progress -f examples/mechanium-addon-example/pom.xml clean package
+      - name: Upload distributable JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: MECHANIUM-0.7.2.01-SNAPSHOT
+          path: mechanium-plugin/target/MECHANIUM-0.7.2.01-SNAPSHOT.jar
+          if-no-files-found: error
+          retention-days: 30
 
   publish-prerelease:
     name: Publish MECHANIUM Pre-release

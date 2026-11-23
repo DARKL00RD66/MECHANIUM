@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.0-SNAPSHOT
+## 0.7.0.00-SNAPSHOT
 - Adicionado o módulo opcional better-reactor com gerador cristalino abstrato, sem simulação de engenharia nuclear real.
 - O gerador usa cristais fictícios como combustível: uma unidade mantém a produção de 8 unidades de energia por segundo durante cinco minutos, carregando baterias MECHANIUM adjacentes.
 - Adicionado o módulo opcional industrial-networks: conduítes e caixas protegidas para transporte automático de itens MECHANIUM.

@@ -6,6 +6,7 @@ import java.util.Map;
 
 final class AutomationModule extends AbstractBuiltinModule {
     @Override public String id() { return "industrial-automation"; }
+    @Override public java.util.Set<String> dependencies() { return java.util.Set.of("industry"); }
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(new TechnologyDefinition("industrial_automation", "Automação industrial",
                 "information_age", 58, List.of("automated_control")));

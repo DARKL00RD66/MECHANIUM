@@ -5,7 +5,7 @@
 - Novas receitas suportadas recebem uma era histórica sugerida automaticamente; regras existentes e alterações administrativas são preservadas.
 - Bloqueios aplicados a crafting, livro de receitas, autocrafter, processamento em fornalhas, corte de pedra e ferraria.
 - Correção da receita da mesa de encantamentos para a Era Mítica, com migração automática do valor padrão antigo em instalações existentes.
-- Primeiro módulo ExoticGarden: mistura de sementes, ervas desidratadas, extrato botânico, conserva tropical e caixote de pomar.
+- Primeiro módulo ExoticGarden: mistura de sementes, ervas desidratadas, extrato botânico, conserva tropical e caixote de pomar.\n- Primeira expansão DankTech2: upgrade de armazém portátil de 27 para 54 espaços, com conteúdo persistido no próprio item.
 - Novos testes unitários para a classificação histórica de receitas e inclusão do ExoticGarden no catálogo de módulos.
 - Versionamento Maven avançado para 0.4.0-SNAPSHOT. CI e smoke test em Paper/Purpur 1.21.11 ainda pendentes.
 

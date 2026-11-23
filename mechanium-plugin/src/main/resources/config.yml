@@ -175,6 +175,9 @@ modules:
     enabled: true
   better-reactor:
     enabled: true
+  material-generators:
+    enabled: true
+    interval-ticks: 200
 
 machines:
   wear:

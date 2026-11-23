@@ -42,11 +42,13 @@ final class MechaniumResearchMenu implements Listener {
     private final MechaniumPlugin plugin;
     private final MechaniumApi api;
     private final NamespacedKey guideKey;
+    private final MechaniumFabricationMenu fabricationMenu;
 
     MechaniumResearchMenu(MechaniumPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
         this.api = api;
         this.guideKey = new NamespacedKey(plugin, "guide_book");
+        this.fabricationMenu = new MechaniumFabricationMenu(plugin, api);
     }
 
     void open(Player player) { openHome(player); }

@@ -104,6 +104,8 @@ modules:
     enabled: true
   agriculture:
     enabled: true
+  exotic-garden:
+    enabled: true
   energy:
     enabled: true
   storage:

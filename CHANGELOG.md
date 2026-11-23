@@ -1,6 +1,9 @@
 # Changelog
 
 ## 0.7.0-SNAPSHOT
+- Adicionado o módulo opcional industrial-networks: conduítes e caixas protegidas para transporte automático de itens MECHANIUM.
+- Redes conectam até 128 conduítes adjacentes do mesmo proprietário; transferem um item personalizado por ciclo entre caixas conectadas, apenas em chunks carregados.
+- Caixas preservam o conteúdo ao serem desmontadas; a rede não transporta itens vanilla nem conecta depósitos à distância.
 - Adicionados quatro módulos oficiais opcionais: `forestry`, `textile-industry`, `biofuel` e `construction-materials`.
 - Forestry: fibras de madeira, resina vegetal, tábuas tratadas e estação florestal.
 - Textile Industry: fibras, tecidos industriais, tecido reforçado e tear mecanizado.

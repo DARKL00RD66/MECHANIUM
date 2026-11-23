@@ -34,7 +34,12 @@ class BuiltinModulesTest {
                 "advanced-metallurgy",
                 "pressure-engineering",
                 "industrial-automation",
-                "industrial-logistics"
+                "industrial-logistics",
+                "global-warming",
+                "networks",
+                "simple-material-generators",
+                "slime-customizer",
+                "slimy-repair"
         )));
     }
 

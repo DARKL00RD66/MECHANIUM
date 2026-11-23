@@ -20,8 +20,15 @@ public interface MechaniumApi {
     boolean registerEra(EraDefinition era);
     Optional<EraDefinition> getEra(String eraId);
     Collection<EraDefinition> getEras();
+    /** Effective era: a player's explicit test override, or the server-wide era when no override exists. */
     Optional<String> getPlayerEra(UUID playerId);
     void setPlayerEra(UUID playerId, String eraId);
+    /** Era explicitly assigned to one player for isolated administrative tests. */
+    default Optional<String> getPlayerEraOverride(UUID playerId) { return Optional.empty(); }
+    default void clearPlayerEraOverride(UUID playerId) { throw new UnsupportedOperationException("Player era overrides cannot be cleared."); }
+    /** Persistent historical era that applies to all players without an individual test override. */
+    default Optional<String> getServerEra() { return Optional.empty(); }
+    default void setServerEra(String eraId) { throw new UnsupportedOperationException("Global server eras are not supported."); }
     long getResearchPoints(UUID playerId);
     void addResearchPoints(UUID playerId, long amount);
     boolean registerTechnology(TechnologyDefinition technology);

@@ -1,5 +1,6 @@
 package dev.mechanium.plugin;
 
+import dev.mechanium.api.MechaniumApi;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -43,12 +44,14 @@ final class IndustrialNetworkManager implements Listener {
     private static final int MAX_NETWORK_SIZE = 128;
 
     private final JavaPlugin plugin;
+    private final MechaniumApi api;
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
     private BukkitTask task;
 
-    IndustrialNetworkManager(JavaPlugin plugin) {
+    IndustrialNetworkManager(JavaPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
+        this.api = api;
         this.itemIdKey = NamespacedKey.fromString("mechanium:item_id");
         this.ownerKey = new NamespacedKey(plugin, "industrial_network_owner");
     }
@@ -105,7 +108,7 @@ final class IndustrialNetworkManager implements Listener {
                 if (item != null && !item.getType().isAir()) contents.add(item.clone());
             }
         }
-        ItemStack recovered = new ItemStack(block.getType());
+        ItemStack recovered = api.createItemStack(id, 1).orElseGet(() -> new ItemStack(block.getType()));
         Location drop = block.getLocation().add(0.5, 0.5, 0.5);
         event.setDropItems(false);
         Bukkit.getScheduler().runTask(plugin, () -> {

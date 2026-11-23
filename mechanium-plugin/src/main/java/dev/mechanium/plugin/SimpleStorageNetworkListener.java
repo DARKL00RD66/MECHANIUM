@@ -220,8 +220,8 @@ final class SimpleStorageNetworkListener implements Listener {
 
     private boolean isSimpleNode(Block block) {
         if (block == null || block.getType() != Material.BARREL || !(block.getState() instanceof TileState tile)) return false;
-        return "simple_storage_node".equals(tile.getPersistentDataContainer()
-                .get(storageTypeKey, PersistentDataType.STRING));
+        String type = tile.getPersistentDataContainer().get(storageTypeKey, PersistentDataType.STRING);
+        return "simple_storage_node".equals(type) || "network_storage_hub".equals(type);
     }
 
     private String ownerOf(Block block) {

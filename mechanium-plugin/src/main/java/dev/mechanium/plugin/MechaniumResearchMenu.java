@@ -275,10 +275,10 @@ final class MechaniumResearchMenu implements Listener {
                 "§8Eles são gastos ao iniciar uma pesquisa."
         )));
 
-        button(holder, 11, Material.IRON_PICKAXE, "§eDescoberta de minérios",
+        inv.setItem(11, item(Material.IRON_PICKAXE, "§eDescoberta de minérios",
                 List.of("§7Quebre pela primeira vez cada tipo de minério.",
                         "§7A recompensa é concedida uma vez por material.",
-                        "§7Recompensas configuradas:"));
+                        "§7Recompensas configuradas:")));
         var blockRewards = plugin.getConfig().getConfigurationSection("research-rewards.blocks");
         if (blockRewards != null) {
             blockRewards.getKeys(false).stream().sorted().limit(18).forEach(materialId ->
@@ -286,29 +286,29 @@ final class MechaniumResearchMenu implements Listener {
                             + " §7(+" + blockRewards.getLong(materialId) + ")"));
         }
 
-        button(holder, 13, Material.COMPASS, "§aExploração de biomas",
+        inv.setItem(13, item(Material.COMPASS, "§aExploração de biomas",
                 List.of("§7Entre em um bioma ainda não descoberto.",
                         "§7Cada bioma concede pontos uma única vez.",
                         "§7Recompensa padrão: §b+" + biomeReward,
-                        "§7Valores específicos podem ser configurados no config.yml."));
+                        "§7Valores específicos podem ser configurados no config.yml.")));
 
-        button(holder, 15, Material.WRITABLE_BOOK, "§dConquistas",
+        inv.setItem(15, item(Material.WRITABLE_BOOK, "§dConquistas",
                 List.of("§7Conclua conquistas vanilla do Minecraft.",
                         "§7Cada conquista elegível conta uma vez.",
                         "§7Receita de itens não concede pontos.",
-                        "§7Recompensa padrão: §b+" + advancementReward));
+                        "§7Recompensa padrão: §b+" + advancementReward)));
 
-        button(holder, 29, Material.GIFT, "§6Pontos iniciais",
+        inv.setItem(29, item(Material.CHEST, "§6Pontos iniciais",
                 List.of("§7Primeira entrada sem histórico de pesquisa:",
                         "§b+" + starting + " pontos",
-                        "§7É uma concessão única, não repetível ao gastar o saldo."));
+                        "§7É uma concessão única, não repetível ao gastar o saldo.")));
 
-        button(holder, 31, Material.KNOWLEDGE_BOOK, "§eComo usar os pontos",
+        inv.setItem(31, item(Material.KNOWLEDGE_BOOK, "§eComo usar os pontos",
                 List.of("§71. Abra a árvore de progressão.",
                         "§72. Selecione uma tecnologia disponível.",
                         "§73. Confira o custo em pontos.",
                         "§74. Clique para iniciar a pesquisa.",
-                        "§7O custo é debitado no início; o tempo continua offline."));
+                        "§7O custo é debitado no início; o tempo continua offline.")));
 
         button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openHome);
         animateOpen(player, holder);

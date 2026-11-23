@@ -332,7 +332,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     }
 
     String formatResearchDuration(long durationMillis) {
-        long totalSeconds = Math.max(0L, (durationMillis + 999L) / 1_000L);
+        long totalSeconds = durationMillis <= 0L ? 0L
+                : durationMillis / 1_000L + (durationMillis % 1_000L == 0L ? 0L : 1L);
         long hours = totalSeconds / 3_600L;
         long minutes = (totalSeconds % 3_600L) / 60L;
         long seconds = totalSeconds % 60L;

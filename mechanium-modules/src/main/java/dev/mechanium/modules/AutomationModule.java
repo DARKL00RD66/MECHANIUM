@@ -28,5 +28,7 @@ final class AutomationModule extends AbstractBuiltinModule {
                 "auto_assembler", 1, List.of(),
                 Map.of('D', "DISPENSER", 'C', "mechanium:control_circuit", 'I', "IRON_INGOT"),
                 "industrial_automation"));
+        registerMachine(api, new MachineDefinition("auto_assembler", "Montadora automática", "auto_assembler",
+                "DISPENSER", "mechanium:mechanical_parts", 2, "control_circuit", 1, 1200, "industrial_automation"));
     }
 }

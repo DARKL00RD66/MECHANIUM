@@ -12,7 +12,7 @@ import java.util.Set;
 /** Independent historical food-chain reimplementation inspired by culinary and garden addons. */
 final class CulinaryModule extends AbstractBuiltinModule {
     @Override public String id() { return "culinary"; }
-    @Override public Set<String> dependencies() { return Set.of("agriculture"); }
+    @Override public Set<String> dependencies() { return Set.of("agriculture", "industry"); }
 
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(

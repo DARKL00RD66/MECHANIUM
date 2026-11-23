@@ -173,6 +173,8 @@ modules:
     enabled: true
   industrial-networks:
     enabled: true
+  better-reactor:
+    enabled: true
 
 machines:
   wear:

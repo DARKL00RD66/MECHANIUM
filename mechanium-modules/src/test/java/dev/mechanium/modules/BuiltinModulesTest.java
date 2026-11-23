@@ -2,6 +2,8 @@ package dev.mechanium.modules;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,4 +60,52 @@ class BuiltinModulesTest {
     void allBuiltinModuleDependenciesResolveWithoutCycles() {
         assertDoesNotThrow(() -> ModuleManager.orderByDependencies(BuiltinModules.create()));
     }
+
+    @Test
+    void everyCrossModuleTechnologyPrerequisiteHasAnExplicitModuleDependency() {
+        var modules = BuiltinModules.create();
+        Map<String, String> technologyOwners = new HashMap<>();
+
+        for (var module : modules) {
+            if (!(module instanceof AbstractBuiltinModule builtin)) continue;
+            for (var technology : builtin.technologies()) {
+                String previous = technologyOwners.putIfAbsent(technology.id(), module.id());
+                assertNull(previous, "Duplicate technology ID: " + technology.id());
+            }
+        }
+
+        for (var module : modules) {
+            if (!(module instanceof AbstractBuiltinModule builtin)) continue;
+            for (var technology : builtin.technologies()) {
+                for (String prerequisite : technology.prerequisites()) {
+                    String provider = technologyOwners.get(prerequisite);
+                    assertNotNull(provider, "Unknown prerequisite " + prerequisite + " in " + technology.id());
+                    if (!provider.equals(module.id())) {
+                        assertTrue(module.dependencies().contains(provider),
+                                module.id() + " must explicitly depend on " + provider
+                                        + " because " + technology.id() + " requires " + prerequisite);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void modulesDependingOnOptionalModulesMustAlsoBeOptional() {
+        var modules = BuiltinModules.create();
+        Map<String, dev.mechanium.api.MechaniumModule> byId = modules.stream()
+                .collect(Collectors.toMap(dev.mechanium.api.MechaniumModule::id, module -> module));
+
+        for (var module : modules) {
+            for (String dependencyId : module.dependencies()) {
+                var dependency = byId.get(dependencyId);
+                assertNotNull(dependency, "Missing module dependency: " + dependencyId);
+                if (dependency.optional()) {
+                    assertTrue(module.optional(), module.id()
+                            + " depends on optional module " + dependencyId + " and must also be optional");
+                }
+            }
+        }
+    }
+
 }

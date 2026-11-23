@@ -26,7 +26,10 @@ class BuiltinModulesTest {
                 "exotic-garden",
                 "dank-tech2",
                 "culinary",
-                "environment"
+                "environment",
+                "electric-spawners",
+                "fast-machines",
+                "hardcore-slimefun"
         )));
     }
 

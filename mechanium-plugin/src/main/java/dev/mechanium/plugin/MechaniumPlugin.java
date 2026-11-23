@@ -47,6 +47,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumMachineManager machineManager;
     private EnergyGridManager energyGridManager;
     private FluidPipeManager fluidPipeManager;
+    private IndustrialNetworkManager industrialNetworkManager;
     private SpecialEquipmentListener specialEquipmentListener;
     private SimpleStorageNetworkListener simpleStorageNetworkListener;
     private TownyNationHook townyNationHook;
@@ -102,6 +103,11 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             fluidPipeManager = new FluidPipeManager(this, api);
             Bukkit.getPluginManager().registerEvents(fluidPipeManager, this);
             fluidPipeManager.start();
+            if (moduleManager.enabledModuleIds().contains("industrial-networks")) {
+                industrialNetworkManager = new IndustrialNetworkManager(this, api);
+                Bukkit.getPluginManager().registerEvents(industrialNetworkManager, this);
+                industrialNetworkManager.start();
+            }
             specialEquipmentListener = new SpecialEquipmentListener(this);
             Bukkit.getPluginManager().registerEvents(specialEquipmentListener, this);
             machineManager = new MechaniumMachineManager(this, api, energyGridManager);
@@ -913,6 +919,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         if (fluidPipeManager != null) {
             fluidPipeManager.stop();
             fluidPipeManager = null;
+        }
+        if (industrialNetworkManager != null) {
+            industrialNetworkManager.stop();
+            industrialNetworkManager = null;
         }
         if (energyGridManager != null) {
             energyGridManager.stop();

@@ -45,10 +45,12 @@ progression:
       name: Futuro Especulativo
       order: 11
 
-# Keys are Bukkit recipe IDs. A recipe is unrestricted when its entry is absent.
-# The administrator HUD can cycle each recipe through the configured eras.
+# Recipe IDs are discovered from Paper's vanilla recipe registry on startup.
+# Existing entries are preserved; missing entries receive a suggested historical era.
+# The admin HUD can review and change the complete supported catalog page by page.
 vanilla-recipe-gates:
   enabled: true
+  auto-register: true
   recipes:
     'minecraft:stone_pickaxe': ancient
     'minecraft:iron_pickaxe': medieval
@@ -57,7 +59,7 @@ vanilla-recipe-gates:
     'minecraft:bow': medieval
     'minecraft:crossbow': renaissance
     'minecraft:anvil': renaissance
-    'minecraft:enchanting_table': renaissance
+    'minecraft:enchanting_table': mythic_age
     'minecraft:piston': industrial_revolution
     'minecraft:hopper': industrial_revolution
     'minecraft:minecart': industrial_revolution

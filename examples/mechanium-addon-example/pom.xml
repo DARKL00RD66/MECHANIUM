@@ -9,7 +9,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>21</maven.compiler.release>
-        <mechanium.version>0.3.0-SNAPSHOT</mechanium.version>
+        <mechanium.version>0.4.0-SNAPSHOT</mechanium.version>
         <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
     </properties>
 

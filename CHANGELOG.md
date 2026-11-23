@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0-SNAPSHOT
+- Catálogo vanilla ampliado por descoberta automática do registro de receitas do Paper 1.21.11, com paginação no painel administrativo.
+- Novas receitas suportadas recebem uma era histórica sugerida automaticamente; regras existentes e alterações administrativas são preservadas.
+- Bloqueios aplicados a crafting, livro de receitas, autocrafter, processamento em fornalhas, corte de pedra e ferraria.
+- Correção da receita da mesa de encantamentos para a Era Mítica, com migração automática do valor padrão antigo em instalações existentes.
+- Primeiro módulo ExoticGarden: mistura de sementes, ervas desidratadas, extrato botânico, conserva tropical e caixote de pomar.
+- Novos testes unitários para a classificação histórica de receitas e inclusão do ExoticGarden no catálogo de módulos.
+- Versionamento Maven avançado para 0.4.0-SNAPSHOT. CI e smoke test em Paper/Purpur 1.21.11 ainda pendentes.
+
 ## 0.3.0-SNAPSHOT
 - Nova era global persistente no SQLite, aplicada a jogadores online e offline que não tenham sobrescrita individual de teste.
 - Painel administrativo com botão separado para trocar a era de todo o servidor; seleção individual permanece disponível para testes e agora inclui retorno à era global.

@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.3.0-SNAPSHOT  
+**Versão:** 0.4.0-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -8,7 +8,7 @@
 
 - API pública para eras, tecnologias, progressão, módulos e addons.
 - Registro persistente de categorias, itens, receitas, máquinas e regras de drops.
-- Persistência SQLite com schema versionado até a versão 4; máquinas e drops também são restaurados no carregamento da API.
+- Persistência SQLite com schema versionado até a versão 5; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
 - Criação de `ItemStack` com identificador PDC, lore, modelo customizado e limite de pilha configurável.
 - Receitas Bukkit nativas (shaped e shapeless), incluindo ingredientes MECHANIUM exatos.
 - Verificação central de tecnologia ao fabricar, usar, consumir e posicionar itens personalizados.
@@ -47,11 +47,19 @@
 - **Armazenamento portátil:** item único com 27 espaços, conteúdo serializado no PDC do item e salvo ao fechar a interface; depende do módulo opcional simple-storage.
 - **Ambiente:** contador persistente de impacto industrial por mundo; cada ciclo de máquina soma uma unidade, exceto quando o proprietário possui emissions_control; comando /mechanium environment consulta o total.
 
+## Expansões 0.4.0-SNAPSHOT
+
+- **Catálogo vanilla:** descobre automaticamente receitas com namespace `minecraft` expostas pelo registro do Paper 1.21.11 e preenche requisitos de era para novas entradas sem sobrescrever regras existentes.
+- **Painel vanilla:** lista as receitas suportadas em páginas, mostra resultado/tipo/requisito e permite avançar o requisito entre as eras.
+- **Estações cobertas:** crafting de jogador, livro de receitas, autocrafter, processamento em fornalhas, corte de pedra e ferraria.
+- **Mesa de encantamentos:** receita de fabricação exige Era Mítica; valor antigo padrão é migrado sem apagar configurações personalizadas.
+- **ExoticGarden:** primeira cadeia de horticultura com sementes diversificadas, ervas, extrato botânico, conserva tropical e caixote de pomar.
+
 ## Limitações conhecidas
 
 - O runtime de máquinas ainda suporta apenas dispenser, uma entrada e uma saída; não há filas de produção nem múltiplos insumos/produtos.
 - O sistema energético é uma rede local e simplificada: geradores carregam bateria adjacente; baterias face a face podem fornecer energia a máquinas próximas. A carga se perde ao desmontar a bateria.
-- O sistema de fluidos transporta somente o item MECHANIUM `purified_water`, não líquidos vanilla ou outros fluidos.
+- O catálogo de receitas não inclui processos cujo resultado não esteja no registro de receitas suportado (por exemplo, operações especiais de bancada e cozimento em fogueira); itens sem receita registrada não recebem desbloqueio por crafting.\n- O sistema de fluidos transporta somente o item MECHANIUM `purified_water`, não líquidos vanilla ou outros fluidos.
 - O Simple Storage conecta somente nós adjacentes pelas faces e limita cada rede a 64 depósitos.
 - SFCalc calcula materiais, não valores monetários, e não altera o sistema de economia do servidor.
 - Habilidades de kits/ferramentas são utilitárias e simples; não há árvore de atributos ou durabilidade customizada.
@@ -68,4 +76,4 @@
 
 ## Classificação
 
-**Fundação em desenvolvimento; novas funcionalidades 0.3.0-SNAPSHOT aguardam CI e validação no servidor real.**
+**Fundação em desenvolvimento; funcionalidades 0.4.0-SNAPSHOT aguardam CI e validação no servidor real.**

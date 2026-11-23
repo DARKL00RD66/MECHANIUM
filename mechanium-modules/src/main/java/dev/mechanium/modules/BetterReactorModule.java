@@ -17,7 +17,7 @@ final class BetterReactorModule extends AbstractBuiltinModule {
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(
                 new TechnologyDefinition("crystal_energy_conversion", "Conversão de energia cristalina",
-                        "atomic_age", 62, List.of("energy_accumulation", "advanced_forging")),
+                        "atomic_age", 62, List.of("energy_accumulation", "advanced_metallurgy")),
                 new TechnologyDefinition("high_output_generation", "Geração de alta potência",
                         "atomic_age", 76, List.of("crystal_energy_conversion"))
         );
@@ -46,7 +46,7 @@ final class BetterReactorModule extends AbstractBuiltinModule {
                 Map.of('I', "IRON_INGOT"), "crystal_energy_conversion"));
         registerRecipe(api, new RecipeDefinition("abstract_reactor_recipe", RecipeDefinition.Type.SHAPED,
                 "abstract_reactor", 1, List.of("ICI", "CBC", "IRI"),
-                Map.of('I', "reactor_casing", 'C', "reactor_crystal", 'B', "BLAST_FURNACE", 'R', "REDSTONE_BLOCK"),
+                Map.of('I', "mechanium:reactor_casing", 'C', "mechanium:reactor_crystal", 'B', "BLAST_FURNACE", 'R', "REDSTONE_BLOCK"),
                 "high_output_generation"));
     }
 }

@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.7.0.00-SNAPSHOT
+## 0.7.0.01-SNAPSHOT
+- Adicionado o módulo opcional `material-generators`, reimplementação independente do domínio SimpleMaterialGenerators (SMG).
+- Oito geradores passivos produzem pedregulho, pedra, cascalho, areia, pedra lisa, vidro, netherrack e areia das almas em um baú colocado diretamente acima.
+- Produção padrão de um item a cada 200 ticks, configurável em `modules.material-generators.interval-ticks`; progresso fica persistido no bloco e pausa quando não há baú ou espaço.
+- Geradores possuem proprietário, bloqueio contra desmontagem por terceiros, proteção contra explosões/pistões e recuperação do item ao quebrar.
+- Geração básica exige `basic_material_generation`; materiais avançados exigem `advanced_material_generation`. Módulo pode ser desativado em `config.yml`.
+
+## 0.7.0.01-SNAPSHOT
 - Adicionado o módulo opcional better-reactor com gerador cristalino abstrato, sem simulação de engenharia nuclear real.
 - O gerador usa cristais fictícios como combustível: uma unidade mantém a produção de 8 unidades de energia por segundo durante cinco minutos, carregando baterias MECHANIUM adjacentes.
 - Adicionado o módulo opcional industrial-networks: conduítes e caixas protegidas para transporte automático de itens MECHANIUM.

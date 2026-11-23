@@ -31,7 +31,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | MissileWarfare | Não serão portadas armas, mísseis ou mecânicas de ataque | Excluído do escopo operacional |
 | EMCTech | Processamento e conversão de recursos | Aguardando confirmação da referência e da licença |
 | Gastronomicon | Culinária e conservação de alimentos | Primeira cadeia de culinária adicionada |
-| Better Nuclear Reactor | Modelagem abstrata de geração e eficiência energética | Planejado; sem instruções ou simulação técnica do mundo real |
+| Better Nuclear Reactor | Modelagem abstrata de geração e eficiência energética | Primeira etapa: gerador cristalino fictício com 8 unidades/s por cinco minutos por cristal; sem combustível ou engenharia nuclear real |
 | AdvancedTech | Processos industriais avançados | Britador, refinaria e montadora com energia |
 | FastMachines | Filas, desempenho e limites de processamento | Prensa e enrolador acelerados usando o runtime compartilhado; filas e paralelismo pendentes |
 | MapJammers | Interferência/jamming não será implementada; cartografia civil pode ser avaliada separadamente | Excluído o mecanismo de interferência |
@@ -63,7 +63,10 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 
 Os quatro módulos são opcionais e habilitados por padrão; cada um pode ser desligado em `config.yml`. Suas receitas e tecnologias são registradas na API pública, sem dependência dos addons originais.
 
-## Expansões adicionais 0.7.0 — Networks
+## Expansões adicionais 0.7.0 — Networks e geração avançada
+
+- Better Nuclear Reactor (abstração): gerador cristalino fictício que fornece 8 unidades/s por cinco minutos por cristal e carrega uma bateria adjacente do mesmo proprietário. Não representa um reator real.
+
 
 - Networks: conduítes conectam caixas de rede do mesmo proprietário; um item MECHANIUM é transferido por ciclo de 2 segundos. Limite de 128 conduítes e somente chunks carregados. Não há roteamento remoto, filtros por item ou transporte de itens vanilla nesta etapa.
 

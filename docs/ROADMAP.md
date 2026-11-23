@@ -37,10 +37,10 @@
 - [ ] Redes de energia extensíveis por cabos e distribuição entre várias máquinas
 - [ ] Sistema geral de fluidos com líquidos adicionais e válvulas
 - [ ] Rede de armazéns entre locais distantes e logística automatizada
-- [ ] Armazenamento portátil avançado com filtros, upgrades e pesquisa global
+- [ ] Ampliar armazenamento portátil com mais tiers, filtros e upgrades adicionais (primeiro upgrade de 54 espaços implementado)
 - [ ] Economia monetária, preços e integração com plugin de economia
 - [ ] Depósitos minerais regionais, veios, amostras e integração com mineração
-- [x] Primeira expansão de agricultura e culinária: sementes, substrato, colheita embalada, conservas e alimentos processados\n- [x] Primeira expansão ExoticGarden: mistura de sementes, ervas, extrato botânico, conserva tropical e caixote de pomar
+- [x] Primeira expansão de agricultura e culinária: sementes, substrato, colheita embalada, conservas e alimentos processados\n- [x] Primeira expansão ExoticGarden: mistura de sementes, ervas, extrato botânico, conserva tropical e caixote de pomar\n- [x] Primeira expansão DankTech2: upgrade de armazém portátil persistente de 27 para 54 espaços
 - [x] Moinho e conservadora industriais alimentados por energia
 - [x] Armazém portátil individual de 27 espaços persistido no item
 - [x] Contador abstrato de impacto industrial por mundo e comando de consulta

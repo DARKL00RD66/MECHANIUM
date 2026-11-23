@@ -6,19 +6,19 @@ O projeto seguirá a sequência de snapshots definida para chegar à primeira ve
 
 - **Correções pequenas e ajustes localizados:** incrementam o patch da linha atual. Exemplo: `0.3.0-SNAPSHOT`, `0.3.1-SNAPSHOT`, `0.3.2-SNAPSHOT`.
 - **Novos conjuntos de funcionalidades ou integrações de addons:** iniciam o próximo marco de funcionalidades. Exemplo: `0.4.0-SNAPSHOT`, depois `0.5.0-SNAPSHOT`.
-- **Alterações dentro de um marco:** incrementam seu patch sem substituir snapshots anteriores. Exemplo: `0.4.1-SNAPSHOT`, `0.4.2-SNAPSHOT`.
+- **Alterações dentro de um marco:** incrementam seu patch sem substituir snapshots anteriores. Exemplo: `0.4.1-SNAPSHOT`, `0.4.2-SNAPSHOT`. Para snapshots numerados dentro do mesmo patch, usar dois dígitos finais: `0.7.0.00-SNAPSHOT`, `0.7.0.01-SNAPSHOT`, `0.7.0.02-SNAPSHOT`.
 - **Pré-lançamento final:** a sequência de desenvolvimento avança até `0.9.9-SNAPSHOT`.
 - **Versão oficial:** somente depois da validação dos critérios de aceite e do encerramento da linha de snapshots; a versão estável planejada é `1.0.0`.
 
 ## Marco atual
 
-A linha atual é `0.5.0-SNAPSHOT`, iniciada por um novo conjunto de integrações de referência: ElectricSpawners, FastMachines e HardcoreSlimefun.
+A linha atual é `0.7.0.00-SNAPSHOT`. O sufixo `.00` identifica o primeiro snapshot numerado do marco 0.7.0; cada rodada incremental avança para `.01`, `.02` e assim por diante, sem sobrescrever snapshots anteriores.
 
 ## Sincronização obrigatória
 
 Ao avançar a versão, atualizar em conjunto:
 
-1. `pom.xml` raiz e todos os módulos Maven.
+1. `pom.xml` raiz e todos os módulos Maven, mantendo a mesma versão `X.Y.Z.NN-SNAPSHOT` em todo o reactor.
 2. A dependência `mechanium.version` do addon de exemplo.
 3. Caminhos de artefatos e instruções no README.
 4. Changelog e estado do projeto.

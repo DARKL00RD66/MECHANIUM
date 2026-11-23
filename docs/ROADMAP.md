@@ -110,3 +110,13 @@ O projeto só deve ser considerado pronto para produção depois da CI, dos test
 - [x] Registrar os quatro módulos no catálogo, testes de catálogo e configuração
 - [ ] Validar receitas e pré-requisitos de pesquisa em Paper/Purpur 1.21.11
 - [ ] Implementar máquinas runtime específicas para estas quatro cadeias
+
+
+## 0.7.2.00-SNAPSHOT — cinco novos domínios
+- [x] Aquaculture: cadeia de criação aquícola e reaproveitamento de subprodutos
+- [x] Glassworks: preparação de sílica, vidro industrial e componentes ópticos
+- [x] Rail Freight: infraestrutura e componentes para carga ferroviária/intermodal
+- [x] Battery Industry: materiais e montagem de armazenamento elétrico
+- [x] Cold Chain: isolamento térmico e distribuição refrigerada
+- [x] Registrar os cinco módulos, dependências, testes de catálogo e configuração
+- [ ] Validar receitas, pesquisa e runtime de máquinas em Paper/Purpur 1.21.11

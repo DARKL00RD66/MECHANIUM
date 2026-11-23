@@ -23,6 +23,7 @@ class BuiltinModulesTest {
                 "simple-storage",
                 "sensible-toolbox",
                 "agriculture",
+                "exotic-garden",
                 "culinary",
                 "environment"
         )));

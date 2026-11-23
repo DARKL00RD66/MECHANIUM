@@ -357,6 +357,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     void processDueResearches(Player player, long nowEpochMillis) {
         if (!player.isOnline() || api == null) return;
+        Collection<ResearchProgress> active = api.getResearches(player.getUniqueId());
+        if (active.stream().noneMatch(research -> research.completesAtEpochMillis() <= nowEpochMillis)) return;
         Collection<String> completed = api.completeDueResearches(player.getUniqueId(), nowEpochMillis);
         if (completed.isEmpty()) return;
         for (String technologyId : completed) {

@@ -154,10 +154,10 @@ final class EnergyGridManager implements Listener {
         if (state instanceof TileState tile && "energy_cell".equals(id)) {
             int charge = tile.getPersistentDataContainer().getOrDefault(chargeKey, PersistentDataType.INTEGER, 0);
             event.getPlayer().sendMessage("§eBateria MECHANIUM: §f" + charge + "§7 / " + BATTERY_CAPACITY + " unidades");
-        } else if (state instanceof TileState tile && "abstract_reactor".equals(id)) {
+        } else if (state instanceof TileState reactorTile && "abstract_reactor".equals(id)) {
             ItemStack hand = event.getPlayer().getInventory().getItemInMainHand();
             if ("reactor_crystal".equals(itemId(hand))) {
-                String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+                String owner = reactorTile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
                 if (owner != null && !owner.equals(event.getPlayer().getUniqueId().toString())
                         && !event.getPlayer().hasPermission("mechanium.admin")) {
                     event.getPlayer().sendMessage("§cEste gerador pertence a outro jogador.");
@@ -165,12 +165,12 @@ final class EnergyGridManager implements Listener {
                 }
                 if (hand.getAmount() <= 1) event.getPlayer().getInventory().setItemInMainHand(null);
                 else hand.setAmount(hand.getAmount() - 1);
-                tile.getPersistentDataContainer().set(reactorFuelUntilKey, PersistentDataType.LONG,
+                reactorTile.getPersistentDataContainer().set(reactorFuelUntilKey, PersistentDataType.LONG,
                         System.currentTimeMillis() + 300_000L);
-                tile.update(true, false);
+                reactorTile.update(true, false);
                 event.getPlayer().sendMessage("§dCristal energético inserido. O gerador produzirá energia por cinco minutos.");
             } else {
-                long until = tile.getPersistentDataContainer().getOrDefault(reactorFuelUntilKey,
+                long until = reactorTile.getPersistentDataContainer().getOrDefault(reactorFuelUntilKey,
                         PersistentDataType.LONG, 0L);
                 long remaining = Math.max(0L, (until - System.currentTimeMillis()) / 1000L);
                 event.getPlayer().sendMessage("§dGerador cristalino: §f" + remaining
@@ -238,7 +238,7 @@ final class EnergyGridManager implements Listener {
                 for (BlockState state : chunk.getTileEntities()) {
                     if (!(state instanceof TileState tile)) continue;
                     String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
-                    if (!"wind_rotor".equals(id) && !"solar_cell".equals(id)) continue;
+                    if (!"wind_rotor".equals(id) && !"solar_cell".equals(id) && !"abstract_reactor".equals(id)) continue;
                     String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
                     if (owner == null) continue;
                     int production;

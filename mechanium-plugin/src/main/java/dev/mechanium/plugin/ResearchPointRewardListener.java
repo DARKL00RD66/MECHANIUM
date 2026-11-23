@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 /** Rewards scientific points for discovering configured ore types, once per player and material. */
@@ -39,7 +40,32 @@ final class ResearchPointRewardListener implements Listener {
         player.sendMessage("§bDescoberta científica: §f" + materialId.toLowerCase(java.util.Locale.ROOT)
                 .replace('_', ' ') + " §7(+" + reward + " pontos de pesquisa)");
     }
-    /** First-time advancement completions provide a second, non-mining path to scientific points. */
+
+    /** First visit to each biome rewards exploration once per player and biome. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onBiomeDiscovered(PlayerMoveEvent event) {
+        if (event.getTo() == null) return;
+        if (event.getFrom().getBlockX() == event.getTo().getBlockX()
+                && event.getFrom().getBlockY() == event.getTo().getBlockY()
+                && event.getFrom().getBlockZ() == event.getTo().getBlockZ()) return;
+        var biome = event.getTo().getBlock().getBiome();
+        String biomeId = biome.name().toLowerCase(java.util.Locale.ROOT);
+        long reward = plugin.getConfig().getLong("research-rewards.biomes." + biomeId,
+                plugin.getConfig().getLong("research-rewards.biomes.default", 1L));
+        if (reward <= 0L) return;
+
+        NamespacedKey discoveryKey = new NamespacedKey(plugin, "research_biome_" + biomeId);
+        var data = event.getPlayer().getPersistentDataContainer();
+        Byte discovered = data.get(discoveryKey, PersistentDataType.BYTE);
+        if (discovered != null && discovered == (byte) 1) return;
+
+        data.set(discoveryKey, PersistentDataType.BYTE, (byte) 1);
+        api.addResearchPoints(event.getPlayer().getUniqueId(), reward);
+        event.getPlayer().sendMessage("§bNovo bioma pesquisado: §f" + biomeId.replace('_', ' ')
+                + " §7(+" + reward + " pontos de pesquisa)");
+    }
+
+    /** First-time advancement completions provide another non-mining path to scientific points. */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onAdvancement(PlayerAdvancementDoneEvent event) {
         String advancementId = event.getAdvancement().getKey().toString();

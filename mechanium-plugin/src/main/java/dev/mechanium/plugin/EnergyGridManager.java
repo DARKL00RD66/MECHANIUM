@@ -46,7 +46,8 @@ final class EnergyGridManager implements Listener {
             "water_filter_machine", "advanced_assembly_machine",
             "industrial_crusher_machine", "industrial_smelter_machine", "industrial_mill_machine", "industrial_canner_machine",
             "chicken_incubator_machine", "cow_incubator_machine", "pig_incubator_machine", "sheep_incubator_machine",
-            "rapid_press_machine", "rapid_coil_winder_machine", "air_purifier", "metallurgy_furnace",\n            "pressure_chamber", "auto_assembler", "cargo_router");
+            "rapid_press_machine", "rapid_coil_winder_machine", "air_purifier", "metallurgy_furnace",
+            "pressure_chamber", "auto_assembler", "cargo_router");
     private static final int BATTERY_CAPACITY = 10_000;
 
     private final JavaPlugin plugin;

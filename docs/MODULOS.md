@@ -191,3 +191,16 @@ Todos são opcionais e podem ser configurados individualmente.
 - `ore-chunks`: fragmentos minerais de ferro, cobre e ouro e lotes compactados; depende de Geology e Ore Processing.
 
 Todos possuem receitas e pesquisas próprias e podem ser ativados ou desativados individualmente em `config.yml`.
+
+
+## Novos módulos — 0.7.2.00-SNAPSHOT
+
+| ID | Conteúdo | Dependências |
+|---|---|---|
+| `aquaculture` | Ração aquícola, rede de criação, fertilizante reaproveitado, caixote de pescado e incubadora | Agriculture, Culinary |
+| `glassworks` | Carga de sílica, vidro industrial, painéis temperados, lentes de precisão e forno de vidro | Industry |
+| `rail-freight` | Dormentes, trilhos reforçados, paletes e manifestos para transporte intermodal | Industry, Industrial Logistics |
+| `battery-industry` | Separadores, invólucros, células montadas e bancos de baterias industriais | EcoPower |
+| `cold-chain` | Fibras isolantes, células de refrigeração, caixotes térmicos e unidade refrigeradora | Industrial Logistics, Water Treatment, EcoPower |
+
+Os cinco módulos possuem categorias, tecnologias, itens e receitas próprias e podem ser habilitados/desabilitados individualmente em `config.yml`. Aquaculture, Glassworks e Cold Chain também registram definições no runtime genérico de máquinas. Isso ainda não equivale a teste de gameplay nem a máquinas especializadas com múltiplas entradas/saídas.

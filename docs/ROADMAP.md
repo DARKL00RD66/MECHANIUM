@@ -88,5 +88,6 @@ O projeto só deve ser considerado pronto para produção depois da CI, dos test
 
 ## 0.7.0-SNAPSHOT — Expansão de addons
 - Primeira etapa do domínio Networks: conduítes e caixas com transporte local de itens MECHANIUM.
+- Primeira etapa de Better Nuclear Reactor: gerador cristalino abstrato de jogo, sem simulação real.
 - Forestry, Textile Industry, Biofuel e Construction Materials como módulos oficiais opcionais.
 - Próximos alvos de auditoria: Networks, Better Nuclear Reactor (somente abstração de jogo), GeyserHeads (compatibilidade de apresentação) e referências cuja identidade/licença ainda precisa ser confirmada.

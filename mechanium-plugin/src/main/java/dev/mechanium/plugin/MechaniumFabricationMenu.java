@@ -69,14 +69,23 @@ final class MechaniumFabricationMenu implements Listener {
         for (int i = 0; i < count; i++) {
             RecipeDefinition recipe = recipes.get(start + i);
             ItemDefinition item = api.getItem(recipe.resultItemId()).orElseThrow();
-            boolean machine = api.getMachines().stream().anyMatch(m -> m.machineItemId().equals(item.id()));
+            MachineDefinition machineDefinition = api.getMachines().stream()
+                    .filter(m -> m.machineItemId().equals(item.id())).findFirst().orElse(null);
+            boolean machine = machineDefinition != null;
             Material icon = Material.matchMaterial(item.material());
             if (icon == null || !icon.isItem()) icon = Material.BARRIER;
             List<String> lore = new ArrayList<>();
-            lore.add("§7Categoria: §f" + item.categoryId());
+            lore.add("§7Categoria: §f" + api.getCategory(item.categoryId())
+                    .map(category -> category.displayName()).orElse(item.categoryId()));
             lore.add("§7Tipo: " + (machine ? "§6Máquina" : "§bComponente/item"));
             lore.add("§7Receita: §f" + recipe.id());
             lore.add("§7Tecnologia: §f" + Objects.toString(recipe.requiredTechnologyId(), "Nenhuma"));
+            if (machineDefinition != null) {
+                lore.add("§7Processo: §f" + ingredientLabel(machineDefinition.inputId()) + " → "
+                        + api.getItem(machineDefinition.outputItemId())
+                        .map(ItemDefinition::displayName).orElse(machineDefinition.outputItemId()));
+                lore.add("§7Duração: §f" + (machineDefinition.processingTicks() / 20) + "s por ciclo");
+            }
             lore.add("§7Ingredientes:");
             ingredientCounts(recipe).forEach((ingredient, amount) ->
                     lore.add(" §8• §f" + ingredientLabel(ingredient) + " x" + amount));

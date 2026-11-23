@@ -7,6 +7,9 @@ import dev.mechanium.api.MechaniumDataStore;
 import dev.mechanium.api.MechaniumModuleContext;
 import dev.mechanium.api.integration.NationIdentityProvider;
 import dev.mechanium.api.model.EraDefinition;
+import dev.mechanium.api.model.ResearchProgress;
+import dev.mechanium.api.model.ResearchResult;
+import dev.mechanium.api.model.TechnologyDefinition;
 import dev.mechanium.api.model.RecipeDefinition;
 import dev.mechanium.engine.DefaultMechaniumApi;
 import dev.mechanium.modules.BuiltinModules;
@@ -25,6 +28,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
@@ -46,6 +50,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private SpecialEquipmentListener specialEquipmentListener;
     private SimpleStorageNetworkListener simpleStorageNetworkListener;
     private TownyNationHook townyNationHook;
+    private BukkitTask researchCompletionTask;
 
     @Override
     public void onEnable() {
@@ -111,6 +116,13 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             }
             researchMenu = new MechaniumResearchMenu(this, api);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
+            researchCompletionTask = Bukkit.getScheduler().runTaskTimer(this, () -> {
+                long now = System.currentTimeMillis();
+                for (Player online : Bukkit.getOnlinePlayers()) {
+                    processDueResearches(online, now);
+                    if (researchMenu != null) researchMenu.refreshProgress(online, now);
+                }
+            }, 20L, 20L);
             adminMenu = new MechaniumAdminMenu(this, api);
             Bukkit.getPluginManager().registerEvents(adminMenu, this);
             recipeAdminMenu = new MechaniumRecipeAdminMenu(this, api);
@@ -311,6 +323,50 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         }
     }
 
+
+    long researchDurationMillis(TechnologyDefinition technology) {
+        EraDefinition era = api.getEra(technology.requiredEraId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Era da tecnologia não encontrada: " + technology.requiredEraId()));
+        return ResearchDurationCalculator.durationMillis(technology, era, getConfig());
+    }
+
+    String formatResearchDuration(long durationMillis) {
+        long totalSeconds = Math.max(0L, (durationMillis + 999L) / 1_000L);
+        long hours = totalSeconds / 3_600L;
+        long minutes = (totalSeconds % 3_600L) / 60L;
+        long seconds = totalSeconds % 60L;
+        if (hours > 0L) return hours + "h " + minutes + "m";
+        if (minutes > 0L) return minutes + "m " + seconds + "s";
+        return seconds + "s";
+    }
+
+    void startResearch(Player player, TechnologyDefinition technology) {
+        long duration = researchDurationMillis(technology);
+        ResearchResult result = api.startResearch(player.getUniqueId(), technology.id(), duration);
+        ChatColor color = result.status() == ResearchResult.Status.STARTED
+                ? ChatColor.GREEN : ChatColor.YELLOW;
+        player.sendMessage(color + result.message());
+        if (result.status() == ResearchResult.Status.STARTED) {
+            player.sendMessage(ChatColor.GRAY + "Tempo estimado: " + ChatColor.AQUA
+                    + formatResearchDuration(duration) + ChatColor.GRAY
+                    + ". O tempo continua contando mesmo enquanto você estiver offline.");
+        }
+    }
+
+    void processDueResearches(Player player, long nowEpochMillis) {
+        if (!player.isOnline() || api == null) return;
+        Collection<String> completed = api.completeDueResearches(player.getUniqueId(), nowEpochMillis);
+        if (completed.isEmpty()) return;
+        for (String technologyId : completed) {
+            String name = api.getTechnology(technologyId)
+                    .map(TechnologyDefinition::displayName).orElse(technologyId);
+            player.sendMessage(ChatColor.GREEN + "Pesquisa concluída: " + ChatColor.GOLD + name
+                    + ChatColor.GREEN + "!");
+        }
+        player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1.15f);
+    }
+
     /** Updates the runtime registry and saves a separate YAML override, leaving module-owned SQLite data intact. */
     boolean saveAdminRecipeOverride(RecipeDefinition replacement) {
         RecipeDefinition previous = api.getRecipe(replacement.id())
@@ -372,10 +428,12 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         UUID playerId = event.getPlayer().getUniqueId();
+        processDueResearches(event.getPlayer(), System.currentTimeMillis());
         // Players without a test override automatically inherit the current server-wide era.
         deliverPendingGlobalEraAnnouncement(event.getPlayer());
         long startingPoints = Math.max(0L, getConfig().getLong("progression.starting-research-points", 40L));
-        boolean hasResearch = api.getTechnologies().stream()
+        boolean hasResearch = !api.getResearches(playerId).isEmpty()
+                || api.getTechnologies().stream()
                 .anyMatch(technology -> api.hasUnlockedTechnology(playerId, technology.id()));
         // Existing players who never received points are bootstrapped too; spending the balance
         // cannot trigger another grant because a successful research remains recorded.
@@ -482,8 +540,12 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium unlock <tecnologia>");
                     return true;
                 }
-                var result = api.unlockTechnology(player.getUniqueId(), args[1]);
-                player.sendMessage((result.successful() ? ChatColor.GREEN : ChatColor.RED) + result.message());
+                Optional<TechnologyDefinition> technology = api.getTechnology(args[1]);
+                if (technology.isEmpty()) {
+                    player.sendMessage(ChatColor.RED + "Tecnologia desconhecida.");
+                    return true;
+                }
+                startResearch(player, technology.orElseThrow());
                 return true;
             }
             case "calc" -> {
@@ -829,6 +891,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     }
 
     private void shutdownServices() {
+        if (researchCompletionTask != null) {
+            researchCompletionTask.cancel();
+            researchCompletionTask = null;
+        }
         if (recipeBridge != null) {
             try {
                 recipeBridge.unregisterAll();

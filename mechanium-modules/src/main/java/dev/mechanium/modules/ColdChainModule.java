@@ -8,6 +8,7 @@ import java.util.Set;
 /** Refrigerated storage and temperature-controlled distribution components. */
 final class ColdChainModule extends AbstractBuiltinModule {
     @Override public String id() { return "cold-chain"; }
+    @Override public boolean optional() { return true; }
     @Override public Set<String> dependencies() { return Set.of("industrial-logistics", "water-treatment", "eco-power"); }
 
     @Override protected List<TechnologyDefinition> technologies() {

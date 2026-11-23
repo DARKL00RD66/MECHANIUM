@@ -111,7 +111,7 @@ final class MechaniumResearchMenu implements Listener {
         button(holder, 33, Material.CLOCK, "§dEras históricas",
                 List.of("§7Veja a linha do tempo."), p -> openEraTree(p, 0, 0));
         button(holder, 49, Material.BARRIER, "§cFechar", List.of(), Player::closeInventory);
-        player.openInventory(inv);
+        animateOpen(player, holder);
     }
 
     private void openEraTree(Player player, int requestedEra, int requestedPage) {
@@ -191,7 +191,7 @@ final class MechaniumResearchMenu implements Listener {
                 p -> openEraTree(p, eraIndex + 1, 0));
         if (page + 1 < pageCount) button(holder, 53, Material.PAPER, "§ePróxima página", List.of(),
                 p -> openEraTree(p, eraIndex, page + 1));
-        player.openInventory(inv);
+        animateOpen(player, holder);
     }
 
     private void openSimpleList(Player player, String section) {
@@ -221,13 +221,18 @@ final class MechaniumResearchMenu implements Listener {
             }
         }
         button(holder, 49, Material.ARROW, "§eVoltar", List.of(), this::openHome);
-        player.openInventory(inv);
+        animateOpen(player, holder);
     }
 
     private MenuHolder create(String title) {
         MenuHolder holder = new MenuHolder();
         holder.inventory = Bukkit.createInventory(holder, SIZE, Component.text(title));
         return holder;
+    }
+
+    private void animateOpen(Player player, MenuHolder holder) {
+        holder.animating = true;
+        MechaniumMenuAnimator.open(plugin, player, holder.inventory, () -> holder.animating = false);
     }
 
     private void fillFrame(Inventory inventory) {
@@ -302,6 +307,7 @@ final class MechaniumResearchMenu implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) return;
         if (!(event.getView().getTopInventory().getHolder() instanceof MenuHolder holder)) return;
         event.setCancelled(true);
+        if (holder.animating) return;
         if (event.getClickedInventory() != event.getView().getTopInventory()) return;
         Consumer<Player> action = holder.actions.get(event.getSlot());
         if (action != null) action.accept(player);
@@ -319,6 +325,7 @@ final class MechaniumResearchMenu implements Listener {
 
     private static final class MenuHolder implements InventoryHolder {
         private Inventory inventory;
+        private boolean animating;
         private final Map<Integer, Consumer<Player>> actions = new HashMap<>();
         @Override public Inventory getInventory() { return inventory; }
     }

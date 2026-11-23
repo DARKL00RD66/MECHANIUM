@@ -52,7 +52,7 @@ mechanium-plugin/target/MECHANIUM-0.5.0-SNAPSHOT.jar
 4. Ajuste `plugins/MECHANIUM/config.yml`.
 5. Coloque addons externos em `plugins/MECHANIUM/addons/` e reinicie.
 
-A linha 0.4.1 aprimora a abertura animada dos menus e adiciona pesquisas temporizadas com duração dinâmica, persistência SQLite e progresso que continua avançando offline. O mínimo por pesquisa é de dois minutos. A linha 0.4.0 também inclui catálogo vanilla ampliado, primeira cadeia ExoticGarden e upgrade de armazenamento DankTech2. Ainda é experimental e requer validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
+A linha 0.5.0 adiciona três módulos opcionais inspirados em addons Slimefun: incubadoras elétricas para animais passivos (ElectricSpawners), máquinas aceleradas (FastMachines) e manutenção industrial com regras hardcore configuráveis (HardcoreSlimefun). A linha 0.4.1 também traz pesquisas temporizadas com duração dinâmica e progresso offline, e 0.4.0 ampliou o catálogo vanilla e trouxe as primeiras cadeias ExoticGarden/DankTech2. O projeto segue experimental e precisa de validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
 
 ## CI e estado
 

@@ -97,15 +97,43 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     }
     @Override public Optional<EraDefinition> getEra(String id) { return Optional.ofNullable(eras.get(normalize(id))); }
     @Override public Collection<EraDefinition> getEras() { return eras.values().stream().sorted(Comparator.comparingInt(EraDefinition::order)).toList(); }
-    @Override public Optional<String> getPlayerEra(UUID id) { return dataStore.getPlayerEra(Objects.requireNonNull(id)); }
+    @Override public Optional<String> getPlayerEra(UUID id) {
+        UUID playerId = Objects.requireNonNull(id);
+        return dataStore.getPlayerEraOverride(playerId).or(() -> dataStore.getServerEra());
+    }
+    @Override public Optional<String> getPlayerEraOverride(UUID id) {
+        return dataStore.getPlayerEraOverride(Objects.requireNonNull(id));
+    }
+    @Override public Optional<String> getServerEra() { return dataStore.getServerEra(); }
+
+    @Override public synchronized void setServerEra(String era) {
+        String id = normalize(era);
+        if (!eras.containsKey(id)) throw new IllegalArgumentException("Unknown era: " + era);
+        String previousEraId = dataStore.getServerEra().orElse(null);
+        dataStore.setServerEra(id);
+        if (!Objects.equals(previousEraId, id) && Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().callEvent(new MechaniumServerEraChangeEvent(previousEraId, id));
+        }
+    }
+
     @Override public synchronized void setPlayerEra(UUID player, String era) {
         String id = normalize(era);
         if (!eras.containsKey(id)) throw new IllegalArgumentException("Unknown era: " + era);
         UUID playerId = Objects.requireNonNull(player);
-        String previousEraId = dataStore.getPlayerEra(playerId).orElse(null);
+        String previousEraId = getPlayerEra(playerId).orElse(null);
         dataStore.setPlayerEra(playerId, id);
         if (!Objects.equals(previousEraId, id) && Bukkit.getServer() != null) {
             Bukkit.getPluginManager().callEvent(new MechaniumPlayerEraChangeEvent(playerId, previousEraId, id));
+        }
+    }
+
+    @Override public synchronized void clearPlayerEraOverride(UUID player) {
+        UUID playerId = Objects.requireNonNull(player);
+        String previousEraId = getPlayerEra(playerId).orElse(null);
+        dataStore.clearPlayerEraOverride(playerId);
+        String newEraId = getPlayerEra(playerId).orElse(null);
+        if (!Objects.equals(previousEraId, newEraId) && newEraId != null && Bukkit.getServer() != null) {
+            Bukkit.getPluginManager().callEvent(new MechaniumPlayerEraChangeEvent(playerId, previousEraId, newEraId));
         }
     }
     @Override public long getResearchPoints(UUID id) { return dataStore.getResearchPoints(Objects.requireNonNull(id)); }

@@ -29,5 +29,7 @@ final class AirFiltrationModule extends AbstractBuiltinModule {
                 "air_purifier", 1, List.of(),
                 Map.of('W', "WATER_BUCKET", 'I', "IRON_INGOT", 'G', "GLASS", 'R', "REDSTONE"),
                 "industrial_air_filtration"));
+        registerMachine(api, new MachineDefinition("air_purifier", "Purificador de ar", "air_purifier",
+                "DISPENSER", "CHARCOAL", 2, "air_filter_cartridge", 1, 1200, "industrial_air_filtration"));
     }
 }

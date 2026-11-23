@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.4.0-SNAPSHOT  
+**Versão:** 0.4.1-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -8,7 +8,7 @@
 
 - API pública para eras, tecnologias, progressão, módulos e addons.
 - Registro persistente de categorias, itens, receitas, máquinas e regras de drops.
-- Persistência SQLite com schema versionado até a versão 5; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
+- Persistência SQLite com schema versionado até a versão 6; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
 - Criação de `ItemStack` com identificador PDC, lore, modelo customizado e limite de pilha configurável.
 - Receitas Bukkit nativas (shaped e shapeless), incluindo ingredientes MECHANIUM exatos.
 - Verificação central de tecnologia ao fabricar, usar, consumir e posicionar itens personalizados.
@@ -55,6 +55,16 @@
 - **Mesa de encantamentos:** receita de fabricação exige Era Mítica; valor antigo padrão é migrado sem apagar configurações personalizadas.
 - **ExoticGarden:** primeira cadeia de horticultura com sementes diversificadas, ervas, extrato botânico, conserva tropical e caixote de pomar.\n- **DankTech2:** primeira expansão de armazenamento portátil com upgrade para 54 espaços, mantendo a persistência no PDC do item.
 
+## Atualizações 0.4.1-SNAPSHOT
+
+- **Animação de menus:** abertura mais lenta e uniforme, revelando 3 itens de moldura e 2 de conteúdo a cada 2 ticks.
+- **Pesquisas temporizadas:** cada tecnologia tem uma duração calculada por custo e era; o mínimo absoluto é de 120 segundos.
+- **Duração configurável:** `progression.research.minimum-seconds`, `base-seconds`, `seconds-per-research-point`, `seconds-per-era` e sobrescritas em `overrides.<technology_id>`.
+- **Persistência offline:** jobs ativos ficam em `mechanium_active_researches`; o horário final é absoluto e continua avançando offline e durante reinicializações. Os jobs são finalizados no ciclo online ou no próximo login.
+- **Economia de pesquisa:** pontos são gastos quando a pesquisa começa; o desbloqueio ocorre somente depois de atingir o prazo.
+- **Interface:** exibe duração estimada, estado, barra percentual e tempo restante; atualiza a cada segundo sem reiniciar a animação.
+- **Compatibilidade:** `unlockTechnology` imediato da API permanece disponível para addons antigos; menu e comando do jogador usam o caminho temporizado.
+
 ## Limitações conhecidas
 
 - O runtime de máquinas ainda suporta apenas dispenser, uma entrada e uma saída; não há filas de produção nem múltiplos insumos/produtos.
@@ -76,4 +86,4 @@
 
 ## Classificação
 
-**Fundação em desenvolvimento; funcionalidades 0.4.0-SNAPSHOT aguardam CI e validação no servidor real.**
+**Fundação em desenvolvimento; funcionalidades 0.4.1-SNAPSHOT aguardam CI e validação no servidor real.**

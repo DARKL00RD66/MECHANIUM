@@ -104,6 +104,9 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             fluidPipeManager.start();
             specialEquipmentListener = new SpecialEquipmentListener(this);
             Bukkit.getPluginManager().registerEvents(specialEquipmentListener, this);
+            if (moduleManager.enabledModuleIds().contains("global-warming")) {
+                Bukkit.getPluginManager().registerEvents(new EnvironmentalRecoveryListener(this), this);
+            }
             machineManager = new MechaniumMachineManager(this, api, energyGridManager);
             Bukkit.getPluginManager().registerEvents(machineManager, this);
             machineManager.start();
@@ -483,6 +486,29 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                 }
                 return true;
             }
+            case "points" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
+                    return true;
+                }
+                sender.sendMessage(ChatColor.AQUA + "Pontos de pesquisa: "
+                        + ChatColor.WHITE + api.getResearchPoints(player.getUniqueId()));
+                sender.sendMessage(ChatColor.GRAY + "Obtenha pontos descobrindo minérios, explorando biomas inéditos e concluindo conquistas.");
+                sender.sendMessage(ChatColor.GRAY + "Use /mechanium research para abrir a árvore de tecnologias.");
+                return true;
+            }
+            case "customizer" -> {
+                if (!moduleManager.enabledModuleIds().contains("slime-customizer")) {
+                    sender.sendMessage(ChatColor.RED + "O módulo SlimeCustomizer está desativado.");
+                    return true;
+                }
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(ChatColor.RED + "O editor exige um jogador.");
+                    return true;
+                }
+                openRecipeAdminMenu(player);
+                return true;
+            }
             case "status" -> {
                 sender.sendMessage(ChatColor.GOLD + "MECHANIUM " + getDescription().getVersion());
                 sender.sendMessage(ChatColor.GRAY + "Eras: " + api.getEras().size()
@@ -803,12 +829,14 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium menu" + ChatColor.GRAY + " — abrir o HUD em baú");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium research" + ChatColor.GRAY + " — abrir pesquisas e progressão");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium research info" + ChatColor.GRAY + " — resumo da sua progressão");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium points" + ChatColor.GRAY + " — consultar pontos e formas de obtê-los");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium book" + ChatColor.GRAY + " — abrir o catálogo");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage trust <jogador>" + ChatColor.GRAY + " — autorizar acesso ao barril observado");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage untrust <jogador>" + ChatColor.GRAY + " — remover acesso");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium storage list" + ChatColor.GRAY + " — listar acessos");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium calc <receita> [quantidade]" + ChatColor.GRAY + " — calcular materiais e lotes");
+        if (hasAdminAccess(sender)) sender.sendMessage(ChatColor.YELLOW + "/mechanium customizer" + ChatColor.GRAY + " — abrir o editor de receitas MECHANIUM");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium environment" + ChatColor.GRAY + " — consultar impacto industrial do mundo");
         if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium era <era> [jogador|todos]" + ChatColor.GRAY + " — alterar era (staff)");
@@ -825,7 +853,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("help", "status", "menu", "gui", "hud", "research", "book", "storage", "unlock", "calc", "environment", "era", "admin");
+        if (args.length == 1) return List.of("help", "status", "menu", "gui", "hud", "research", "book", "storage", "unlock", "calc", "environment", "era", "admin", "points", "customizer");
         if (args.length == 2 && args[0].equalsIgnoreCase("era") && hasAdminAccess(sender)) {
             return api.getEras().stream().map(EraDefinition::id).toList();
         }

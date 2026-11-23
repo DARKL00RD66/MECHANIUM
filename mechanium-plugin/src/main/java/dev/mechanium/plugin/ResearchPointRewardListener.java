@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.persistence.PersistentDataType;
 
 /** Rewards scientific points for discovering configured ore types, once per player and material. */
@@ -37,5 +38,22 @@ final class ResearchPointRewardListener implements Listener {
         api.addResearchPoints(player.getUniqueId(), reward);
         player.sendMessage("§bDescoberta científica: §f" + materialId.toLowerCase(java.util.Locale.ROOT)
                 .replace('_', ' ') + " §7(+" + reward + " pontos de pesquisa)");
+    }
+    /** First-time advancement completions provide a second, non-mining path to scientific points. */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onAdvancement(PlayerAdvancementDoneEvent event) {
+        String advancementId = event.getAdvancement().getKey().toString();
+        if (advancementId.startsWith("minecraft:recipes/")) return;
+        long reward = plugin.getConfig().getLong("research-rewards.advancements.default", 2L);
+        if (reward <= 0L) return;
+        String marker = "research_advancement_" + advancementId.replace(':', '_').replace('/', '_');
+        NamespacedKey key = new NamespacedKey(plugin, marker);
+        var data = event.getPlayer().getPersistentDataContainer();
+        Byte claimed = data.get(key, PersistentDataType.BYTE);
+        if (claimed != null && claimed == (byte) 1) return;
+        data.set(key, PersistentDataType.BYTE, (byte) 1);
+        api.addResearchPoints(event.getPlayer().getUniqueId(), reward);
+        event.getPlayer().sendMessage("§bConhecimento adquirido: §f" + advancementId
+                + " §7(+" + reward + " pontos de pesquisa)");
     }
 }

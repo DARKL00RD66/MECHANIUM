@@ -1,5 +1,15 @@
 # Módulos oficiais do MECHANIUM
 
+### Novos módulos 0.6.0-SNAPSHOT
+
+| ID | Conteúdo |
+|---|---|
+| `air-filtration` | Purificador de ar e cartuchos filtrantes; a receita do purificador consome um balde de água. |
+| `advanced-metallurgy` | Componentes de aço e forno metalúrgico. |
+| `pressure-engineering` | Placas compactadas e câmara de pressão. |
+| `industrial-automation` | Circuitos de controle e montadora automática. |
+| `industrial-logistics` | Caixas de transporte e roteador de carga. |
+
 ## Módulos históricos e industriais padrão
 
 | ID | Módulo | Padrão |

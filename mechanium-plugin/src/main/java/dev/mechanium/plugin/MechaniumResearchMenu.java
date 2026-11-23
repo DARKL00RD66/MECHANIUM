@@ -110,6 +110,8 @@ final class MechaniumResearchMenu implements Listener {
                 List.of("§7Consulte resultados e requisitos."), p -> openSimpleList(p, "receitas"));
         button(holder, 29, Material.ANVIL, "§6Máquinas",
                 List.of("§7Consulte os processos industriais."), p -> openSimpleList(p, "máquinas"));
+        button(holder, 31, Material.SMITHING_TABLE, "§bFabricar itens e máquinas",
+                List.of("§7Catálogo organizado por categoria.", "§7Clique no resultado para fabricar.", "§7Os ingredientes serão consumidos."), fabricationMenu::open);
         button(holder, 33, Material.CLOCK, "§dEras históricas",
                 List.of("§7Veja a linha do tempo."), p -> openEraTree(p, 0, 0));
         button(holder, 49, Material.BARRIER, "§cFechar", List.of(), Player::closeInventory);

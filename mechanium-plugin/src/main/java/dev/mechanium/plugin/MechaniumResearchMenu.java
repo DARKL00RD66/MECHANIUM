@@ -26,7 +26,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -40,11 +39,11 @@ final class MechaniumResearchMenu implements Listener {
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43
     };
 
-    private final JavaPlugin plugin;
+    private final MechaniumPlugin plugin;
     private final MechaniumApi api;
     private final NamespacedKey guideKey;
 
-    MechaniumResearchMenu(JavaPlugin plugin, MechaniumApi api) {
+    MechaniumResearchMenu(MechaniumPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
         this.api = api;
         this.guideKey = new NamespacedKey(plugin, "guide_book");

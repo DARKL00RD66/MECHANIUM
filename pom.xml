@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
  <modelVersion>4.0.0</modelVersion>
- <groupId>dev.mechanium</groupId><artifactId>mechanium-parent</artifactId><version>0.3.0-SNAPSHOT</version><packaging>pom</packaging>
+ <groupId>dev.mechanium</groupId><artifactId>mechanium-parent</artifactId><version>0.4.0-SNAPSHOT</version><packaging>pom</packaging>
  <name>MECHANIUM</name><description>Motor independente de progressão histórica, tecnologia e indústria.</description>
  <modules><module>mechanium-api</module><module>mechanium-storage</module><module>mechanium-engine</module><module>mechanium-modules</module><module>mechanium-addon-loader</module><module>mechanium-plugin</module></modules>
  <properties>

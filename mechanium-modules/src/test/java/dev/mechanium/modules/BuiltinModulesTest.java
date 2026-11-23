@@ -40,7 +40,8 @@ class BuiltinModulesTest {
                 "biofuel",
                 "construction-materials",
                 "industrial-networks",
-                "better-reactor"
+                "better-reactor",
+                "material-generators"
         )));
     }
 

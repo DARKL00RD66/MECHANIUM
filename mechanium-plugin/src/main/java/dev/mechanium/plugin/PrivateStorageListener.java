@@ -199,7 +199,8 @@ final class PrivateStorageListener implements Listener {
         if (item == null || !item.hasItemMeta()) return null;
         String id = item.getItemMeta().getPersistentDataContainer()
                 .get(itemIdKey, PersistentDataType.STRING);
-        return STORAGE_ITEM_ID.equals(id) || "simple_storage_node".equals(id) ? id : null;
+        return STORAGE_ITEM_ID.equals(id) || "simple_storage_node".equals(id)
+                || "network_storage_hub".equals(id) ? id : null;
     }
 
     private boolean isPrivateStorage(Block block) {

@@ -1,6 +1,12 @@
 # Changelog
 
 ## 0.3.0-SNAPSHOT
+- Nova era global persistente no SQLite, aplicada a jogadores online e offline que não tenham sobrescrita individual de teste.
+- Painel administrativo com botão separado para trocar a era de todo o servidor; seleção individual permanece disponível para testes e agora inclui retorno à era global.
+- Anúncio de mudança global com título “Nova era”, nome da era como subtítulo e som de conclusão de desafio; jogadores offline recebem o aviso no próximo login.
+- Animação de revelação nos menus de pesquisa, administração e edição de receitas: moldura e controles aparecem em sequência com sons de interface.
+- Migração SQLite para schema 5 com suporte a era global e sobrescritas individuais.
+- Teste automatizado para persistência da era global, herança por jogadores e sobrescritas de teste.
 - Ampliação funcional dos sete domínios integrados na versão anterior.
 - EcoPower: geradores eólicos/solares, baterias persistentes, geração por tick e consumo de energia por máquinas industriais.
 - Liquid: itens de tubulação e tanque; rede local de transporte de água purificada entre tanques do mesmo proprietário.

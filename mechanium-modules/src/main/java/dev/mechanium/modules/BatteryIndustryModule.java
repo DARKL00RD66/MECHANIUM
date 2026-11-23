@@ -9,7 +9,7 @@ import java.util.Set;
 final class BatteryIndustryModule extends AbstractBuiltinModule {
     @Override public String id() { return "battery-industry"; }
     @Override public boolean optional() { return true; }
-    @Override public Set<String> dependencies() { return Set.of("eco-power"); }
+    @Override public Set<String> dependencies() { return Set.of("eco-power", "energy"); }
 
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(

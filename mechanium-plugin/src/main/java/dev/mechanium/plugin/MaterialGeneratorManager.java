@@ -151,7 +151,7 @@ final class MaterialGeneratorManager implements Listener {
                     BlockState chestState = chestBlock.getState();
                     if (!(chestState instanceof InventoryHolder holder)) continue;
                     Inventory inventory = holder.getInventory();
-                    if (inventory.firstEmpty() < 0) continue;
+                    // addItem can still merge into a matching partial stack even when every slot is occupied.
                     int progress = tile.getPersistentDataContainer().getOrDefault(progressKey, PersistentDataType.INTEGER, 0) + 20;
                     if (progress >= interval) {
                         if (inventory.addItem(new ItemStack(output, 1)).isEmpty()) progress = 0;

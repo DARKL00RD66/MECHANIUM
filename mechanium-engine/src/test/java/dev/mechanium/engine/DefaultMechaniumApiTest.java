@@ -56,6 +56,45 @@ class DefaultMechaniumApiTest {
     }
 
     @Test
+    void serverEraAppliesToPlayersWithoutOverridesAndPersistsAcrossReloads() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("global-era.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            api.registerEra(new EraDefinition("industrial_revolution", "Revolução Industrial", 3));
+
+            UUID regularPlayer = UUID.randomUUID();
+            UUID testPlayer = UUID.randomUUID();
+
+            api.setServerEra("ancient");
+            assertEquals("ancient", api.getPlayerEra(regularPlayer).orElseThrow());
+            assertTrue(api.getPlayerEraOverride(regularPlayer).isEmpty());
+
+            // The existing individual-era tool remains available for isolated testing.
+            api.setPlayerEra(testPlayer, "ancient");
+            api.setServerEra("industrial_revolution");
+
+            assertEquals("industrial_revolution", api.getServerEra().orElseThrow());
+            assertEquals("industrial_revolution", api.getPlayerEra(regularPlayer).orElseThrow(),
+                    "Players without a test override must inherit the global era immediately.");
+            assertEquals("ancient", api.getPlayerEra(testPlayer).orElseThrow(),
+                    "An explicit test override must remain isolated from global changes.");
+
+            DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
+            reloaded.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            reloaded.registerEra(new EraDefinition("industrial_revolution", "Revolução Industrial", 3));
+            assertEquals("industrial_revolution", reloaded.getServerEra().orElseThrow());
+            assertEquals("industrial_revolution", reloaded.getPlayerEra(regularPlayer).orElseThrow());
+            assertEquals("ancient", reloaded.getPlayerEra(testPlayer).orElseThrow());
+
+            reloaded.clearPlayerEraOverride(testPlayer);
+            assertTrue(reloaded.getPlayerEraOverride(testPlayer).isEmpty());
+            assertEquals("industrial_revolution", reloaded.getPlayerEra(testPlayer).orElseThrow(),
+                    "Clearing a test override must restore inheritance from the server era.");
+        }
+    }
+
+    @Test
     void refusesRecipeOutputAboveCustomItemStackLimit() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(directory.resolve("recipe-stack-limit.db"), Logger.getLogger("test"))) {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);

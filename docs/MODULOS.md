@@ -156,9 +156,20 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 
 ## Novos módulos 0.7.0-SNAPSHOT
 
+- industrial-networks: conduítes industriais e caixas de rede com transporte automático de itens MECHANIUM.
+
 - `forestry`: fibras de madeira, resina e estação florestal.
 - `textile-industry`: fibras, tecidos e tear mecanizado.
 - `biofuel`: biomassa e célula de biocombustível abstrata.
 - `construction-materials`: cerâmica, painéis e estruturas pré-fabricadas.
 
 Todos são opcionais e podem ser configurados individualmente.
+
+### Industrial Networks — transporte de itens
+
+- industrial_conduit é instalado como dispenser e network_crate como barril.
+- Conduítes adjacentes formam uma rede de até 128 blocos; caixas adjacentes aos conduítes entram na rede se tiverem o mesmo proprietário.
+- A cada 2 segundos, a rede tenta mover um item MECHANIUM de uma caixa para outra com espaço.
+- Apenas itens com identidade persistente MECHANIUM são transportados; itens vanilla permanecem nos depósitos.
+- Somente chunks carregados são examinados. A rede não atravessa distâncias sem conduítes nem conecta depósitos remotamente.
+- As caixas são protegidas pelo proprietário e seus conteúdos são devolvidos ao desmontar o bloco. O transporte por funis externos é bloqueado nas caixas e conduítes.

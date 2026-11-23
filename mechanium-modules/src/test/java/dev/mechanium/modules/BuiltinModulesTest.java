@@ -38,7 +38,8 @@ class BuiltinModulesTest {
                 "forestry",
                 "textile-industry",
                 "biofuel",
-                "construction-materials"
+                "construction-materials",
+                "industrial-networks"
         )));
     }
 

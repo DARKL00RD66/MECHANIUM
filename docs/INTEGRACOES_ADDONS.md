@@ -26,7 +26,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | Galactifun | Conteúdo de exploração espacial | Apenas módulo futurista opcional, desativado por padrão |
 | FNAmplifications | Extensões de conteúdo e amplificação | Aguardando validação funcional e de licença |
 | Element Manipulation | Conteúdo fantástico | Apenas módulo de fantasia opcional, desativado por padrão |
-| DankTech2 | Armazenamento portátil | Planejado |
+| DankTech2 | Armazenamento portátil | Primeira expansão: upgrade para armazém portátil persistente de 54 espaços; outras tiers e filtros pendentes |
 | Networks | Redes logísticas entre máquinas e depósitos | Planejado; redes atuais são locais e específicas por domínio |
 | MissileWarfare | Não serão portadas armas, mísseis ou mecânicas de ataque | Excluído do escopo operacional |
 | EMCTech | Processamento e conversão de recursos | Aguardando confirmação da referência e da licença |
@@ -40,7 +40,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 
 ## Funcionalidades ampliadas nesta etapa (0.3.0–0.4.0)
 
-- **ExoticGarden:** cadeia inicial de horticultura com mistura de sementes, ervas desidratadas, extrato botânico, conserva tropical e caixote de pomar; ainda sem crescimento de culturas customizadas.\n- **ExtraGear:** picareta reforçada aplica Haste breve após mineração; bússola apresenta coordenadas, biome, direção e bloco observado.
+- **ExoticGarden:** cadeia inicial de horticultura com mistura de sementes, ervas desidratadas, extrato botânico, conserva tropical e caixote de pomar; ainda sem crescimento de culturas customizadas.\n- **DankTech2:** upgrade de armazém portátil que amplia o inventário persistente de 27 para 54 espaços; tiers adicionais e filtros continuam pendentes.\n- **ExtraGear:** picareta reforçada aplica Haste breve após mineração; bússola apresenta coordenadas, biome, direção e bloco observado.
 - **EcoPower:** gerador eólico (1 unidade/s), gerador solar (2 unidades/s de dia sem tempestade), baterias até 10.000 unidades e consumo por máquinas industriais.
 - **SFCalc:** `/mechanium calc <receita> [quantidade]`, com cálculo de lotes e expansão de ingredientes MECHANIUM até oito níveis.
 - **Liquid:** filtro de água, tanques e tubulações adjacentes que transportam água purificada entre tanques do mesmo proprietário.

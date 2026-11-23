@@ -40,7 +40,7 @@ final class ResearchPointRewardListener implements Listener {
                 .replace('_', ' ') + " §7(+" + reward + " pontos de pesquisa)");
     }
     /** First-time advancement completions provide a second, non-mining path to scientific points. */
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onAdvancement(PlayerAdvancementDoneEvent event) {
         String advancementId = event.getAdvancement().getKey().toString();
         if (advancementId.startsWith("minecraft:recipes/")) return;

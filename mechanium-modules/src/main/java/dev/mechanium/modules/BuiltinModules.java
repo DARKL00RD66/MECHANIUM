@@ -12,6 +12,7 @@ public final class BuiltinModules {
                 new OptionalFantasyModule(), new OptionalFuturisticModule(), new CulinaryModule(), new OreProcessingModule(),
                 new ExtraGearModule(), new EcoPowerModule(), new SFCalcModule(), new LiquidModule(),
                 new AdvancedTechModule(), new SimpleStorageModule(), new SensibleToolboxModule(),
-                new DankTech2Module(), new ElectricSpawnersModule(), new FastMachinesModule(), new HardcoreSlimefunModule());
+                new DankTech2Module(), new ElectricSpawnersModule(), new FastMachinesModule(), new HardcoreSlimefunModule(), new NetworksModule(), new GastronomiconModule(),
+                new GlobalWarmingModule(), new BetterNuclearReactorModule(), new EMCTechModule());
     }
 }

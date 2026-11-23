@@ -70,4 +70,5 @@ A linha 0.4.0 amplia o catálogo de receitas vanilla e inicia a integração de 
 - [Matriz de portabilidade](docs/PORTABILIDADE_ADDONS.md)
 - [Licenças e atribuição](docs/LICENCAS_E_ORIGENS.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Política de versionamento até 0.9.9](docs/VERSIONAMENTO.md)
 - [Contribuição](CONTRIBUTING.md)

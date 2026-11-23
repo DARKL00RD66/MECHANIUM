@@ -163,6 +163,14 @@ modules:
     enabled: true
   industrial-logistics:
     enabled: true
+  forestry:
+    enabled: true
+  textile-industry:
+    enabled: true
+  biofuel:
+    enabled: true
+  construction-materials:
+    enabled: true
 
 machines:
   wear:

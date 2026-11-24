@@ -186,12 +186,13 @@ final class VanillaRecipeCatalog {
 
     private static boolean isAncientOutput(String material, String path) {
         if (containsAny(material, "COPPER_INGOT", "RAW_COPPER", "COPPER_BLOCK",
-                "OAK_PLANKS", "CRAFTING_TABLE", "COBBLESTONE", "STONE", "DIRT",
+                "OAK_PLANKS", "CRAFTING_TABLE", "COBBLESTONE", "DIRT",
                 "GRAVEL", "SAND", "GLASS", "GLASS_PANE", "BRICK", "BRICKS",
                 "TERRACOTTA", "FLOWER_POT", "PAPER", "BOOK", "BREAD", "BOWL",
                 "TORCH", "FURNACE", "CHEST", "BARREL", "STICK", "LADDER", "FISHING_ROD",
                 "HONEY_BOTTLE", "HONEY_BLOCK", "HONEYCOMB", "DRIED_KELP", "COOKIE", "CAKE",
                 "PUMPKIN_PIE", "MUSHROOM_STEW", "RABBIT_STEW", "BEETROOT_SOUP")) return true;
+        if (material.equals("STONE")) return true;
 
         if (material.startsWith("WOODEN_") || material.startsWith("STONE_") || material.startsWith("COOKED_")) return true;
         if (material.endsWith("_PLANKS") || material.endsWith("_LOG")
@@ -207,7 +208,8 @@ final class VanillaRecipeCatalog {
     }
 
     private static boolean isElectricalOutput(String material) {
-        return containsAny(material, "REDSTONE_LAMP", "REPEATER", "COMPARATOR",
+        return material.equals("REDSTONE") || material.equals("REDSTONE_ORE")
+                || containsAny(material, "REDSTONE_LAMP", "REPEATER", "COMPARATOR",
                 "REDSTONE_TORCH", "REDSTONE_BLOCK", "DAYLIGHT_DETECTOR",
                 "LIGHTNING_ROD", "COPPER_BULB", "NOTE_BLOCK");
     }

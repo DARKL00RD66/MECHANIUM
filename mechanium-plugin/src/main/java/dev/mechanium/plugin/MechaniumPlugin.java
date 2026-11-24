@@ -110,6 +110,12 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     activeContentOwners.add(SlimeCustomizerMenu.ownerId(itemId));
                 }
             }
+            for (String recipeId : getConfig().getStringList("slime-customizer.user-recipe-ids")) {
+                if (recipeId != null && recipeId.trim().toLowerCase(Locale.ROOT)
+                        .matches("[a-z0-9][a-z0-9_.-]{1,95}")) {
+                    activeContentOwners.add(SlimeCustomizerMenu.recipeOwnerId(recipeId));
+                }
+            }
             api.pruneInactiveContentOwners(activeContentOwners);
             applyConfiguredRecipeOverrides();
             List<String> contentErrors = api.validateContent();

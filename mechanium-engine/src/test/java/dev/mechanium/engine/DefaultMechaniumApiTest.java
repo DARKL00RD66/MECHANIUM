@@ -488,6 +488,45 @@ class DefaultMechaniumApiTest {
     }
 
     @Test
+    void customizerRecipesHaveIndependentOwnershipAndSurviveStartupPruning() throws Exception {
+        Path database = directory.resolve("customizer-owned-recipes.db");
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            try (var scope = api.openContentScope("system:customizer")) {
+                assertTrue(api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                        "customizer_user_items", "Itens personalizados", "Categoria do editor")));
+                scope.commit();
+            }
+            try (var scope = api.openContentScope("customizer:item:custom_output")) {
+                assertTrue(api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                        "custom_output", "Produto customizado", "COPPER_INGOT", List.of(), 0, 64,
+                        "customizer_user_items", null)));
+                scope.commit();
+            }
+            var recipe = new dev.mechanium.api.model.RecipeDefinition(
+                    "custom_output_recipe", dev.mechanium.api.model.RecipeDefinition.Type.SHAPELESS,
+                    "custom_output", 2, List.of(), java.util.Map.of('A', "IRON_INGOT",
+                    'B', "mechanium:custom_output"), null);
+            try (var scope = api.openContentScope("customizer:recipe:custom_output_recipe")) {
+                assertTrue(api.registerRecipe(recipe));
+                scope.commit();
+            }
+
+            DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
+            reloaded.pruneInactiveContentOwners(Set.of(
+                    "system:customizer",
+                    "customizer:item:custom_output",
+                    "customizer:recipe:custom_output_recipe"));
+
+            assertEquals(recipe, reloaded.getRecipe("custom_output_recipe").orElseThrow());
+            try (SqliteDataStore reopened = new SqliteDataStore(database, Logger.getLogger("test"))) {
+                assertEquals(List.of(recipe), List.copyOf(reopened.loadRecipes()),
+                        "Administrator-created recipes must survive owner pruning and database reload.");
+            }
+        }
+    }
+
+    @Test
     void uncommittedContentScopeRestoresMemoryAndDatabase() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(directory.resolve("scope-rollback.db"), Logger.getLogger("test"))) {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);

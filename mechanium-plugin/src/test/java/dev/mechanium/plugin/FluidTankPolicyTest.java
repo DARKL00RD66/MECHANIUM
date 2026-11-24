@@ -20,6 +20,16 @@ class FluidTankPolicyTest {
     }
 
     @Test
+    void preservesExistingVolumeWhenConfiguredCapacityIsReduced() {
+        var existing = new FluidTankContents("purified_water", 20_000);
+        var attempt = FluidTankPolicy.fill(existing, "purified_water", 250, 16_000);
+
+        assertEquals(0, attempt.acceptedMb());
+        assertEquals(existing, attempt.contents(),
+                "Reducing configured capacity must not truncate fluid already stored in a tank.");
+    }
+
+    @Test
     void rejectsMixingDifferentFluidTypes() {
         var existing = new FluidTankContents("purified_water", 1_000);
         var attempt = FluidTankPolicy.fill(existing, "industrial_coolant", 250, 10_000);

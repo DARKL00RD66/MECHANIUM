@@ -30,6 +30,6 @@ final class ColdChainModule extends AbstractBuiltinModule {
         registerRecipe(api, new RecipeDefinition("cooling_cell_recipe", RecipeDefinition.Type.SHAPELESS, "cooling_cell", 2, List.of(), Map.of('I', "mechanium:coolant_cell", 'P', "PACKED_ICE"), "refrigerated_distribution"));
         registerRecipe(api, new RecipeDefinition("insulated_crate_recipe", RecipeDefinition.Type.SHAPED, "insulated_crate", 1, List.of("FFF", "FCF", "FFF"), Map.of('F', "mechanium:insulating_fiber", 'C', "BARREL"), "thermal_insulation"));
         registerRecipe(api, new RecipeDefinition("refrigeration_unit_recipe", RecipeDefinition.Type.SHAPED, "refrigeration_unit", 1, List.of("ICI", "RDR", "III"), Map.of('I', "IRON_INGOT", 'C', "mechanium:cooling_cell", 'R', "REDSTONE", 'D', "DISPENSER"), "refrigerated_distribution"));
-        registerMachine(api, new MachineDefinition("refrigeration_unit", "Unidade refrigeradora", "refrigeration_unit", "DISPENSER", "mechanium:coolant_cell", 1, "cooling_cell", 1, 1200, "refrigerated_distribution"));
+        registerMachine(api, new MachineDefinition("refrigeration_unit", "Unidade refrigeradora", "refrigeration_unit", "DISPENSER", "mechanium:coolant_cell", 1, "cooling_cell", 1, 1200, 2, "refrigerated_distribution"));
     }
 }

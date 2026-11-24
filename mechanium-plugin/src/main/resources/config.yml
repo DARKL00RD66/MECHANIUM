@@ -229,6 +229,10 @@ greenhouse:
   growth-radius: 4
   energy-per-growth: 1
 
+slime-customizer:
+  # IDs for administrator-created items. SQLite ownership is kept separately for each item.
+  user-item-ids: []
+
 machines:
   wear:
     enabled: true

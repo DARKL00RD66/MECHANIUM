@@ -1,6 +1,8 @@
 # Changelog
 
 ## 0.7.4.01-SNAPSHOT
+- Criada a Wiki oficial em português em `docs/wiki/`, com guia de jogador, sistemas, catálogo de módulos, comandos/configuração, administração e desenvolvimento de addons.
+- README principal atualizado para apontar para a Wiki; documentação diferencia funcionalidades implementadas, parciais e pendentes.
 - Adicionado ao HUD principal o item **Carteira EMC**, com saldo individual e quantidade de itens aprendidos.
 - O item abre diretamente o painel EMC existente; a área superior do HUD também mostra o saldo atual.
 - O atalho aparece como desativado quando o módulo emc-exchange está desligado.

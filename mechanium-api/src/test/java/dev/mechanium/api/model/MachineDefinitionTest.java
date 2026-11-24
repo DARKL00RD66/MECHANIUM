@@ -43,6 +43,24 @@ class MachineDefinitionTest {
     }
 
     @Test
+    void storesEnergyCostAndRejectsInvalidCosts() {
+        MachineDefinition powered = new MachineDefinition(
+                "powered_press", "Prensa elétrica", "powered_press", "DISPENSER",
+                "IRON_INGOT", 2, "mechanical_parts", 1, 100, 3, "basic_mechanics");
+        assertEquals(3, powered.energyCostPerOperation());
+
+        MachineDefinition legacy = new MachineDefinition(
+                "legacy_press", "Prensa antiga", "legacy_press", "DISPENSER",
+                "IRON_INGOT", 2, "mechanical_parts", 1, 100, "basic_mechanics");
+        assertEquals(0, legacy.energyCostPerOperation(),
+                "Legacy constructors remain unpowered until their module opts into energy.");
+
+        assertThrows(IllegalArgumentException.class, () -> new MachineDefinition(
+                "invalid_energy", "Invalid", "invalid_energy", "DISPENSER",
+                "IRON_INGOT", 1, "mechanical_parts", 1, 100, -1, "basic_mechanics"));
+    }
+
+    @Test
     void machineIngredientsNormalizeVanillaAndCustomIds() {
         assertEquals("IRON_INGOT", new MachineIngredient("iron_ingot", 2).itemId());
         assertEquals("mechanium:raw_material",

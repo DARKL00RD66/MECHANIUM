@@ -31,6 +31,6 @@ final class GlassworksModule extends AbstractBuiltinModule {
         registerRecipe(api, new RecipeDefinition("tempered_glass_panel_recipe", RecipeDefinition.Type.SHAPED, "tempered_glass_panel", 8, List.of("GGG", "GIG", "GGG"), Map.of('G', "mechanium:industrial_glass", 'I', "IRON_INGOT"), "tempered_glass_production"));
         registerRecipe(api, new RecipeDefinition("precision_lens_recipe", RecipeDefinition.Type.SHAPED, "precision_lens", 1, List.of(" G ", "GAG", " G "), Map.of('G', "mechanium:industrial_glass", 'A', "AMETHYST_SHARD"), "tempered_glass_production"));
         registerRecipe(api, new RecipeDefinition("glass_furnace_recipe", RecipeDefinition.Type.SHAPED, "glass_furnace", 1, List.of("III", "IFI", "ICI"), Map.of('I', "IRON_INGOT", 'F', "FURNACE", 'C', "COPPER_INGOT"), "industrial_glass_forming"));
-        registerMachine(api, new MachineDefinition("glass_furnace", "Forno de vidro", "glass_furnace", "DISPENSER", "mechanium:silica_batch", 2, "industrial_glass", 2, 1200, "industrial_glass_forming"));
+        registerMachine(api, new MachineDefinition("glass_furnace", "Forno de vidro", "glass_furnace", "DISPENSER", "mechanium:silica_batch", 2, "industrial_glass", 2, 1200, 2, "industrial_glass_forming"));
     }
 }

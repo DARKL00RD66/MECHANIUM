@@ -168,8 +168,14 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                     """);
                 statement.execute("""
                     UPDATE mechanium_machines SET energy_cost_per_operation=2
-                    WHERE id IN ('mining_assembler','polymer_mixer','glass_furnace',
-                                 'refrigeration_unit','aquaculture_hatchery')
+                    WHERE id IN ('rapid_press_machine','rapid_coil_winder_machine',
+                                 'pressure_chamber','auto_assembler','metallurgy_furnace',
+                                 'mining_assembler','polymer_mixer','glass_furnace',
+                                 'refrigeration_unit')
+                    """);
+                statement.execute("""
+                    UPDATE mechanium_machines SET energy_cost_per_operation=1
+                    WHERE id='aquaculture_hatchery'
                     """);
                 statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (8)");
             }

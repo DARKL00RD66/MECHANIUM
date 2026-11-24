@@ -134,8 +134,11 @@ final class VanillaRecipeCatalog {
                 || result == Material.CALIBRATED_SCULK_SENSOR) return "digital_age";
         if (isIndustrialOutput(result) || containsAny(path,
                 "piston", "hopper", "dispenser", "dropper", "minecart", "rail")) return "industrial_revolution";
-        if (isElectricalOutput(material) || containsAny(path,
-                "redstone", "repeater", "comparator", "daylight_detector", "tripwire")) return "electrification";
+        if (containsAny(material, "REDSTONE_LAMP", "REPEATER", "COMPARATOR",
+                "REDSTONE_TORCH", "REDSTONE_BLOCK", "DAYLIGHT_DETECTOR", "TARGET", "TRIPWIRE_HOOK")
+                || containsAny(path, "redstone", "repeater", "comparator", "daylight_detector", "tripwire")) {
+            return "electrification";
+        }
         if (material.equals("BEACON") || material.equals("BREWING_STAND")
                 || material.equals("ENDER_CHEST") || material.equals("CONDUIT")
                 || path.contains("enchant")) return "mythic_age";

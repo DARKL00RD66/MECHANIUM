@@ -3,7 +3,7 @@
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
 **Fase atual:** fundação de máquinas, energia e fluidos implementada no código; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v8, conduítes energéticos, carga de baterias preservada, redes indexadas por chunk e tanques de fluido tipado implementados. CI #45504038521 aprovou 97 testes, mais a compilação do addon de exemplo. Paper/Purpur ainda não testados.  
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v8, conduítes energéticos, carga de baterias preservada, redes indexadas por chunk e tanques de fluido tipado implementados. CI #45504509829 aprovou 97 testes, mais a compilação do addon de exemplo; inclui a preservação do volume no item de tanque. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -105,10 +105,10 @@
 
 ## Classificação
 
-**Fundação em desenvolvimento; funcionalidades 0.5.0-SNAPSHOT aguardam CI e validação no servidor real.**
+**Consolidação 0.9.9 em desenvolvimento; CI automatizado aprovado, validação funcional em Paper/Purpur ainda pendente.**
 
 
-Expansão em revisão: Forestry, Textile Industry, Biofuel e Construction Materials foram adicionados como módulos opcionais. PR #10 aguarda CI Java 21/Maven.
+Expansão 0.9.9 em consolidação: PR #10 continua aberto; CI Java 21/Maven aprovado no commit `9215d46967a246e559dae60e5802026d05c9e2e6` (97 testes). Testes de runtime Paper/Purpur ainda pendentes.
 
 
 ## Snapshot 0.7.1.00-SNAPSHOT

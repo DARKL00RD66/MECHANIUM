@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `8e2c78264cf3470a6f11813ac0c8d1296e75d8cc` (workflow #45508690080): 116 testes automatizados, compilação dos sete módulos Maven e do addon de exemplo. Inclui o controlador inicial de estufa, mantendo o item climático legado e adicionando o item separado `greenhouse_controller`. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O último CI concluído antes da ampliação do editor foi o commit `e657f8c1f54a4514c8982d9c89e2ceccc99a68c5` (workflow #45510163868): 118 testes automatizados, sete módulos Maven e addon de exemplo aprovados. A implementação adicional de receitas shapeless no Slime Customizer está em validação nesta revisão. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 
@@ -98,7 +98,9 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - O módulo Head Collection é cosmético e local. Não instala, detecta nem exige Geyser, GeyserMC, Floodgate ou qualquer plataforma Bedrock. Os IDs antigos de categoria/configuração são mantidos apenas para migrar dados já existentes.
 
 - [ ] Mining Automation: definir e implementar a extração de jogo prometida; não anunciar mineração automática antes do teste.
-- [ ] Slime Customizer: finalizar a interface administrativa para criação, edição e validação de conteúdo.
+- [x] Slime Customizer: editor inicial para criar/listar/entregar/editar/remover itens personalizados, com validação de referências e ownership SQLite por item.
+- [x] Slime Customizer: criação e remoção de receitas shapeless com até nove ingredientes vanilla ou MECHANIUM, resultado/pesquisa registrados e ownership SQLite por receita.
+- [ ] Slime Customizer: editor de receitas shaped, edição de receitas existentes e formulários para criar categorias/tecnologias.
 - [x] Head Collection: manter o módulo como cosmético local sem integração Geyser/Bedrock; IDs antigos de categoria/config são preservados somente para migração.
 - [x] Implementar controlador `greenhouse_controller` que aplica +1 estágio a plantas `Ageable` após crescimento normal aceito, dentro do raio configurado e com energia da rede do proprietário; preservar `climate_controller` legado.
 - [ ] Validar o controlador em Paper/Purpur e completar hidroponia, nutrientes, colheita/replantio e culturas customizadas.

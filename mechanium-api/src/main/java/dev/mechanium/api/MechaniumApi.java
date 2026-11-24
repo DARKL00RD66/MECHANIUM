@@ -72,5 +72,9 @@ public interface MechaniumApi {
     default boolean registerMachine(MachineDefinition machine) { return false; }
     default Optional<MachineDefinition> getMachine(String machineId) { return Optional.empty(); }
     default Collection<MachineDefinition> getMachines() { return java.util.List.of(); }
+    /** Registers a typed fluid and its fill/extraction containers. */
+    default boolean registerFluid(FluidDefinition fluid) { return false; }
+    default Optional<FluidDefinition> getFluid(String fluidId) { return Optional.empty(); }
+    default Collection<FluidDefinition> getFluids() { return java.util.List.of(); }
     java.util.List<String> validateContent();
 }

@@ -4,18 +4,20 @@
 - Mantida a linha de trabalho consolidada 0.9.9, sem publicar snapshots intermediários.
 - API e runtime de máquinas multi-entrada/multi-saída: seis slots de entrada e três de saída, com pré-validação do lote completo.
 - Custos de energia agora são declarados por máquina (energyCostPerOperation), persistidos no SQLite v8 e migrados para preservar os custos das máquinas antigas.
+- SQLite v9 adiciona registro persistente de fluidos/recipientes e ownership; a API pública permite que módulos e addons registrem novos fluidos e seus recipientes de enchimento/extração.
 - Rede energética com conduítes HOPPER craftáveis, topologia de até 256 nós, isolamento por proprietário e acesso somente a chunks carregados.
 - Débito de energia agregado entre baterias com plano completo antes das alterações; geradores distribuem produção entre baterias conectadas.
 - Carga de baterias é preservada no PDC do item ao desmontar e restaurada ao recolocar.
 - Geradores passaram a usar índice de chunks carregados em vez de varrer todos os chunks a cada segundo.
 - Interface de interação das máquinas informa entradas, saídas, duração e custo energético.
-- Módulo cosmético renomeado para Head Collection; integração Geyser/Bedrock removida, com migração de config e ownership preservando os IDs legados.
+- Módulo cosmético renomeado para Head Collection; não possui dependência nem integração Geyser, GeyserMC, Floodgate ou Bedrock. A migração preserva IDs antigos de configuração/ownership e a categoria persistente.
 - Corrigidos IDs de produtos das máquinas de moinho e conservadora que impediam seu registro correto.
-- CI #45504509829 aprovou Java 21/Maven `clean verify` com 97 testes e compilação do addon de exemplo; o commit validado inclui a preservação do tipo/volume de fluido no PDC do item de tanque.
-- Tanques de fluido armazenam volume em mB no PDC: 16.000 mB por padrão, transferência de 250 mB/ciclo, água purificada e refrigerante, sem mistura.
+- CI #45505906156 aprovou Java 21/Maven `clean verify` com 107 testes e compilação do addon de exemplo; o commit validado inclui a API pública de fluidos, SQLite v9 e a preservação do tipo/volume de fluido no PDC do item de tanque.
+- Tanques de fluido armazenam volume tipado em mB no PDC: 16.000 mB por padrão, transferência de 250 mB/ciclo, água purificada e refrigerante como exemplos, sem mistura entre tipos. A API permite registrar volumes/recipientes personalizados.
 - Itens de fluido legados no inventário do tanque são migrados para volume; tipo e volume também ficam preservados no item de tanque recuperado.
+- Corrigida a retirada de fluidos: agora seleciona o maior recipiente de extração desbloqueado cujo volume caiba no tanque, em vez de exigir sempre 250 mB. Testes unitários para 250, 500 e 1.000 mB foram adicionados; aguardam CI nesta revisão.
 - Índices dos tubos de fluido e conduítes industriais evitam varreduras recorrentes de todos os chunks.
-- Limitações: sem válvulas/bombas, fluidos vanilla ou outros tipos arbitrários e sem API pública de registro de fluidos para addons.
+- Limitações: ainda sem válvulas/bombas e sem integração com fluidos vanilla. A API pública já aceita fluidos customizados e recipientes registrados.
 - Testes reais em servidores Paper/Purpur 1.21.11 continuam pendentes.
 
 ## 0.7.4.02-SNAPSHOT

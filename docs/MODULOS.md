@@ -105,7 +105,7 @@ Esta etapa amplia itens e receitas; não adiciona ainda novas plantas com cresci
 
 ### AdvancedTech — indústria avançada
 
-O britador converte minério britado em concentrado de ferro; a refinaria converte concentrado em liga refinada; a montadora converte peças mecânicas em peças de precisão. As três máquinas usam o runtime atual de dispenser, têm entrada/saída, progresso e proprietário persistentes e exigem energia. O runtime ainda é de entrada única e saída única; não há filas de produção ou vários insumos por máquina.
+O britador converte minério britado em concentrado de ferro; a refinaria converte concentrado em liga refinada; a montadora converte peças mecânicas em peças de precisão. As três máquinas usam o runtime atual de dispenser, têm entrada/saída, progresso e proprietário persistentes e exigem energia. O runtime agora suporta até seis tipos de insumo e três produtos por lote; filas de produção e processamento paralelo continuam pendentes.
 
 ### Simple Storage — inventário conectado
 
@@ -146,7 +146,7 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 ## Limites conhecidos antes do teste de servidor
 
 - O build automatizado pode verificar compilação e testes unitários, mas não confirma comportamento real em Paper/Purpur 1.21.11.
-- Máquinas continuam limitadas ao dispenser com um insumo e um produto por ciclo.
+- Máquinas continuam hospedadas em dispenser; o runtime suporta até seis entradas e três saídas, mas ainda não possui filas nem processamento paralelo.
 - Energia e fluidos são redes locais simples, não um simulador genérico de cabos ou líquidos.
 - Armazenamento conectado exige nós face a face; não é uma rede logística de longa distância.
 - Não há integração com economia para calcular preços monetários.

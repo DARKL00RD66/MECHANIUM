@@ -33,6 +33,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.Set;
 
 /** Transfers MECHANIUM-tagged items through owner-matched industrial conduits. */
@@ -47,6 +50,7 @@ final class IndustrialNetworkManager implements Listener {
     private final MechaniumApi api;
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
+    private final Map<String, Location> loadedPipes = new HashMap<>();
     private BukkitTask task;
 
     IndustrialNetworkManager(JavaPlugin plugin, MechaniumApi api) {
@@ -57,6 +61,9 @@ final class IndustrialNetworkManager implements Listener {
     }
 
     void start() {
+        for (World world : Bukkit.getWorlds()) {
+            for (Chunk chunk : world.getLoadedChunks()) registerChunkPipes(chunk);
+        }
         task = Bukkit.getScheduler().runTaskTimer(plugin, this::transferNetworks, 40L, 40L);
     }
 
@@ -65,6 +72,7 @@ final class IndustrialNetworkManager implements Listener {
             task.cancel();
             task = null;
         }
+        loadedPipes.clear();
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -84,7 +92,9 @@ final class IndustrialNetworkManager implements Listener {
         if (!tile.update(true, false)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage("§cNão foi possível registrar o componente da rede.");
+            return;
         }
+        if ("industrial_conduit".equals(id)) loadedPipes.put(key(block.getLocation()), block.getLocation());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -111,8 +121,10 @@ final class IndustrialNetworkManager implements Listener {
         ItemStack recovered = api.createItemStack(id, 1).orElseGet(() -> new ItemStack(block.getType()));
         Location drop = block.getLocation().add(0.5, 0.5, 0.5);
         event.setDropItems(false);
+        String locationKey = key(block.getLocation());
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (event.isCancelled() || !block.getType().isAir()) return;
+            loadedPipes.remove(locationKey);
             for (ItemStack item : contents) block.getWorld().dropItemNaturally(drop, item);
             block.getWorld().dropItemNaturally(drop, recovered);
         });
@@ -164,22 +176,54 @@ final class IndustrialNetworkManager implements Listener {
 
     private void transferNetworks() {
         Set<String> processed = new HashSet<>();
-        for (World world : Bukkit.getWorlds()) {
-            for (Chunk chunk : world.getLoadedChunks()) {
-                for (BlockState state : chunk.getTileEntities()) {
-                    if (!(state instanceof TileState tile)
-                            || !"industrial_conduit".equals(tile.getPersistentDataContainer()
-                            .get(itemIdKey, PersistentDataType.STRING))) continue;
-                    String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
-                    if (owner == null || processed.contains(key(state.getBlock()))) continue;
-                    Network network = collectNetwork(state.getBlock(), owner);
-                    if (network.pipes().isEmpty()) continue;
-                    boolean overlap = network.pipes().stream().anyMatch(processed::contains);
-                    processed.addAll(network.pipes());
-                    if (!overlap && network.complete()) moveOneCustomItem(network.crates());
-                }
+        for (Location location : new ArrayList<>(loadedPipes.values())) {
+            World world = location.getWorld();
+            if (world == null || !world.isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+                loadedPipes.remove(key(location));
+                continue;
+            }
+            BlockState state = location.getBlock().getState();
+            if (!(state instanceof TileState tile)
+                    || !"industrial_conduit".equals(tile.getPersistentDataContainer()
+                    .get(itemIdKey, PersistentDataType.STRING))) {
+                loadedPipes.remove(key(location));
+                continue;
+            }
+            String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+            if (owner == null || processed.contains(key(state.getBlock()))) continue;
+            Network network = collectNetwork(state.getBlock(), owner);
+            if (network.pipes().isEmpty()) continue;
+            boolean overlap = network.pipes().stream().anyMatch(processed::contains);
+            processed.addAll(network.pipes());
+            if (!overlap && network.complete()) moveOneCustomItem(network.crates());
+        }
+    }
+
+    private void registerChunkPipes(Chunk chunk) {
+        for (BlockState state : chunk.getTileEntities()) {
+            if (!(state instanceof TileState tile)) continue;
+            if ("industrial_conduit".equals(tile.getPersistentDataContainer()
+                    .get(itemIdKey, PersistentDataType.STRING))) {
+                loadedPipes.put(key(state.getLocation()), state.getLocation());
             }
         }
+    }
+
+    @EventHandler
+    public void onNetworkChunkLoad(org.bukkit.event.world.ChunkLoadEvent event) {
+        registerChunkPipes(event.getChunk());
+    }
+
+    @EventHandler
+    public void onNetworkChunkUnload(org.bukkit.event.world.ChunkUnloadEvent event) {
+        int chunkX = event.getChunk().getX();
+        int chunkZ = event.getChunk().getZ();
+        UUID worldId = event.getWorld().getUID();
+        loadedPipes.entrySet().removeIf(entry -> {
+            Location location = entry.getValue();
+            return location.getWorld() != null && location.getWorld().getUID().equals(worldId)
+                    && (location.getBlockX() >> 4) == chunkX && (location.getBlockZ() >> 4) == chunkZ;
+        });
     }
 
     private Network collectNetwork(Block firstPipe, String owner) {
@@ -285,6 +329,11 @@ final class IndustrialNetworkManager implements Listener {
 
     private String key(Block block) {
         return block.getWorld().getUID() + ":" + block.getX() + ":" + block.getY() + ":" + block.getZ();
+    }
+
+    private String key(Location location) {
+        return location.getWorld().getUID() + ":" + location.getBlockX() + ":"
+                + location.getBlockY() + ":" + location.getBlockZ();
     }
 
     private record Network(Set<String> pipes, List<Inventory> crates, boolean complete) { }

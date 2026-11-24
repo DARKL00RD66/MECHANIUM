@@ -473,6 +473,10 @@ final class FluidPipeManager implements Listener {
         return drops;
     }
 
+    private String messageError(String value) { return "§c" + value; }
+    private String messageInfo(String value) { return "§7" + value; }
+    private String messageSuccess(String value) { return "§a" + value; }
+
     private FluidItem fluidItem(ItemStack item) {
         String id = itemId(item);
         if (id == null) return null;

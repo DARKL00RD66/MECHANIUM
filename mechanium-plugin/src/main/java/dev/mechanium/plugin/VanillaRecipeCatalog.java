@@ -229,13 +229,6 @@ final class VanillaRecipeCatalog {
                 || result == Material.BLAST_FURNACE || result == Material.SMOKER;
     }
 
-    private static boolean isElectricalOutput(Material result) {
-        return result == Material.REDSTONE_LAMP || result == Material.REPEATER
-                || result == Material.COMPARATOR || result == Material.REDSTONE_TORCH
-                || result == Material.REDSTONE_BLOCK || result == Material.DAYLIGHT_DETECTOR
-                || result == Material.TARGET || result == Material.TRIPWIRE_HOOK;
-    }
-
     private static boolean isCombatOutput(Material result) {
         String name = result.name();
         return name.endsWith("_SWORD")

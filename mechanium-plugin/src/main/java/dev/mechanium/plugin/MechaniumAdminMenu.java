@@ -78,6 +78,9 @@ final class MechaniumAdminMenu implements Listener {
                 mechanium::openRecipeAdminMenu);
         button(holder, 31, Material.EXPERIENCE_BOTTLE, "§dPontos de pesquisa",
                 List.of("§7Selecione um jogador para conceder", "§750 pontos científicos."), this::openResearchPointTargets);
+        button(holder, 33, Material.SMITHING_TABLE, "§bSlime Customizer",
+                List.of("§7Criar e remover itens personalizados.", "§7Use categorias e pesquisas existentes."),
+                mechanium::openSlimeCustomizerMenu);
         boolean gatesEnabled = plugin.getConfig().getBoolean("vanilla-recipe-gates.enabled", true);
         button(holder, 40, gatesEnabled ? Material.LIME_DYE : Material.GRAY_DYE,
                 gatesEnabled ? "§aBloqueios vanilla: ATIVADOS" : "§cBloqueios vanilla: DESATIVADOS",

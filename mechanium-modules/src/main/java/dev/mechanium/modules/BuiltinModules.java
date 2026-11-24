@@ -14,6 +14,6 @@ public final class BuiltinModules {
                 new AdvancedTechModule(), new SimpleStorageModule(), new SensibleToolboxModule(),
                 new DankTech2Module(), new ElectricSpawnersModule(), new FastMachinesModule(), new HardcoreSlimefunModule(), new AirFiltrationModule(), new MetallurgyModule(),
                 new PressureEngineeringModule(), new AutomationModule(), new LogisticsModule(), new ForestryModule(), new TextileIndustryModule(), new BiofuelModule(), new ConstructionMaterialsModule(), new NetworksModule(), new BetterReactorModule(), new MaterialGeneratorsModule(), new WaterTreatmentModule(), new GreenhouseModule(), new IndustrialRecyclingModule(), new OreChunksModule(), new AquacultureModule(), new GlassworksModule(), new RailFreightModule(), new BatteryIndustryModule(), new ColdChainModule(),
-                new FNAmplificationsModule(), new GeyserHeadsModule(), new SlimeCustomizerModule(), new IndustrialChemistryModule(), new MiningAutomationModule(), new EmcExchangeModule());
+                new FNAmplificationsModule(), new HeadCollectionModule(), new SlimeCustomizerModule(), new IndustrialChemistryModule(), new MiningAutomationModule(), new EmcExchangeModule());
     }
 }

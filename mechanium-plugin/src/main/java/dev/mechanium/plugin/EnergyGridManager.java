@@ -107,6 +107,8 @@ final class EnergyGridManager implements Listener {
             }
             tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, newCharge);
             if (!tile.update(true, false)) {
+                plugin.getLogger().severe("Falha ao gravar débito de energia em "
+                        + locationLabel(battery) + "; revertendo alterações anteriores.");
                 rollbackChargeChanges(applied);
                 return false;
             }
@@ -119,11 +121,21 @@ final class EnergyGridManager implements Listener {
         for (int i = applied.size() - 1; i >= 0; i--) {
             ChargeChange change = applied.get(i);
             BlockState state = change.block().getState();
-            if (state instanceof TileState tile) {
-                tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, change.oldCharge());
-                tile.update(true, false);
+            if (!(state instanceof TileState tile)) {
+                plugin.getLogger().severe("Não foi possível reverter a carga em "
+                        + locationLabel(change.block()) + ": o bloco deixou de ser um bloco de dados.");
+                continue;
+            }
+            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, change.oldCharge());
+            if (!tile.update(true, false)) {
+                plugin.getLogger().severe("Falha ao reverter carga de bateria em "
+                        + locationLabel(change.block()) + ". Verifique a carga desta rede manualmente.");
             }
         }
+    }
+
+    private String locationLabel(Block block) {
+        return block.getWorld().getName() + " " + block.getX() + "," + block.getY() + "," + block.getZ();
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -365,6 +377,8 @@ final class EnergyGridManager implements Listener {
             }
             tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, newCharge);
             if (!tile.update(true, false)) {
+                plugin.getLogger().severe("Falha ao gravar geração de energia em "
+                        + locationLabel(battery) + "; revertendo alterações anteriores.");
                 rollbackChargeChanges(applied);
                 return;
             }

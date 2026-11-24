@@ -67,7 +67,7 @@ Na primeira inicialização desta versão, o MECHANIUM compara o valor salvo de 
 
 - Regras definidas como `off` são preservadas.
 - Valores que já diferem da sugestão anterior são preservados.
-- O antigo padrão `minecraft:observer = modern` é corrigido para `digital_age`.
+- Os antigos padrões empacotados da bigorna, alto-forno, defumador, detector de luz e observador também são corrigidos para Medieval, Revolução Industrial, Eletrificação e Era Digital, respectivamente.
 - A migração executa uma única vez e grava um marcador em `vanilla-recipe-gates.migrations`.
 
 **Limitação importante:** versões antigas não registravam se um valor igual à sugestão automática havia sido escolhido manualmente. Por isso, uma escolha manual que coincidia exatamente com o antigo default também pode ser atualizada. O plugin registra essa ressalva no console; revise o catálogo e reaplique qualquer escolha deliberada com:

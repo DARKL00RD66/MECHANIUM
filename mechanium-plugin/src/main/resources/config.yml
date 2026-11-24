@@ -67,7 +67,7 @@ vanilla-recipe-gates:
     'minecraft:shield': medieval
     'minecraft:bow': medieval
     'minecraft:crossbow': renaissance
-    'minecraft:anvil': renaissance
+    'minecraft:anvil': medieval
     'minecraft:enchanting_table': mythic_age
     'minecraft:piston': industrial_revolution
     'minecraft:hopper': industrial_revolution
@@ -89,8 +89,8 @@ vanilla-recipe-gates:
     'minecraft:sculk_sensor': information_age
     'minecraft:shulker_box': space_age
     'minecraft:netherite_ingot': speculative_future
-    'minecraft:smoker': modern
-    'minecraft:daylight_detector': modern
+    'minecraft:smoker': industrial_revolution
+    'minecraft:daylight_detector': electrification
     'minecraft:crafter': digital_age
 
 # Reward is granted once per player for the first discovered block of each listed ore type.

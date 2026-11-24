@@ -200,7 +200,7 @@ class DefaultMechaniumApiTest {
 
             var machine = new dev.mechanium.api.model.MachineDefinition(
                     "mechanical_press", "Prensa", "mechanical_press", "DISPENSER",
-                    "IRON_INGOT", 2, "mechanical_parts", 1, 100, "basic_mechanics");
+                    "IRON_INGOT", 2, "mechanical_parts", 1, 100, 2, "basic_mechanics");
             assertTrue(api.registerMachine(machine));
             assertTrue(api.registerMachine(machine), "Identical machine registration must be idempotent");
             assertEquals(machine, api.getMachine("MECHANICAL_PRESS").orElseThrow());
@@ -215,11 +215,12 @@ class DefaultMechaniumApiTest {
                             new dev.mechanium.api.model.MachineIngredient("mechanium:mechanical_parts", 1)),
                     List.of(new dev.mechanium.api.model.MachineProduct("mechanical_parts", 2),
                             new dev.mechanium.api.model.MachineProduct("copper_coil", 1)),
-                    240, "basic_mechanics");
+                    240, 5, "basic_mechanics");
             assertTrue(api.registerMachine(multiIoMachine));
             assertEquals(multiIoMachine, new DefaultMechaniumApi(store)
                     .getMachine("multi_io_mixer").orElseThrow(),
                     "Multi-input/multi-output machine definitions must persist across reloads");
+            assertEquals(5, api.getMachine("multi_io_mixer").orElseThrow().energyCostPerOperation());
             assertTrue(api.validateContent().isEmpty());
 
             assertThrows(IllegalArgumentException.class, () -> api.registerMachine(

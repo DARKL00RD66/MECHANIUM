@@ -66,6 +66,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     .resolve(getConfig().getString("storage.database", "mechanium.db"));
             dataStore = new SqliteDataStore(database, getLogger());
             api = new DefaultMechaniumApi(dataStore);
+            migrateHeadCollectionModuleConfig();
+            api.migrateContentOwner("module:geyser-heads", "module:head-collection");
             registerConfiguredEras();
             initializeServerEra();
             migrateVanillaRecipeGateSettings();
@@ -200,6 +202,25 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             merged.add(Map.of("id", id, "name", name, "order", order));
         }
         getConfig().set("progression.eras", merged);
+    }
+
+    /**
+     * Renames the old cosmetic module without changing persisted item/recipe IDs.
+     * Existing administrator enable/disable choices take precedence over the new default.
+     */
+    private void migrateHeadCollectionModuleConfig() {
+        String migrationPath = "modules.migrations.head-collection-from-geyser-heads";
+        if (getConfig().getBoolean(migrationPath, false)) return;
+
+        String oldPath = "modules.geyser-heads.enabled";
+        String newPath = "modules.head-collection.enabled";
+        if (!getConfig().contains(newPath, true) && getConfig().contains(oldPath, true)) {
+            getConfig().set(newPath, getConfig().getBoolean(oldPath, true));
+        }
+        getConfig().set(oldPath, null);
+        getConfig().set(migrationPath, true);
+        saveConfig();
+        getLogger().info("Módulo cosmético renomeado para Head Collection; IDs de itens e receitas foram preservados.");
     }
 
     private void migrateVanillaRecipeGateSettings() {

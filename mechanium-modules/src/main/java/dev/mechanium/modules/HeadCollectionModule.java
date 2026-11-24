@@ -18,17 +18,18 @@ final class HeadCollectionModule extends AbstractBuiltinModule {
     }
     @Override protected void registerExtra(dev.mechanium.api.MechaniumModuleContext context) {
         var api = context.api();
+        // The category ID is retained as a storage key for existing worlds; it is not a platform integration.
         registerCategory(api, new ContentCategory("geyser_heads_goods", "Coleção de cabeças",
-                "Itens cosméticos e expositores de coleção; sem dependência de skins ou recursos externos"));
+                "Itens cosméticos e expositores locais de coleção do MECHANIUM"));
         // Persisted item/category/recipe IDs intentionally remain stable for existing worlds.
         registerItem(api, new ItemDefinition("head_token", "&eFicha de coleção", "PAPER",
-                List.of("&8Conteúdo do módulo geyser-heads"), 0, 64, "geyser_heads_goods", "head_collecting"));
+                List.of("&8Coleção cosmética local do MECHANIUM"), 0, 64, "geyser_heads_goods", "head_collecting"));
         registerItem(api, new ItemDefinition("artisan_head", "&eCabeça de artesão", "PLAYER_HEAD",
-                List.of("&8Conteúdo do módulo geyser-heads"), 0, 1, "geyser_heads_goods", "head_collecting"));
+                List.of("&8Coleção cosmética local do MECHANIUM"), 0, 1, "geyser_heads_goods", "head_collecting"));
         registerItem(api, new ItemDefinition("head_display", "&eSuporte de exposição", "ITEM_FRAME",
-                List.of("&8Conteúdo do módulo geyser-heads"), 0, 64, "geyser_heads_goods", "head_exhibitions"));
+                List.of("&8Coleção cosmética local do MECHANIUM"), 0, 64, "geyser_heads_goods", "head_exhibitions"));
         registerItem(api, new ItemDefinition("head_collection_case", "&eVitrine de coleção", "CHEST",
-                List.of("&8Conteúdo do módulo geyser-heads"), 0, 64, "geyser_heads_goods", "head_exhibitions"));
+                List.of("&8Coleção cosmética local do MECHANIUM"), 0, 64, "geyser_heads_goods", "head_exhibitions"));
         registerRecipe(api, new RecipeDefinition("head_token_recipe", RecipeDefinition.Type.SHAPELESS,
                 "head_token", 4, List.of(), Map.of('P', "PAPER", 'I', "INK_SAC"), "head_collecting"));
         registerRecipe(api, new RecipeDefinition("artisan_head_recipe", RecipeDefinition.Type.SHAPELESS,

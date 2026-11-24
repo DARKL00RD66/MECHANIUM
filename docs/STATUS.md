@@ -2,8 +2,8 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** primeira entrega da fundação industrial implementada; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, migração SQLite v8, conduítes energéticos, preservação da carga em baterias e índice de geradores por chunks carregados implementados. CI #45502503078 aprovou 91 testes; novas alterações de energia e interface aguardam CI. Paper/Purpur ainda não testados.  
+**Fase atual:** fundação de máquinas, energia e fluidos implementada no código; CI Java 21/Maven aprovado; teste em servidor real pendente
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v8, conduítes energéticos, carga de baterias preservada, redes indexadas por chunk e tanques de fluido tipado implementados. CI #45504038521 aprovou 97 testes, mais a compilação do addon de exemplo. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -42,7 +42,7 @@
 - **ExtraGear:** picareta reforçada com Haste breve após mineração e bússola para levantamento de coordenadas/biome/direção/bloco apontado.
 - **EcoPower:** geradores eólico/solar, baterias de 10.000 unidades e conduítes que conectam geradores, baterias e máquinas por redes isoladas por proprietário.
 - **SFCalc:** comando `/mechanium calc <receita> [quantidade]`, cálculo de lotes, produção e expansão recursiva de materiais intermediários até oito níveis.
-- **Liquid:** filtro alimentado por energia, tanques e tubulações; rede do mesmo proprietário transfere água purificada a cada dois segundos.
+- **Liquid:** filtro de água, tanques de 16.000 mB e tubulações; a rede transfere água purificada e refrigerante tipados em ciclos de 250 mB, sem misturar fluidos.
 - **AdvancedTech:** britador, refinaria e montadora; todos usam o runtime de máquina e exigem energia.
 - **Simple Storage:** inventário virtual paginado para até 64 nós de barril conectados por faces, respeitando propriedade e jogadores confiáveis.
 - **SensibleToolbox:** kit de campo com Speed/Night Vision temporárias e kit consumível para reparar equipamento em 25% da durabilidade máxima.
@@ -87,7 +87,7 @@
 ## Limitações conhecidas
 
 - O runtime de máquinas usa dispenser com seis slots de entrada e três de saída; cada definição suporta até seis tipos de ingrediente e três produtos. Filas e processamento paralelo ainda não existem.
-- O sistema energético usa conduítes HOPPER identificados, até 256 nós por rede, propriedade por UUID e somente chunks carregados. Geradores distribuem carga entre baterias conectadas; máquinas debitam o custo definido em sua MachineDefinition. Baterias preservam a carga ao serem desmontadas e recolocadas.
+- O sistema energético usa conduítes HOPPER identificados, até 256 nós por rede, propriedade por UUID e somente chunks carregados. Geradores distribuem carga entre baterias conectadas; máquinas debitam o custo definido em sua MachineDefinition. Baterias preservam a carga ao serem desmontadas e recolocadas. Geradores, tubos e conduítes industriais mantêm índices de nós em chunks carregados, evitando varreduras globais recorrentes.
 - O catálogo de receitas não inclui processos cujo resultado não esteja no registro de receitas suportado (por exemplo, operações especiais de bancada e cozimento em fogueira); itens sem receita registrada não recebem desbloqueio por crafting.\n- O sistema de fluidos transporta somente o item MECHANIUM `purified_water`, não líquidos vanilla ou outros fluidos.
 - O Simple Storage conecta somente nós adjacentes pelas faces e limita cada rede a 64 depósitos.
 - SFCalc calcula materiais, não valores monetários, e não altera o sistema de economia do servidor.

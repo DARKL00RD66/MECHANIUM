@@ -17,6 +17,8 @@ public interface MechaniumApi {
     }
     /** Removes persisted content owned by modules/addons that did not load this startup. */
     default void pruneInactiveContentOwners(Set<String> activeOwnerIds) { }
+    /** Renames an internal module/addon content owner while preserving its persisted definitions. */
+    default void migrateContentOwner(String previousOwnerId, String newOwnerId) { }
     boolean registerEra(EraDefinition era);
     Optional<EraDefinition> getEra(String eraId);
     Collection<EraDefinition> getEras();

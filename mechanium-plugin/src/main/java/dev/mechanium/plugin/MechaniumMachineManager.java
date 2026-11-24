@@ -370,8 +370,9 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
 
-        if (energyGridManager != null && energyGridManager.requiresPower(machineId)
-                && !energyGridManager.consume(owner, dispenser.getLocation(), 1)) {
+        int energyCost = definition.energyCostPerOperation();
+        if (energyCost > 0 && (energyGridManager == null
+                || !energyGridManager.consume(owner, dispenser.getLocation(), energyCost))) {
             setProgress(dispenser, progress);
             return;
         }

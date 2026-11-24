@@ -180,6 +180,11 @@ final class SlimeCustomizerMenu implements Listener {
     }
 
     private boolean deleteItem(String itemId, Player player) {
+        String reference = findContentReference(itemId);
+        if (reference != null) {
+            player.sendMessage("§cO item não pode ser removido porque ainda é usado por: §f" + reference);
+            return false;
+        }
         String ownerId = ownerId(itemId);
         try (MechaniumContentRegistrationScope scope = api.openContentScope(ownerId)) {
             // Committing an empty scope deletes only definitions owned by this custom item.
@@ -195,6 +200,34 @@ final class SlimeCustomizerMenu implements Listener {
         plugin.saveConfig();
         player.sendMessage("§aItem personalizado removido: §f" + itemId);
         return true;
+    }
+
+    private String findContentReference(String itemId) {
+        String customIngredient = "mechanium:" + itemId;
+        for (var recipe : api.getRecipes()) {
+            if (recipe.resultItemId().equals(itemId)) return "receita " + recipe.id() + " (resultado)";
+            if (recipe.ingredients().values().contains(customIngredient)) {
+                return "receita " + recipe.id() + " (ingrediente)";
+            }
+        }
+        for (var machine : api.getMachines()) {
+            if (machine.machineItemId().equals(itemId)) return "máquina " + machine.id() + " (item da máquina)";
+            if (machine.inputs().stream().anyMatch(input -> input.itemId().equals(customIngredient))) {
+                return "máquina " + machine.id() + " (insumo)";
+            }
+            if (machine.outputs().stream().anyMatch(output -> output.itemId().equals(itemId))) {
+                return "máquina " + machine.id() + " (produto)";
+            }
+        }
+        for (var drop : api.getMobDrops()) {
+            if (drop.resultItemId().equals(itemId)) return "drop " + drop.id();
+        }
+        for (var fluid : api.getFluids()) {
+            if (fluid.containers().stream().anyMatch(container -> container.itemId().equals(itemId))) {
+                return "fluido " + fluid.id() + " (recipiente)";
+            }
+        }
+        return null;
     }
 
     private void giveItem(Player player, ItemDefinition definition, int page) {

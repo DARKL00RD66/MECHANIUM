@@ -29,7 +29,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | DankTech2 | Armazenamento portátil | Primeira expansão: upgrade para armazém portátil persistente de 54 espaços; outras tiers e filtros pendentes |
 | Networks | Redes logísticas entre máquinas e depósitos | Primeira etapa: conduítes e caixas protegidas transportam itens MECHANIUM em redes locais de até 128 conduítes; logística remota pendente |
 | MissileWarfare | Não serão portadas armas, mísseis ou mecânicas de ataque | Excluído do escopo operacional |
-| EMCTech | Processamento e conversão de recursos | Aguardando confirmação da referência e da licença |
+| EMCTech | Equivalência EMC por jogador, aprendizado e síntese de itens | Primeira etapa nativa: ledger individual, dissolução, catálogo aprendido, síntese e cinco tiers de estações; energia/automação e PlaceholderAPI pendentes |
 | Gastronomicon | Culinária e conservação de alimentos | Primeira cadeia de culinária adicionada |
 | Better Nuclear Reactor | Modelagem abstrata de geração e eficiência energética | Primeira etapa: gerador cristalino fictício com 8 unidades/s por cinco minutos por cristal; sem combustível ou engenharia nuclear real |
 | AdvancedTech | Processos industriais avançados | Britador, refinaria e montadora com energia |
@@ -107,3 +107,17 @@ Implementações nativas e independentes; não carregam JARs de terceiros. Os qu
 - **Mining Automation:** componentes de prospecção e montagem de módulos; mineração automática de mundo não está incluída.
 
 A contagem do plano consolidado permanece em 31 referências; esta rodada acrescenta cinco módulos internos e amplia a cobertura funcional. As referências explicitamente excluídas por escopo (combate, mísseis e interferência) não são tratadas como trabalho pendente.
+
+
+## EMCTech — implementação nativa 0.7.4.00-SNAPSHOT
+
+A referência foi confirmada como o addon EMCTech de Sefiraat. O repositório upstream declara GPL-3.0. Esta implementação do MECHANIUM é independente: não incorpora código-fonte, logotipos, texturas ou outros assets do projeto original. Foram usadas apenas descrições de comportamento publicadas: EMC individual, aprender um item ao dissolvê-lo, sintetizar itens aprendidos e progressão em cinco níveis.
+
+- **Ledger individual:** saldo persistido por UUID, em banco SQLite separado do armazenamento de progressão.
+- **Dissolução:** o jogador coloca uma pilha na estação; o servidor valida o valor configurado e o limite do tier, consome a pilha, credita EMC e registra o item como aprendido.
+- **Síntese:** o menu lista somente os itens aprendidos pelo jogador e compatíveis com o tier. Cada clique sintetiza uma unidade e debita seu valor EMC.
+- **Cinco níveis:** limites máximos por unidade de 16, 64, 256, 1.024 e 4.096 EMC. Os dez blocos de estação usam dispensadores com identidade e proprietário gravados em PDC.
+- **Configuração:** `emc-exchange.values` define valores unitários. Itens não listados são recusados por padrão; valores podem ser ajustados pelo administrador.
+- **Acesso:** `/mechanium emc` abre o ledger e `/mechanium emc balance` consulta o saldo. Estações são utilizáveis pelo proprietário ou por administradores.
+
+Esta é a primeira etapa funcional. Ainda não há integração com consumo de energia, automação por funis/conduítes, conversão automática de inventários, PlaceholderAPI ou cálculo de EMC para todos os itens vanilla e de addons. Consulte [EMC Exchange](EMC_EXCHANGE.md).

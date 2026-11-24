@@ -53,7 +53,8 @@ class BuiltinModulesTest {
                 "rail-freight",
                 "battery-industry",
                 "cold-chain",
-                "fn-amplifications", "geyser-heads", "slime-customizer", "industrial-chemistry", "mining-automation"
+                "fn-amplifications", "geyser-heads", "slime-customizer", "industrial-chemistry", "mining-automation",
+                "emc-exchange"
         )));
     }
 

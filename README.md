@@ -43,8 +43,10 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.7.3.01-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.7.4.00-SNAPSHOT.jar
 ```
+
+A linha 0.7.4 adiciona a primeira implementação de equivalência EMC, com saldo por jogador, dissolução, síntese, catálogo aprendido e cinco níveis de estações. Consulte [EMC Exchange](docs/EMC_EXCHANGE.md) para uso, configuração e limitações.
 
 ## Instalar
 
@@ -69,6 +71,7 @@ A linha 0.7.0.01 amplia os módulos Forestry, Textile Industry, Biofuel, Constru
 - [Desenvolvimento de addons externos](docs/ADDONS_EXTERNOS.md)
 - [Projeto-exemplo de addon Maven](examples/mechanium-addon-example/README.md)
 - [Módulos oficiais e opcionais](docs/MODULOS.md)
+- [Equivalência EMC](docs/EMC_EXCHANGE.md)
 - [Matriz de portabilidade](docs/PORTABILIDADE_ADDONS.md)
 - [Licenças e atribuição](docs/LICENCAS_E_ORIGENS.md)
 - [Roadmap](docs/ROADMAP.md)

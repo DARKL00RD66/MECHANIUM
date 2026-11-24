@@ -15,3 +15,8 @@ A matriz de portabilidade descreve comportamento desejado; não concede permiss�
 ## Licença do MECHANIUM
 
 A licença deste repositório ainda não foi escolhida pelo proprietário. Não foi adicionada uma licença arbitrária nesta fundação. Sem um arquivo LICENSE, terceiros não devem presumir que tenham permissão para redistribuir ou modificar o código.
+
+
+## Referência EMCTech
+
+O repositório público [Sefiraat/EMCTech](https://github.com/Sefiraat/EMCTech) declara GNU GPL-3.0. A implementação `emc-exchange` do MECHANIUM foi desenvolvida de forma independente a partir de descrições funcionais públicas (saldo EMC individual, aprendizado por dissolução, síntese e cinco níveis de máquinas). Nenhum código, logotipo, imagem ou outro asset do upstream foi copiado ou incorporado. A referência é registrada para transparência e proveniência, não como dependência de runtime.

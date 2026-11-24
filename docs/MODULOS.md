@@ -204,3 +204,17 @@ Todos possuem receitas e pesquisas próprias e podem ser ativados ou desativados
 | `cold-chain` | Fibras isolantes, células de refrigeração, caixotes térmicos e unidade refrigeradora | Industrial Logistics, Water Treatment, EcoPower |
 
 Os cinco módulos possuem categorias, tecnologias, itens e receitas próprias e podem ser habilitados/desabilitados individualmente em `config.yml`. Aquaculture, Glassworks e Cold Chain também registram definições no runtime genérico de máquinas. Isso ainda não equivale a teste de gameplay nem a máquinas especializadas com múltiplas entradas/saídas.
+
+
+### Equivalência EMC — 0.7.4.00-SNAPSHOT
+
+O módulo opcional `emc-exchange` adiciona um ledger individual por UUID e dez estações colocáveis (Dissolvedor e Materializador nos níveis I a V).
+
+- O Dissolvedor consome uma pilha de item com valor positivo definido em `emc-exchange.values`, credita o valor unitário multiplicado pela quantidade e registra o item no catálogo aprendido do jogador.
+- O Materializador mostra apenas itens aprendidos e compatíveis com seu nível; cada interação sintetiza uma unidade e debita seu valor EMC.
+- Limites por item: nível I = 16 EMC; II = 64; III = 256; IV = 1.024; V = 4.096.
+- Saldo e itens aprendidos são salvos em `plugins/MECHANIUM/emc-exchange.db`, separado do banco de progressão.
+- Estações são dispensadores protegidos por proprietário; apenas o dono ou um administrador pode abrir ou desmontar.
+- `/mechanium emc` abre o painel; `/mechanium emc balance` mostra o saldo.
+
+A primeira etapa usa uma lista explícita de valores para evitar conversão de itens não balanceados. Rede de energia, automação por conduítes/funis, PlaceholderAPI e cobertura automática de todos os itens ainda não estão implementadas.

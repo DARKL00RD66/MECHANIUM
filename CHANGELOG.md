@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.4.00-SNAPSHOT
+- Adicionada a primeira implementação nativa de equivalência EMC: saldo por jogador, catálogo de itens aprendidos, dissolução e síntese.
+- Criadas cinco tiers de Dissolvedor e cinco tiers de Materializador, com desbloqueios por pesquisa e limites crescentes de valor por item.
+- Adicionados ledger SQLite separado, comando `/mechanium emc`, configuração de valores EMC e receitas para as dez estações.
+- Itens sem valor explicitamente configurado são recusados; a síntese só oferece itens aprendidos pelo próprio jogador.
+- Implementação funcional inicial e independente, sem copiar código ou recursos do upstream EMCTech. Integração com rede de energia, automação logística e PlaceholderAPI permanecem pendentes.
+- Build Maven/CI e testes Paper/Purpur 1.21.11 necessários para validar a release.
+
+
 ## 0.7.3.01-SNAPSHOT
 - Reorganizado o Guia do MECHANIUM: menu principal com Árvore de progressão, Eras históricas, Crafting e Wiki.
 - Árvore de progressão abre diretamente na era efetiva do jogador; Eras históricas apresenta relógios selecionáveis e marca a era atual com uma Estrela do Nether acima do relógio correspondente. A seleção altera apenas a visualização da árvore, não a era/progressão do jogador.

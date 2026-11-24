@@ -206,6 +206,8 @@ modules:
     enabled: true
   mining-automation:
     enabled: true
+  emc-exchange:
+    enabled: true
 
 machines:
   wear:
@@ -227,3 +229,27 @@ staff:
 
 # Administrative recipe edits override module/addon definitions without modifying SQLite ownership.
 admin-recipe-overrides: {}
+
+# Equivalent exchange. Unlisted items cannot be converted into EMC.
+# Values are EMC per single item. Keys may reference vanilla or MECHANIUM items.
+emc-exchange:
+  values:
+    'minecraft:stone': 1
+    'minecraft:cobblestone': 1
+    'minecraft:dirt': 1
+    'minecraft:sand': 1
+    'minecraft:gravel': 1
+    'minecraft:oak_log': 4
+    'minecraft:coal': 8
+    'minecraft:redstone': 8
+    'minecraft:copper_ingot': 16
+    'minecraft:iron_ingot': 32
+    'minecraft:gold_ingot': 64
+    'minecraft:lapis_lazuli': 16
+    'minecraft:quartz': 16
+    'minecraft:glowstone_dust': 16
+    'minecraft:obsidian': 64
+    'minecraft:diamond': 512
+    'minecraft:emerald': 512
+    'mechanium:mechanical_parts': 48
+    'mechanium:copper_coil': 32

@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.7.3.01-SNAPSHOT  
+**Versão:** 0.7.4.00-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -149,3 +149,15 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - Wiki de consulta separada, com listas paginadas e telas de detalhe para itens, receitas e máquinas. Ela não fabrica itens nem consome materiais.
 - Crafting permanece como a única área da interface que efetua fabricação e consome ingredientes.
 - A atualização foi compilada para validação por CI; teste visual e funcional dentro de Paper/Purpur 1.21.11 permanece necessário.
+
+
+## Atualização 0.7.4.00-SNAPSHOT — Equivalência EMC
+
+- Implementado módulo nativo opcional `emc-exchange`, com saldo EMC persistente por jogador em SQLite separado.
+- Dissolvedores e Materializadores em cinco níveis; cada item dissolvido recebe um valor de EMC configurado e é aprendido automaticamente na primeira conversão.
+- Materializadores sintetizam apenas itens já aprendidos pelo jogador e debitam o valor unitário do saldo.
+- Limites de valor unitário por tier: 16, 64, 256, 1.024 e 4.096 EMC.
+- Estações são instaladas como dispensadores identificados pelo PDC; somente o proprietário ou administradores podem usar/desmontar.
+- Valores padrão iniciais cobrem alguns materiais vanilla e dois itens MECHANIUM. Itens não listados não podem ser dissolvidos.
+- Ainda pendentes: integração de consumo/produção com a rede de energia, transporte automático por redes logísticas, PlaceholderAPI e suporte amplo a todos os itens/addons sem configuração manual.
+- Build e validação dentro de Paper/Purpur 1.21.11 ainda precisam concluir.

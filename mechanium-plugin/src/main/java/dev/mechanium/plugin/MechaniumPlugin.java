@@ -45,6 +45,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumRecipeAdminMenu recipeAdminMenu;
     private PrivateStorageListener privateStorageListener;
     private MechaniumMachineManager machineManager;
+    private EmcExchangeManager emcExchangeManager;
     private EnergyGridManager energyGridManager;
     private FluidPipeManager fluidPipeManager;
     private IndustrialNetworkManager industrialNetworkManager;
@@ -119,6 +120,12 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             machineManager = new MechaniumMachineManager(this, api, energyGridManager);
             Bukkit.getPluginManager().registerEvents(machineManager, this);
             machineManager.start();
+            if (moduleManager.enabledModuleIds().contains("emc-exchange")) {
+                emcExchangeManager = new EmcExchangeManager(this, api,
+                        getDataFolder().toPath().resolve("emc-exchange.db"),
+                        getConfig().getConfigurationSection("emc-exchange"));
+                Bukkit.getPluginManager().registerEvents(emcExchangeManager, this);
+            }
             privateStorageListener = new PrivateStorageListener(this, api);
             Bukkit.getPluginManager().registerEvents(privateStorageListener, this);
             simpleStorageNetworkListener = new SimpleStorageNetworkListener(this);
@@ -503,6 +510,23 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                         + " | Addons: " + addonLoader.loadedAddonIds().size());
                 return true;
             }
+            case "emc" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
+                    return true;
+                }
+                if (emcExchangeManager == null) {
+                    player.sendMessage(ChatColor.RED + "O módulo de equivalência EMC está desativado.");
+                    return true;
+                }
+                if (args.length > 1 && args[1].equalsIgnoreCase("balance")) {
+                    player.sendMessage(ChatColor.GOLD + "Seu saldo EMC: "
+                            + ChatColor.AQUA + emcExchangeManager.balance(player.getUniqueId()) + " EMC");
+                } else {
+                    emcExchangeManager.openCommand(player);
+                }
+                return true;
+            }
             case "menu", "gui", "hud" -> {
                 if (!(sender instanceof Player player)) {
                     sender.sendMessage(ChatColor.RED + "Este comando exige um jogador.");
@@ -822,6 +846,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "/mechanium unlock <id>" + ChatColor.GRAY + " — pesquisar tecnologia");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium calc <receita> [quantidade]" + ChatColor.GRAY + " — calcular materiais e lotes");
         sender.sendMessage(ChatColor.YELLOW + "/mechanium environment" + ChatColor.GRAY + " — consultar impacto industrial do mundo");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium emc" + ChatColor.GRAY + " — abrir seu ledger de equivalência");
+        sender.sendMessage(ChatColor.YELLOW + "/mechanium emc balance" + ChatColor.GRAY + " — consultar saldo EMC");
         if (hasAdminAccess(sender)) {
             sender.sendMessage(ChatColor.YELLOW + "/mechanium era <era> [jogador|todos]" + ChatColor.GRAY + " — alterar era (staff)");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin hud" + ChatColor.GRAY + " — painel administrativo");
@@ -837,7 +863,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1) return List.of("help", "status", "menu", "gui", "hud", "research", "book", "storage", "unlock", "calc", "environment", "era", "admin");
+        if (args.length == 1) return List.of("help", "status", "menu", "gui", "hud", "research", "book", "storage", "unlock", "calc", "environment", "emc", "era", "admin");
+        if (args.length == 2 && args[0].equalsIgnoreCase("emc")) return List.of("balance");
         if (args.length == 2 && args[0].equalsIgnoreCase("era") && hasAdminAccess(sender)) {
             return api.getEras().stream().map(EraDefinition::id).toList();
         }
@@ -950,6 +977,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         if (machineManager != null) {
             machineManager.stop();
             machineManager = null;
+        }
+        if (emcExchangeManager != null) {
+            emcExchangeManager.close();
+            emcExchangeManager = null;
         }
         if (addonLoader != null) {
             addonLoader.close();

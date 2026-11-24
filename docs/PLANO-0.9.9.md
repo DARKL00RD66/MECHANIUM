@@ -5,17 +5,17 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `e37e14abf6988035cc192c2be4d14895c1f73a8b`; essa aprovação não substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `7b62dc782903f162b797d900a10c67b028428d1e` com 91 testes; as alterações posteriores de preservação de carga e interface ainda aguardam CI. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 
 | Sistema | Estado confirmado na base | Lacuna para 0.9.9 |
 |---|---|---|
-| Definição de máquinas | Cada definição contém um item de entrada e um item de saída | Aceitar múltiplos ingredientes e produtos, validando todos antes de consumir recursos |
+| Definição de máquinas | Cada definição aceita 1–6 tipos de entrada e 1–3 produtos; custo energético por operação é parte da definição | Filas, processamento em lote contínuo, concorrência e blocos físicos adicionais |
 | Bloco de máquina | O runtime atual aceita dispensadores | Separar o modelo de processo do tipo de bloco e ampliar os blocos suportados com segurança |
 | Inventário de máquina | Primeiro slot é entrada e último slot é saída | Slots e buffers configuráveis para múltiplos insumos e produtos |
 | Processamento | Um ciclo central por máquina, com progresso salvo no PDC | Filas, lotes, concorrência limitada e controle de throughput |
-| Energia | Geradores carregam baterias; máquinas consomem de baterias conectadas diretamente | Cabos/conduítes energéticos, topologia de rede, distribuição e limites de transferência |
+| Energia | Geradores, baterias e máquinas podem ser conectados por conduítes energéticos do mesmo proprietário; até 256 nós, somente chunks carregados | Testes funcionais em servidor, métricas de rede, telemetria e limites de throughput configuráveis |
 | Fluidos | Tubos conectam tanques; a rede transporta o item MECHANIUM `purified_water` | Modelo de fluido tipado, quantidade, capacidade, válvulas e múltiplos fluidos |
 | Logística | Conduítes e caixas transportam itens MECHANIUM entre caixas do mesmo proprietário | Filtros, prioridades, limites de transferência, múltiplos itens por ciclo e escalabilidade |
 | Persistência | Definições ficam no SQLite; identidade, dono e progresso da máquina ficam no PDC do bloco | Migrações compatíveis, recuperação após reinício e testes de chunks/mundos |
@@ -27,7 +27,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 ### Limitações técnicas importantes encontradas
 
 - `MachineDefinition` e o runtime agora aceitam 1–6 tipos de entrada e 1–3 tipos de saída, distribuídos em seis slots de entrada e três de saída; o bloco físico ainda é `DISPENSER`.
-- O gerenciador de energia procura baterias adjacentes à máquina e percorre baterias conectadas diretamente; não existe ainda uma camada geral de cabos energéticos.
+- A rede elétrica agora possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga; faltam testes em servidor e telemetria da rede.
 - O gerenciador de fluidos movimenta somente o item customizado `purified_water` entre tanques, por tubos adjacentes.
 - A rede industrial percorre até 128 conduítes e movimenta um item MECHANIUM por ciclo de transferência.
 - O processamento atual não possui fila de ordens configurável nem um plano genérico de entradas/saídas.
@@ -38,6 +38,11 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - Modelo multi-entrada/multi-saída adicionado à API.
 - Construtor e acessores antigos preservados para módulos e addons existentes.
 - Runtime de dispensador atualizado para seis slots de entrada e três de saída.
+- Custos energéticos por operação movidos da lista fixa de IDs para `MachineDefinition`; SQLite v8 migra as máquinas antigas e mantém o consumo anterior.
+- Conduíte energético adicionada como item craftável; geradores, baterias e máquinas usam rede conectada com limite de 256 nós.
+- Carga da bateria é armazenada no PDC do item quando desmontada e restaurada ao recolocar.
+- Geradores são indexados em chunks carregados, evitando a varredura de todos os chunks a cada segundo.
+- O clique na máquina mostra insumos, produtos, duração e custo de energia.
 - Produção valida todos os insumos e planeja todas as saídas antes de debitar recursos.
 - Migração SQLite v7 grava entradas/saídas normalizadas e lê linhas legadas pelos campos antigos.
 - CI GitHub Actions #45484853405 passou em Java 21/Maven `clean verify`; 84 testes automatizados passaram (API 19, Storage 13, Engine 12, Modules 9, Addon Loader 2, Plugin 29).
@@ -57,9 +62,9 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 ### Marco B — Rede de energia (equivalente interno a 0.8.1)
 
-- [ ] Introduzir conduíte energético identificado e protegido por proprietário.
-- [ ] Construir topologia por componentes conectados sem carregar chunks descarregados.
-- [ ] Permitir geradores, baterias e máquinas conectados através de conduítes.
+- [x] Introduzir conduíte energético identificado e protegido por proprietário.
+- [x] Construir topologia por componentes conectados sem carregar chunks descarregados (limite atual: 256 nós).
+- [x] Permitir geradores, baterias e máquinas conectados através de conduítes.
 - [ ] Definir capacidade, taxa de transferência, perda/eficiência de gameplay e política de distribuição.
 - [ ] Garantir débito atômico: uma máquina não pode consumir parcialmente energia nem duplicar energia em uma falha.
 - [ ] Exibir carga, geração, consumo e bloqueios da rede para jogadores autorizados.

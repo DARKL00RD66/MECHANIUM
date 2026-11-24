@@ -74,7 +74,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 | ID | Finalidade e estado |
 |---|---|
 | `head-collection` | Fichas cosméticas, cabeças de coleção e expositores locais, sem dependências externas. |
-| `slime-customizer` | Modelos, projetos em branco, ferramenta e catálogo. O editor inicial `/mechanium admin customizer` cria e remove itens personalizados, escolhendo material e pesquisa existentes, com ownership SQLite individual. Edição de itens e criação visual de receitas continuam pendentes. |
+| `slime-customizer` | O editor `/mechanium admin customizer` cria, lista, entrega, edita e remove itens personalizados com ownership SQLite individual. Também cria e remove receitas shapeless de até nove ingredientes vanilla ou MECHANIUM. Receitas shaped, categorias/tecnologias pelo editor e edição de receitas continuam pendentes. |
 
 ## Módulos opcionais
 
@@ -91,7 +91,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 - Greenhouse e Agriculture ainda não representam um simulador completo de culturas customizadas. O controlador atual apenas acelera um estágio de crescimento em plantas compatíveis e não colhe nem replanta.
 - Mining Automation possui componentes e receitas, mas não mineração autônoma de blocos.
 - Head Collection é um catálogo cosmético local. MECHANIUM não inclui nem exige Geyser e não implementa uma camada Bedrock.
-- Slime Customizer ainda não tem editor administrativo visual completo.
+- Slime Customizer possui editor inicial para itens e receitas shapeless; ainda não há editor visual de receitas shaped nem formulário para criar categorias/tecnologias.
 - Rail Freight registra itens e receitas de carga, não um sistema ferroviário autônomo completo.
 - Validação real de cada cadeia precisa ocorrer em Paper/Purpur 1.21.11.
 

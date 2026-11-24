@@ -63,7 +63,27 @@ Addons podem registrar listeners Bukkit para acompanhar mudanças do motor:
 - `MechaniumMobDropRegisterEvent`: nova regra de drop de criatura registrada.
 - `MechaniumMachineRegisterEvent`: nova definição de máquina industrial registrada.
 
-Addons podem registrar máquinas com `api.registerMachine(new MachineDefinition(...))`. O modelo atual define lista de até seis `MachineIngredient`, até três `MachineProduct`, duração em ticks, custo de energia por operação e tecnologia exigida. O runtime hospeda máquinas em `DISPENSER`: slots 0–5 são entradas e slots 6–8 são saídas. O custo energético é declarado na própria definição; valor zero significa que a máquina não consome energia. Máquinas energizadas devem conectar-se a uma bateria do mesmo proprietário, diretamente ou por conduítes `energy_conduit`. O progresso, desgaste e UUID do proprietário ficam no PDC do bloco; as definições e seus ingredientes/produtos são persistidos no SQLite v8. O bloco físico continua limitado a `DISPENSER`; outros tipos de máquina aguardam uma extensão do runtime. A rede de fluidos já armazena água purificada e refrigerante em tanques tipados, mas essa implementação ainda é interna ao plugin: não existe uma API pública `registerFluid` para addons definirem fluidos, compatibilidades ou receitas de tanque.
+Addons podem registrar máquinas com `api.registerMachine(new MachineDefinition(...))`. O modelo atual define lista de até seis `MachineIngredient`, até três `MachineProduct`, duração em ticks, custo de energia por operação e tecnologia exigida. O runtime hospeda máquinas em `DISPENSER`: slots 0–5 são entradas e slots 6–8 são saídas. O custo energético é declarado na própria definição; valor zero significa que a máquina não consome energia. Máquinas energizadas devem conectar-se a uma bateria do mesmo proprietário, diretamente ou por conduítes `energy_conduit`. O progresso, desgaste e UUID do proprietário ficam no PDC do bloco; as definições e seus ingredientes/produtos são persistidos no SQLite (schema atual v9). O bloco físico continua limitado a `DISPENSER`; outros tipos de máquina aguardam uma extensão do runtime.
+
+### Registrar fluidos e recipientes
+
+A API pública permite registrar fluidos personalizados com `FluidDefinition` e `FluidContainerDefinition`. Registre primeiro a tecnologia requerida e cada item de recipiente com `api.registerTechnology(...)` e `api.registerItem(...)`; depois registre o fluido:
+
+```java
+api.registerFluid(new FluidDefinition(
+    "industrial_coolant",
+    "Refrigerante industrial",
+    "industrial_water_recycling",
+    List.of(
+        new FluidContainerDefinition("coolant_cell", 250, true, true),
+        new FluidContainerDefinition("coolant_canister", 1000, true, false)
+    )
+));
+```
+
+Cada recipiente declara seu volume em milibuckets (mB), se pode abastecer o tanque e se pode retirar fluido. O volume deve ser múltiplo de 250 mB; o registro precisa conter ao menos um recipiente de entrada e um de saída. Os IDs dos itens devem corresponder a itens MECHANIUM já registrados e a tecnologia indicada precisa existir.
+
+Os tanques guardam o ID e o volume no PDC, bloqueiam mistura de fluidos diferentes e transferem volume entre tanques conectados do mesmo proprietário. Ao retirar fluido, o runtime escolhe o maior recipiente de saída que esteja desbloqueado e caiba no volume disponível. As definições e seus recipientes são persistidos no SQLite v9 e associados ao módulo/addon que os registrou; se o registro do fluido for removido, o volume que já está em um tanque permanece preservado. Ainda não há adaptadores para fluidos vanilla, válvulas ou bombas.
 
 Addons podem registrar regras de drops com `api.registerMobDrop(new MobDropDefinition(...))`. A definição informa o tipo de entidade Bukkit, ID do item MECHANIUM, quantidade mínima/máxima, chance entre 0 e 1 e tecnologia opcional. A regra e o próprio item são verificados contra a progressão do jogador antes do drop. Definições de máquinas e regras de drops são persistidas no SQLite e restauradas no próximo carregamento da API. O registro persistente guarda a definição; tarefas, listeners e integrações de runtime continuam sendo responsabilidade do addon em cada inicialização.
 
@@ -104,7 +124,7 @@ Addons executam código Java no servidor. O carregador não é uma sandbox e nã
 
 ## Propriedade e ciclo de vida do conteúdo
 
-Durante `onEnable`, MECHANIUM abre automaticamente um escopo transacional para o addon. Os registros de categorias, itens, receitas, máquinas e drops feitos nesse callback ficam associados a `addon:<id>`. O escopo é confirmado somente quando `onEnable` termina com sucesso; em caso de falha, as gravações SQLite e as definições em memória são revertidas.
+Durante `onEnable`, MECHANIUM abre automaticamente um escopo transacional para o addon. Os registros de categorias, itens, receitas, máquinas, fluidos e drops feitos nesse callback ficam associados a `addon:<id>`. O escopo é confirmado somente quando `onEnable` termina com sucesso; em caso de falha, as gravações SQLite e as definições em memória são revertidas.
 
 A cada inicialização, o addon deve registrar novamente todo o conteúdo que deseja manter. Se um addon carregar sem registrar uma definição que era sua, essa definição antiga é removida durante a reconciliação. Se o addon deixar de carregar, todas as definições com ownership dele são removidas. Um ID de conteúdo tem um único proprietário: não reutilize IDs pertencentes a módulos oficiais ou a outros addons. Declare sempre as dependências no descriptor.
 

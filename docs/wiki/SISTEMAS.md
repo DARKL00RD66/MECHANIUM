@@ -86,7 +86,7 @@ Os tanques guardam volume tipado no PDC do bloco, medido em milibuckets (mB). A 
 - Tubulações são dispensers identificados e conectam tanques do mesmo proprietário por faces. A rede transporta volume, não apenas um item por ciclo.
 - A rede percorre até 128 tubulações indexadas e somente chunks carregados. Não carrega chunks automaticamente.
 - Itens fluidos legados no inventário são convertidos em volume quando o tanque é acessado. Tipo e quantidade são preservados no PDC do item de tanque ao desmontar e recolocar.
-- Módulos e addons podem registrar fluidos customizados e recipientes pela API pública. Ainda não há válvulas, bombas nem transporte de lava/água vanilla por tubulações.
+- Módulos e addons podem registrar fluidos customizados e recipientes pela API pública (`FluidDefinition` e `FluidContainerDefinition`). Cada recipiente declara volume em múltiplos de 250 mB e se pode abastecer e/ou esvaziar; os itens e a tecnologia necessária devem estar registrados antes. Ainda não há válvulas, bombas nem transporte de lava/água vanilla por tubulações.
 
 ## 7. Logística industrial
 

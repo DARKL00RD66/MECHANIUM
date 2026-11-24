@@ -100,7 +100,7 @@ Esta etapa amplia itens e receitas; não adiciona ainda novas plantas com cresci
 - O tanque aceita somente um tipo de fluido por vez. Água purificada e refrigerante não se misturam; o volume não ultrapassa a capacidade configurada.
 - Para abastecer, clique no tanque com um item de fluido desbloqueado. Para retirar, agache e clique com a mão vazia; o sistema escolhe o maior recipiente de saída desbloqueado cujo volume caiba no tanque (250 mB, 500 mB, 1.000 mB ou outro volume registrado).
 - Tubulações são dispensers identificados. Tanques do mesmo proprietário conectados por faces formam uma rede; a cada dois segundos podem transferir até 250 mB para outro tanque compatível.
-- As redes examinam até 128 tubulações indexadas nos chunks carregados. Não carregam chunks automaticamente, não transportam fluidos vanilla e ainda não possuem válvulas ou bombas. Módulos e addons podem registrar fluidos customizados e recipientes pela API pública.
+- As redes examinam até 128 tubulações indexadas nos chunks carregados. Não carregam chunks automaticamente, não transportam fluidos vanilla e ainda não possuem válvulas ou bombas. Módulos e addons podem registrar fluidos e recipientes pela API pública `FluidDefinition`/`FluidContainerDefinition`. O item do recipiente e a tecnologia exigida devem estar registrados primeiro; o recipiente declara seu volume em múltiplos de 250 mB e se pode encher e/ou esvaziar.
 - Itens de fluido legados encontrados no inventário de um tanque são convertidos para volume tipado quando o tanque é acessado/inspecionado; ao desmontar o tanque, tipo e volume são preservados no PDC do próprio item de tanque.
 - O acesso aos tanques respeita o proprietário; a tubulação é um bloco de conexão, não um inventário acessível.
 

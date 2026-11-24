@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `95fbf0d6a9d6805a01fa01536d803e87015ccbdc` (workflow #45505906156): 107 testes automatizados e compilação do addon de exemplo, incluindo API pública de fluidos e preservação do volume de fluido no item de tanque. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `332aafeed233b8f8adb7209233a58f8c42dc6a09` (workflow #45506733683): 111 testes automatizados, compilação dos sete módulos Maven e do addon de exemplo. Inclui a API pública de fluidos, SQLite v9 e recipientes de extração de volume variável. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 
@@ -16,7 +16,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 | Inventário de máquina | Seis slots de entrada e três slots de saída, com planejamento do lote completo | Filas de produção e buffers/slots configuráveis |
 | Processamento | Um ciclo central por máquina, com progresso salvo no PDC | Filas, lotes, concorrência limitada e controle de throughput |
 | Energia | Geradores, baterias e máquinas podem ser conectados por conduítes energéticos do mesmo proprietário; até 256 nós, somente chunks carregados | Testes funcionais em servidor, métricas de rede, telemetria e limites de throughput configuráveis |
-| Fluidos | API pública registra definições tipadas e recipientes; tanques guardam mB no PDC e redes isoladas transferem fluidos compatíveis; água purificada e refrigerante são exemplos padrão | Válvulas, bombas, telemetria, integração com processos e testes em servidor |
+| Fluidos | API pública registra definições tipadas e recipientes; tanques guardam mB no PDC, bloqueiam mistura e extraem pelo maior recipiente desbloqueado que caiba no volume | Válvulas, bombas, telemetria, integração com processos e testes em servidor |
 | Logística | Conduítes e caixas transportam itens MECHANIUM entre caixas do mesmo proprietário | Filtros, prioridades, limites de transferência, múltiplos itens por ciclo e escalabilidade |
 | Persistência | Definições ficam no SQLite; identidade, dono e progresso da máquina ficam no PDC do bloco | Migrações compatíveis, recuperação após reinício e testes de chunks/mundos |
 | EMC | Saldo individual, dissolução e síntese já existem | Integração com energia, máquinas e logística; revisar limites e operações atômicas |
@@ -28,7 +28,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 - `MachineDefinition` e o runtime agora aceitam 1–6 tipos de entrada e 1–3 tipos de saída, distribuídos em seis slots de entrada e três de saída; o bloco físico ainda é `DISPENSER`.
 - A rede elétrica agora possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga; faltam testes em servidor e telemetria da rede.
-- A rede de fluidos usa definições registradas via API pública, volumes em mB no PDC dos tanques, bloqueio de misturas e transferência por tubos conectados. Itens de tanque preservam tipo e volume ao serem desmontados; a retirada escolhe o maior recipiente de saída desbloqueado que caiba no volume disponível.
+- A rede de fluidos usa `FluidDefinition` e `FluidContainerDefinition` registradas via API pública, volumes em mB no PDC dos tanques, bloqueio de misturas e transferência por tubos conectados. Itens de tanque preservam tipo e volume ao serem desmontados; a retirada escolhe o maior recipiente desbloqueado que caiba no volume disponível.
 - A rede industrial percorre até 128 conduítes indexados nos chunks carregados e movimenta um item MECHANIUM por ciclo; filtros e prioridades continuam pendentes.
 - O processamento atual não possui fila de ordens configurável nem um plano genérico de entradas/saídas.
 - Ainda não há confirmação de teste funcional completo em Paper e Purpur 1.21.11. As verificações Maven/CI devem ser relatadas separadamente.
@@ -48,7 +48,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - O clique na máquina mostra insumos, produtos, duração e custo de energia.
 - Produção valida todos os insumos e planeja todas as saídas antes de debitar recursos.
 - Migração SQLite v7 grava entradas/saídas normalizadas e lê linhas legadas pelos campos antigos.
-- CI Java 21/Maven mais recente aprovou a API pública de fluidos, persistência SQLite v9 e os testes de registro/migração. A validação das novas correções de extração variável ainda será executada.
+- CI Java 21/Maven #45506733683 aprovou a API pública de fluidos, persistência SQLite v9, seleção de recipientes de extração variável e a suíte completa de 111 testes.
 
 ## 2. Marcos internos de implementação
 
@@ -80,7 +80,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [x] Expor registro de fluidos/recipientes na API pública e persistir definições e ownership no SQLite schema v9.
 - [ ] Introduzir válvulas e bombas com regras explícitas; os tanques já atuam como reservatórios.
 - [x] Manter compatibilidade com tanques e tubos existentes; converter itens fluidos legados no inventário do tanque para volume tipado e preservar esse estado no item de tanque recuperado.
-- [x] Testar automaticamente capacidade, mistura inválida, drenagem e transferência por meio de `FluidTankPolicyTest`.
+- [x] Testar automaticamente capacidade, mistura inválida, drenagem, transferência e seleção de recipientes de extração por volume disponível (`FluidTankPolicyTest`).
 - [ ] Testar migração real, reinícios, chunks e bloqueios em Paper/Purpur 1.21.11.
 
 ### Marco D — Logística e produção (equivalente interno a 0.8.3–0.8.4)

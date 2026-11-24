@@ -3,7 +3,7 @@
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
 **Fase atual:** fundação de máquinas, energia e fluidos implementada no código; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v9, API pública de fluidos tipados, conduítes energéticos, carga de baterias preservada, redes indexadas por chunk e tanques de fluido tipado implementados. CI #45505906156 aprovou 107 testes, mais a compilação do addon de exemplo; inclui a API de fluidos tipados e a preservação do volume no item de tanque. Paper/Purpur ainda não testados.  
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v9, API pública de fluidos tipados, conduítes energéticos, carga de baterias preservada, redes indexadas por chunk e tanques de fluido tipado implementados. CI #45506733683 aprovou 111 testes, compilação dos sete módulos Maven e do addon de exemplo; inclui a API pública de fluidos, SQLite v9 e extração por recipientes de volume variável. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -88,7 +88,7 @@
 
 - O runtime de máquinas usa dispenser com seis slots de entrada e três de saída; cada definição suporta até seis tipos de ingrediente e três produtos. Filas e processamento paralelo ainda não existem.
 - O sistema energético usa conduítes HOPPER identificados, até 256 nós por rede, propriedade por UUID e somente chunks carregados. Geradores distribuem carga entre baterias conectadas; máquinas debitam o custo definido em sua MachineDefinition. Baterias preservam a carga ao serem desmontadas e recolocadas. Geradores, tubos e conduítes industriais mantêm índices de nós em chunks carregados, evitando varreduras globais recorrentes.
-- O sistema de fluidos guarda volumes tipados em mB no PDC dos tanques; módulos e addons podem registrar fluidos e recipientes pela API pública. Não há ainda suporte a fluidos vanilla, válvulas ou bombas; os exemplos padrão são água purificada e refrigerante, com 16.000 mB por tanque e transferência de 250 mB por ciclo.
+- O sistema de fluidos guarda volumes tipados em mB no PDC dos tanques; módulos e addons podem registrar fluidos e recipientes pela API pública. A retirada escolhe o maior recipiente de saída desbloqueado que caiba no volume. Não há ainda suporte a fluidos vanilla, válvulas ou bombas; os exemplos padrão são água purificada e refrigerante, com 16.000 mB por tanque e transferência de 250 mB por ciclo.
 - O Simple Storage conecta somente nós adjacentes pelas faces e limita cada rede a 64 depósitos.
 - SFCalc calcula materiais, não valores monetários, e não altera o sistema de economia do servidor.
 - Habilidades de kits/ferramentas são utilitárias e simples; não há árvore de atributos ou durabilidade customizada.
@@ -108,7 +108,7 @@
 **Consolidação 0.9.9 em desenvolvimento; CI automatizado aprovado, validação funcional em Paper/Purpur ainda pendente.**
 
 
-Expansão 0.9.9 em consolidação: PR #10 continua aberto; CI Java 21/Maven aprovado no commit `9215d46967a246e559dae60e5802026d05c9e2e6` (97 testes). Testes de runtime Paper/Purpur ainda pendentes.
+Expansão 0.9.9 em consolidação: PR #10 continua aberto; CI Java 21/Maven aprovado no commit `332aafeed233b8f8adb7209233a58f8c42dc6a09` (111 testes, workflow #45506733683). Testes de runtime Paper/Purpur ainda pendentes.
 
 
 ## Snapshot 0.7.1.00-SNAPSHOT

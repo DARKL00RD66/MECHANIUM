@@ -12,10 +12,10 @@
 - Interface de interação das máquinas informa entradas, saídas, duração e custo energético.
 - Módulo cosmético renomeado para Head Collection; não possui dependência nem integração Geyser, GeyserMC, Floodgate ou Bedrock. A migração preserva IDs antigos de configuração/ownership e a categoria persistente.
 - Corrigidos IDs de produtos das máquinas de moinho e conservadora que impediam seu registro correto.
-- CI #45505906156 aprovou Java 21/Maven `clean verify` com 107 testes e compilação do addon de exemplo; o commit validado inclui a API pública de fluidos, SQLite v9 e a preservação do tipo/volume de fluido no PDC do item de tanque.
+- CI #45506733683 aprovou Java 21/Maven `clean verify` com 111 testes e compilação do addon de exemplo; o commit validado inclui a API pública de fluidos, SQLite v9, recipientes de volume variável e seleção do maior recipiente de extração desbloqueado que cabe no tanque.
 - Tanques de fluido armazenam volume tipado em mB no PDC: 16.000 mB por padrão, transferência de 250 mB/ciclo, água purificada e refrigerante como exemplos, sem mistura entre tipos. A API permite registrar volumes/recipientes personalizados.
 - Itens de fluido legados no inventário do tanque são migrados para volume; tipo e volume também ficam preservados no item de tanque recuperado.
-- Corrigida a retirada de fluidos: agora seleciona o maior recipiente de extração desbloqueado cujo volume caiba no tanque, em vez de exigir sempre 250 mB. Testes unitários para 250, 500 e 1.000 mB foram adicionados; aguardam CI nesta revisão.
+- Corrigida a retirada de fluidos: agora seleciona o maior recipiente de extração desbloqueado cujo volume caiba no tanque, em vez de exigir sempre 250 mB. Testes unitários para 250, 500 e 1.000 mB passaram no CI #45506733683.
 - Índices dos tubos de fluido e conduítes industriais evitam varreduras recorrentes de todos os chunks.
 - Limitações: ainda sem válvulas/bombas e sem integração com fluidos vanilla. A API pública já aceita fluidos customizados e recipientes registrados.
 - Testes reais em servidores Paper/Purpur 1.21.11 continuam pendentes.

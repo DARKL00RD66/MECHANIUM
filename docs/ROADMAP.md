@@ -1,5 +1,12 @@
 # Roadmap do MECHANIUM
 
+## Alvo consolidado: 0.9.9.00-SNAPSHOT
+
+O desenvolvimento passa a ser consolidado diretamente na linha `0.9.9.00-SNAPSHOT`. As etapas 0.8.x e 0.9.x são marcos internos, sem necessidade de publicar snapshots intermediários. O checklist auditado, o estado real da arquitetura e os critérios de aceite estão em [Plano de consolidação 0.9.9](PLANO-0.9.9.md).
+
+Prioridade imediata: fundação industrial — processos de máquinas com múltiplas entradas/saídas, persistência compatível, depois redes de energia e fluidos tipados. Não ampliar o catálogo de addons até corrigir essas limitações estruturais.
+
+
 ## Marco 0 — Fundação independente
 - [x] Repositório próprio e branch de fundação
 - [x] Maven multi-módulo e alvo Java 21

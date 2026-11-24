@@ -170,11 +170,23 @@ final class MechaniumMachineManager implements Listener {
             String machineId = dispenser.getPersistentDataContainer()
                     .get(machineIdKey, PersistentDataType.STRING);
             MachineDefinition definition = api.getMachine(machineId).orElse(null);
-            if (definition != null && definition.energyCostPerOperation() > 0) {
-                player.sendMessage(Component.text("Consumo energético por operação: "
-                        + definition.energyCostPerOperation() + " unidades.", NamedTextColor.AQUA));
-                player.sendMessage(Component.text("Conecte esta máquina a uma bateria carregada por conduítes energéticos do mesmo proprietário.",
-                        NamedTextColor.GRAY));
+            if (definition != null) {
+                String inputSummary = definition.inputs().stream()
+                        .map(input -> input.amount() + "x " + input.itemId()).collect(java.util.stream.Collectors.joining(", "));
+                String outputSummary = definition.outputs().stream()
+                        .map(output -> output.amount() + "x " + output.itemId()).collect(java.util.stream.Collectors.joining(", "));
+                player.sendMessage(Component.text("Entradas: " + inputSummary, NamedTextColor.GRAY));
+                player.sendMessage(Component.text("Saídas: " + outputSummary, NamedTextColor.GRAY));
+                player.sendMessage(Component.text("Tempo por operação: "
+                        + definition.processingTicks() + " ticks.", NamedTextColor.GRAY));
+                if (definition.energyCostPerOperation() > 0) {
+                    player.sendMessage(Component.text("Consumo energético por operação: "
+                            + definition.energyCostPerOperation() + " unidades.", NamedTextColor.AQUA));
+                    player.sendMessage(Component.text("Conecte esta máquina a uma bateria carregada por conduítes energéticos do mesmo proprietário.",
+                            NamedTextColor.GRAY));
+                } else {
+                    player.sendMessage(Component.text("Esta máquina não exige energia.", NamedTextColor.GRAY));
+                }
             }
         }
     }

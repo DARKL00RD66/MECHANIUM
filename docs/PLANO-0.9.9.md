@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `7b62dc782903f162b797d900a10c67b028428d1e` com 91 testes; as alterações posteriores de preservação de carga e interface ainda aguardam CI. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `0708da367851d63413655ee6599306a4a09abff9` com 97 testes automatizados e compilação do addon de exemplo. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 
@@ -16,7 +16,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 | Inventário de máquina | Primeiro slot é entrada e último slot é saída | Slots e buffers configuráveis para múltiplos insumos e produtos |
 | Processamento | Um ciclo central por máquina, com progresso salvo no PDC | Filas, lotes, concorrência limitada e controle de throughput |
 | Energia | Geradores, baterias e máquinas podem ser conectados por conduítes energéticos do mesmo proprietário; até 256 nós, somente chunks carregados | Testes funcionais em servidor, métricas de rede, telemetria e limites de throughput configuráveis |
-| Fluidos | Tubos conectam tanques; a rede transporta o item MECHANIUM `purified_water` | Modelo de fluido tipado, quantidade, capacidade, válvulas e múltiplos fluidos |
+| Fluidos | Tanques guardam volumes tipados no PDC; água purificada e refrigerante são suportados, com capacidade padrão de 16.000 mB e transferência de 250 mB/ciclo | API pública de registro de fluidos, válvulas, bombas, mais fluidos, telemetria e testes em servidor |
 | Logística | Conduítes e caixas transportam itens MECHANIUM entre caixas do mesmo proprietário | Filtros, prioridades, limites de transferência, múltiplos itens por ciclo e escalabilidade |
 | Persistência | Definições ficam no SQLite; identidade, dono e progresso da máquina ficam no PDC do bloco | Migrações compatíveis, recuperação após reinício e testes de chunks/mundos |
 | EMC | Saldo individual, dissolução e síntese já existem | Integração com energia, máquinas e logística; revisar limites e operações atômicas |
@@ -28,8 +28,8 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 - `MachineDefinition` e o runtime agora aceitam 1–6 tipos de entrada e 1–3 tipos de saída, distribuídos em seis slots de entrada e três de saída; o bloco físico ainda é `DISPENSER`.
 - A rede elétrica agora possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga; faltam testes em servidor e telemetria da rede.
-- O gerenciador de fluidos movimenta somente o item customizado `purified_water` entre tanques, por tubos adjacentes.
-- A rede industrial percorre até 128 conduítes e movimenta um item MECHANIUM por ciclo de transferência.
+- A rede de fluidos usa os IDs `purified_water` e `industrial_coolant`, volumes em mB no PDC de tanques, bloqueio de misturas e transferência por tubos conectados. O runtime aceita itens legados como entrada, mas não oferece ainda uma API pública de registro de novos fluidos para addons.
+- A rede industrial percorre até 128 conduítes indexados nos chunks carregados e movimenta um item MECHANIUM por ciclo; filtros e prioridades continuam pendentes.
 - O processamento atual não possui fila de ordens configurável nem um plano genérico de entradas/saídas.
 - Ainda não há confirmação de teste funcional completo em Paper e Purpur 1.21.11. As verificações Maven/CI devem ser relatadas separadamente.
 
@@ -38,6 +38,9 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - Modelo multi-entrada/multi-saída adicionado à API.
 - Construtor e acessores antigos preservados para módulos e addons existentes.
 - Runtime de dispensador atualizado para seis slots de entrada e três de saída.
+- Tanques tipados adicionados: 16.000 mB padrão, transferência de 250 mB por ciclo, água purificada/refrigerante, bloqueio de mistura e migração de itens fluidos legados.
+- O PDC de fluido e volume agora é preservado no próprio item de tanque ao desmontar e restaurado ao recolocar, mesmo quando o registro do item não estiver ativo.
+- Redes de fluidos e conduítes industriais usam índices por chunk carregado, sem varrer todos os chunks do mundo em cada ciclo.
 - Custos energéticos por operação movidos da lista fixa de IDs para `MachineDefinition`; SQLite v8 migra as máquinas antigas e mantém o consumo anterior.
 - Conduíte energético adicionada como item craftável; geradores, baterias e máquinas usam rede conectada com limite de 256 nós.
 - Carga da bateria é armazenada no PDC do item quando desmontada e restaurada ao recolocar.
@@ -72,11 +75,12 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 ### Marco C — Fluidos tipados (equivalente interno a 0.8.2)
 
-- [ ] Criar modelo de fluido independente de ItemStack.
-- [ ] Definir identificador, volume, capacidade, entrada/saída e compatibilidade de conexão.
+- [x] Criar modelo de fluido independente de ItemStack.
+- [x] Definir identificador, volume, capacidade, entrada/saída e compatibilidade de conexão para água purificada e refrigerante.
 - [ ] Introduzir válvulas, bombas e reservatórios com regras explícitas.
-- [ ] Manter compatibilidade com tanques e tubos existentes; migrar o estado legado de água sem perda.
-- [ ] Testar limites, mistura inválida, fluxo reverso, bloqueios e reinícios.
+- [x] Manter compatibilidade com tanques e tubos existentes; converter itens fluidos legados no inventário do tanque para volume tipado e preservar esse estado no item de tanque recuperado.
+- [x] Testar automaticamente capacidade, mistura inválida, drenagem e transferência por meio de `FluidTankPolicyTest`.
+- [ ] Testar migração real, reinícios, chunks e bloqueios em Paper/Purpur 1.21.11.
 
 ### Marco D — Logística e produção (equivalente interno a 0.8.3–0.8.4)
 
@@ -84,7 +88,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [ ] Adicionar filtros de item, prioridades, throughput e limites por tick.
 - [ ] Melhorar o balanceamento de transferência entre caixas.
 - [ ] Permitir redes com mais de um tipo de recurso, mantendo isolamento por proprietário.
-- [ ] Evitar varrer todos os chunks a cada ciclo; manter índice de nós carregados e reconstrução incremental.
+- [x] Evitar varrer todos os chunks a cada ciclo; manter índices de tubos e conduítes carregados, com atualização por eventos de chunk.
 - [ ] Integrar máquinas, energia e logística com contratos comuns e eventos observáveis.
 
 ### Marco E — Completar módulos (equivalente interno a 0.8.5)

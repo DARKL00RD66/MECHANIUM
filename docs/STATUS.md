@@ -2,8 +2,8 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** fundação de máquinas, energia e fluidos implementada no código; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v9, API pública de fluidos tipados, conduítes energéticos, carga de baterias preservada, redes indexadas por chunk e tanques de fluido tipado implementados. CI #45506733683 aprovou 111 testes, compilação dos sete módulos Maven e do addon de exemplo; inclui a API pública de fluidos, SQLite v9 e extração por recipientes de volume variável. Paper/Purpur ainda não testados.  
+**Fase atual:** máquinas, energia, fluidos tipados e controlador inicial de estufa implementados no código; CI Java 21/Maven aprovado; teste em servidor real pendente
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v9, API pública de fluidos tipados, conduítes energéticos, telemetria básica de redes, preservação de carga/volume em itens e controlador inicial de estufa implementados. CI #45508690080 aprovou 116 testes, sete módulos Maven e addon de exemplo. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -13,6 +13,7 @@
 - API pública para eras, tecnologias, progressão, módulos e addons.
 - Registro persistente de categorias, itens, receitas, máquinas e regras de drops.
 - Definições de máquinas multi-entrada/multi-saída (1–6 entradas e 1–3 saídas), com runtime de dispensador e buffers dedicados.
+- Controlador `greenhouse_controller` funcional em código: +1 estágio para plantas `Ageable` após crescimento normal aceito, dentro do raio configurado e com energia da rede do proprietário. O item/receita antigos `climate_controller` são preservados por compatibilidade.
 - Persistência SQLite com schema versionado até a versão 9, incluindo registros de fluidos/recipientes e ownership; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
 - Criação de `ItemStack` com identificador PDC, lore, modelo customizado e limite de pilha configurável.
 - Receitas Bukkit nativas (shaped e shapeless), incluindo ingredientes MECHANIUM exatos.
@@ -108,7 +109,7 @@
 **Consolidação 0.9.9 em desenvolvimento; CI automatizado aprovado, validação funcional em Paper/Purpur ainda pendente.**
 
 
-Expansão 0.9.9 em consolidação: PR #10 continua aberto; CI Java 21/Maven aprovado no commit `332aafeed233b8f8adb7209233a58f8c42dc6a09` (111 testes, workflow #45506733683). Testes de runtime Paper/Purpur ainda pendentes.
+Expansão 0.9.9 em consolidação: PR #10 continua aberto; CI Java 21/Maven aprovado no commit `8e2c78264cf3470a6f11813ac0c8d1296e75d8cc` (116 testes, workflow #45508690080). Testes de runtime Paper/Purpur ainda pendentes.
 
 
 ## Snapshot 0.7.1.00-SNAPSHOT
@@ -143,7 +144,7 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - **Industrial Chemistry:** reagentes abstratos, resina, fibra sintética e misturador industrial; não simula processos químicos reais.
 - **Mining Automation:** componentes fictícios de prospecção e módulo minerador com montadora; não implementa extração autônoma de blocos nesta etapa.
 - Os cinco módulos são opcionais, ativados por padrão e podem ser desligados individualmente em `config.yml`. Cada um registra duas tecnologias, uma categoria, quatro itens e quatro receitas. Três declaram máquinas no runtime genérico.
-- Build Maven/CI Java 21 aprovado no workflow 45484853405 (84 testes automatizados). Testes reais em Paper/Purpur 1.21.11 ainda precisam ser realizados.
+- Build Maven/CI Java 21 aprovado no workflow 45508690080 (116 testes automatizados). O controlador inicial de estufa e a compatibilidade do item climático legado estão incluídos; testes reais em Paper/Purpur 1.21.11 ainda precisam ser realizados.
 
 
 ## Atualização de interface 0.7.3.01-SNAPSHOT

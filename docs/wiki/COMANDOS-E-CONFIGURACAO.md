@@ -112,6 +112,19 @@ Cada chave em `modules` controla o módulo de mesmo ID. A configuração padrão
 
 Desative módulos somente considerando as dependências. Um módulo dependente pode deixar de iniciar se a dependência necessária estiver desligada.
 
+### Estufas
+
+```yaml
+greenhouse:
+  growth-radius: 4
+  energy-per-growth: 1
+```
+
+- `growth-radius`: raio 3D do controlador, limitado pelo plugin a 1–8 blocos.
+- `energy-per-growth`: energia debitada por cada estágio adicional de crescimento.
+- O bônus só é aplicado após um evento normal de crescimento ser concluído; sem energia, o crescimento normal não é bloqueado.
+- O proprietário precisa ter desbloqueado `controlled_environment_farming` e a máquina precisa estar conectada à rede energética dele.
+
 ### Máquinas
 
 ```yaml

@@ -67,6 +67,7 @@ A linha 0.7.0.01 amplia os módulos Forestry, Textile Industry, Biofuel, Constru
 ## Documentação
 
 - [Wiki completa em português](docs/wiki/README.md) — guia de jogadores, sistemas, módulos, comandos, administração e desenvolvimento.
+- [Auditoria da distribuição histórica](docs/wiki/DISTRIBUICAO-HISTORICA.md) — critérios de classificação dos itens e receitas por era.
 - [Arquitetura](docs/ARQUITETURA.md)
 - [Painel administrativo e configuração de progressão](docs/ADMINISTRACAO.md)
 - [Desenvolvimento de addons externos](docs/ADDONS_EXTERNOS.md)

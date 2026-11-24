@@ -6,6 +6,7 @@
 - Adicionada migração única das sugestões automáticas antigas e dos defaults empacotados incorretos; valores `off` são preservados. O log alerta que escolhas manuais iguais a defaults antigos não podem ser distinguidas.
 - Corrigida a regra padrão do observador para Era Digital e ampliados os exemplos de receitas por era no `config.yml`.
 - A prensa mecânica, sua receita e seu processo agora exigem `steam_power` (Revolução Industrial), alinhando o requisito ao pistão usado na receita.
+- Pó e bloco de redstone classificados na Eletrificação, evitando confusão com o termo genérico `stone`; `stone` simples permanece na Antiguidade. Teste de regressão adicionado.
 - Criada página de auditoria histórica na Wiki; adicionados testes de classificação para eras, fallback neutro, alimentos básicos e distribuição das tecnologias próprias.
 
 ## 0.7.4.01-SNAPSHOT

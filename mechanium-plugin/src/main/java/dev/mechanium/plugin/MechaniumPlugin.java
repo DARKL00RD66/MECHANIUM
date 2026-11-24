@@ -219,10 +219,10 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     }
 
     /**
-     * Reclassifies values that still match the previous automatic classifier. A deliberate
-     * setting that differs from the old suggestion (including "off") is preserved. Older
-     * manual overrides identical to the former automatic default cannot be distinguished,
-     * so administrators should review the logged migration summary once after upgrading.
+     * Reclassifies values matching the previous automatic classifier and a small set of
+     * known incorrect packaged defaults. "off" is preserved. Older manual overrides that
+     * coincide with either former default cannot be distinguished from generated values,
+     * so administrators should review the logged migration summary after upgrading.
      */
     private void migrateVanillaRecipeEraDistribution() {
         String migrationPath = "vanilla-recipe-gates.migrations.historical-distribution-0-7-4-02";
@@ -269,8 +269,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         getConfig().set(migrationPath, true);
         saveConfig();
         getLogger().info("Rebalance histórico aplicado: " + updated
-                + " regras vanilla atualizadas. Valores 'off' e escolhas diferentes da sugestão antiga foram preservados; "
-                + "revise regras que tenham sido manualmente fixadas no mesmo valor automático antigo.");
+                + " regras vanilla atualizadas. Valores 'off' foram preservados; escolhas manuais que coincidiam "
+                + "com uma sugestão automática antiga ou com um default empacotado devem ser revisadas.");
     }
 
     private void seedMissingVanillaRecipeGates() {

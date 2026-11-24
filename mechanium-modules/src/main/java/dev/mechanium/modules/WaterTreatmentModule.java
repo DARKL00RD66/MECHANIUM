@@ -13,7 +13,8 @@ import java.util.Set;
 /** Water utility and industrial treatment progression. */
 final class WaterTreatmentModule extends AbstractBuiltinModule {
     @Override public String id() { return "water-treatment"; }
-    @Override public Set<String> dependencies() { return Set.of("environment"); }
+    @Override public boolean optional() { return true; }
+    @Override public Set<String> dependencies() { return Set.of("environment", "liquid"); }
 
     @Override protected List<TechnologyDefinition> technologies() {
         return List.of(

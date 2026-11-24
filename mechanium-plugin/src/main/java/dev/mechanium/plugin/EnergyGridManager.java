@@ -141,7 +141,14 @@ final class EnergyGridManager implements Listener {
         tile.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,
                 event.getPlayer().getUniqueId().toString());
         if (id.equals("energy_cell")) {
-            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, 0);
+            ItemStack placedItem = event.getItemInHand();
+            int storedCharge = 0;
+            if (placedItem.hasItemMeta()) {
+                storedCharge = placedItem.getItemMeta().getPersistentDataContainer()
+                        .getOrDefault(chargeKey, PersistentDataType.INTEGER, 0);
+            }
+            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER,
+                    Math.max(0, Math.min(BATTERY_CAPACITY, storedCharge)));
         }
         if (!tile.update(true, false)) {
             event.setCancelled(true);
@@ -209,6 +216,13 @@ final class EnergyGridManager implements Listener {
             return;
         }
         ItemStack recovered = api.createItemStack(id, 1).orElseGet(() -> new ItemStack(event.getBlock().getType()));
+        if ("energy_cell".equals(id) && recovered.hasItemMeta()) {
+            int charge = tile.getPersistentDataContainer().getOrDefault(chargeKey, PersistentDataType.INTEGER, 0);
+            var itemMeta = recovered.getItemMeta();
+            itemMeta.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER,
+                    Math.max(0, Math.min(BATTERY_CAPACITY, charge)));
+            recovered.setItemMeta(itemMeta);
+        }
         Location drop = event.getBlock().getLocation().add(0.5, 0.5, 0.5);
         Block block = event.getBlock();
         event.setDropItems(false);

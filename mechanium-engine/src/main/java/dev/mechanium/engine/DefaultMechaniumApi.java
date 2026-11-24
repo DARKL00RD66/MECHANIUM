@@ -521,6 +521,17 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             trackContent(MechaniumContentStore.FLUID, value.id());
             return true;
         }
+        for (FluidDefinition registered : fluids.values()) {
+            for (FluidContainerDefinition existingContainer : registered.containers()) {
+                boolean reused = value.containers().stream()
+                        .anyMatch(container -> container.itemId().equals(existingContainer.itemId()));
+                if (reused) {
+                    throw new IllegalArgumentException("Fluid container item " + existingContainer.itemId()
+                            + " is already assigned to fluid " + registered.id()
+                            + " and cannot also identify fluid " + value.id());
+                }
+            }
+        }
         persist(() -> contentStore.saveFluid(value));
         fluids.put(value.id(), value);
         trackContent(MechaniumContentStore.FLUID, value.id());
@@ -578,6 +589,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             if (!technologies.containsKey(machine.requiredTechnologyId()))
                 errors.add("Machine " + machine.id() + " references missing technology " + machine.requiredTechnologyId());
         }
+        Map<String, String> fluidContainerOwners = new HashMap<>();
         for (FluidDefinition fluid : fluids.values()) {
             if (fluid.requiredTechnologyId() != null && !technologies.containsKey(fluid.requiredTechnologyId())) {
                 errors.add("Fluid " + fluid.id() + " references missing technology " + fluid.requiredTechnologyId());
@@ -585,6 +597,11 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             for (FluidContainerDefinition container : fluid.containers()) {
                 if (!items.containsKey(container.itemId())) {
                     errors.add("Fluid " + fluid.id() + " references missing container item " + container.itemId());
+                }
+                String previousFluid = fluidContainerOwners.putIfAbsent(container.itemId(), fluid.id());
+                if (previousFluid != null && !previousFluid.equals(fluid.id())) {
+                    errors.add("Fluid container item " + container.itemId()
+                            + " is assigned to both " + previousFluid + " and " + fluid.id());
                 }
             }
         }

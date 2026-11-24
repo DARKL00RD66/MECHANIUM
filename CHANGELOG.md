@@ -3,7 +3,11 @@
 ## 0.9.9.00-SNAPSHOT — consolidação em andamento
 - Aberta a linha consolidada de desenvolvimento diretamente no alvo 0.9.9, sem publicação de snapshots intermediários 0.8.x/0.9.x.
 - Adicionado plano de execução com auditoria da arquitetura atual, marcos internos, critérios de aceite e limitações conhecidas.
-- Próxima implementação: fundação industrial com máquinas de múltiplos ingredientes/produtos e migração SQLite compatível. Itens do plano não são considerados implementados até passarem por CI e validação funcional.
+- Implementados modelos de máquina com múltiplos ingredientes e produtos, preservando o construtor legado.
+- Runtime de dispensador agora reserva seis slots de entrada e três de saída e planeja o lote completo antes de consumir insumos/energia.
+- Adicionada migração SQLite v7 com tabelas normalizadas de entradas e saídas, mantendo fallback para definições legadas.
+- Testes de modelo, registro via API, persistência e migração adicionados; resultados do CI e validação Paper/Purpur ainda pendentes.
+- Próximas prioridades: rede energética por conduítes e estrutura genérica de fluidos.
 
 ## 0.7.4.02-SNAPSHOT
 - Reclassificado o catálogo automático de receitas vanilla para distribuir melhor os itens pelas eras; receitas não reconhecidas deixam de cair automaticamente na Antiguidade e usam Renascimento como faixa neutra para revisão administrativa.

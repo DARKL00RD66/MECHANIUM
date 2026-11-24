@@ -3,7 +3,7 @@
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
 **Fase atual:** primeira entrega da fundação industrial implementada; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** API multi-entrada/multi-saída, buffers 6+3, validação integral e migração SQLite v7 implementados. CI #45484853405 aprovado com 84 testes automatizados; Paper/Purpur ainda não testados.  
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, migração SQLite v8, conduítes energéticos, preservação da carga em baterias e índice de geradores por chunks carregados implementados. CI #45502503078 aprovou 91 testes; novas alterações de energia e interface aguardam CI. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -13,7 +13,7 @@
 - API pública para eras, tecnologias, progressão, módulos e addons.
 - Registro persistente de categorias, itens, receitas, máquinas e regras de drops.
 - Definições de máquinas multi-entrada/multi-saída (1–6 entradas e 1–3 saídas), com runtime de dispensador e buffers dedicados.
-- Persistência SQLite com schema versionado até a versão 7; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
+- Persistência SQLite com schema versionado até a versão 8; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
 - Criação de `ItemStack` com identificador PDC, lore, modelo customizado e limite de pilha configurável.
 - Receitas Bukkit nativas (shaped e shapeless), incluindo ingredientes MECHANIUM exatos.
 - Verificação central de tecnologia ao fabricar, usar, consumir e posicionar itens personalizados.
@@ -40,7 +40,7 @@
 ## Sete domínios ampliados em 0.3.0-SNAPSHOT
 
 - **ExtraGear:** picareta reforçada com Haste breve após mineração e bússola para levantamento de coordenadas/biome/direção/bloco apontado.
-- **EcoPower:** geradores eólico/solar, bateria com capacidade de 10.000 unidades, carga em rede de baterias adjacentes e consumo em máquinas.
+- **EcoPower:** geradores eólico/solar, baterias de 10.000 unidades e conduítes que conectam geradores, baterias e máquinas por redes isoladas por proprietário.
 - **SFCalc:** comando `/mechanium calc <receita> [quantidade]`, cálculo de lotes, produção e expansão recursiva de materiais intermediários até oito níveis.
 - **Liquid:** filtro alimentado por energia, tanques e tubulações; rede do mesmo proprietário transfere água purificada a cada dois segundos.
 - **AdvancedTech:** britador, refinaria e montadora; todos usam o runtime de máquina e exigem energia.
@@ -72,8 +72,8 @@
 
 ## Expansões 0.5.0-SNAPSHOT
 
-- **ElectricSpawners:** quatro incubadoras para animais passivos (galinha, vaca, porco e ovelha), com insumos, tempo de processamento, pesquisa e energia de bateria adjacente.
-- **FastMachines:** prensa rápida (20 ticks) e enrolador de bobinas (40 ticks), com dois produtos por lote e consumo de energia.
+- **ElectricSpawners:** quatro incubadoras para animais passivos (galinha, vaca, porco e ovelha), com insumos, tempo de processamento, pesquisa e custo de energia por ciclo definido na própria máquina.
+- **FastMachines:** prensa rápida (20 ticks) e enrolador de bobinas (40 ticks), com dois produtos por lote e custo de energia por operação.
 - **HardcoreSlimefun:** kit de manutenção desbloqueado por pesquisa, parâmetros configuráveis de desgaste e modo hardcore opcional (multiplicador de desgaste e reparo com ferro).
 - Os três domínios são reimplementações independentes; nenhum JAR upstream do Slimefun foi adicionado como dependência.
 
@@ -87,7 +87,7 @@
 ## Limitações conhecidas
 
 - O runtime de máquinas usa dispenser com seis slots de entrada e três de saída; cada definição suporta até seis tipos de ingrediente e três produtos. Filas e processamento paralelo ainda não existem.
-- O sistema energético é uma rede local e simplificada: geradores carregam bateria adjacente; baterias face a face podem fornecer energia a máquinas próximas. A carga se perde ao desmontar a bateria.
+- O sistema energético usa conduítes HOPPER identificados, até 256 nós por rede, propriedade por UUID e somente chunks carregados. Geradores distribuem carga entre baterias conectadas; máquinas debitam o custo definido em sua MachineDefinition. Baterias preservam a carga ao serem desmontadas e recolocadas.
 - O catálogo de receitas não inclui processos cujo resultado não esteja no registro de receitas suportado (por exemplo, operações especiais de bancada e cozimento em fogueira); itens sem receita registrada não recebem desbloqueio por crafting.\n- O sistema de fluidos transporta somente o item MECHANIUM `purified_water`, não líquidos vanilla ou outros fluidos.
 - O Simple Storage conecta somente nós adjacentes pelas faces e limita cada rede a 64 depósitos.
 - SFCalc calcula materiais, não valores monetários, e não altera o sistema de economia do servidor.

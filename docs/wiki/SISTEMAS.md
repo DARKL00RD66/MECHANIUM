@@ -114,7 +114,11 @@ Os módulos agrícolas adicionam sementes, substrato, caixotes de colheita e ite
 
 O moinho industrial transforma trigo em farinha MECHANIUM e a conservadora transforma frutas doces em conserva. São máquinas de entrada/saída e exigem energia.
 
-Limitação: existem itens e receitas de cultivo, mas não há crescimento completo de plantas customizadas nem colheita mecanizada universal nesta etapa. Greenhouse inclui componentes e progressão de estufas/hidroponia, mas não deve ser confundido com automação agrícola completa.
+O módulo Greenhouse acrescenta o `greenhouse_controller`: coloque-o como dispenser e conecte uma bateria à rede energética do mesmo proprietário. Depois de desbloquear `controlled_environment_farming`, o controlador pode dar **um estágio adicional** a uma planta compatível (`Ageable`) dentro do raio configurado quando ela já tiver crescido normalmente. Cada bônus consome a quantidade configurada de energia. Se a rede estiver sem energia, o crescimento normal permanece, mas o bônus não ocorre. O sistema só examina chunks carregados e não quebra, coloca, colhe ou replanta blocos.
+
+O raio padrão é 4 blocos (configurável entre 1 e 8) e o custo padrão é 1 unidade por crescimento extra. O item antigo `climate_controller` permanece como legado; a máquina funcional nova é `greenhouse_controller`.
+
+Limitações: não há hidroponia automatizada, colheita automática, replantio nem culturas customizadas. A estufa ainda não substitui um sistema agrícola completo.
 
 ## 10. Incubadoras e máquinas rápidas
 

@@ -33,16 +33,25 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - O processamento atual não possui fila de ordens configurável nem um plano genérico de entradas/saídas.
 - Ainda não há confirmação de teste funcional completo em Paper e Purpur 1.21.11. As verificações Maven/CI devem ser relatadas separadamente.
 
+### Progresso da primeira entrega 0.9.9
+
+- Modelo multi-entrada/multi-saída adicionado à API.
+- Construtor e acessores antigos preservados para módulos e addons existentes.
+- Runtime de dispensador atualizado para seis slots de entrada e três de saída.
+- Produção valida todos os insumos e planeja todas as saídas antes de debitar recursos.
+- Migração SQLite v7 grava entradas/saídas normalizadas e lê linhas legadas pelos campos antigos.
+- Testes unitários, de registro e persistência/migração adicionados; aguardam execução do CI.
+
 ## 2. Marcos internos de implementação
 
 ### Marco A — Fundação industrial (equivalente interno a 0.8.0)
 
-- [ ] Introduzir modelo de processo de máquina com 1–6 ingredientes e 1–3 produtos.
-- [ ] Manter compatibilidade de código com o construtor antigo de `MachineDefinition`.
-- [ ] Migrar SQLite de schema 6 para schema 7 com tabelas normalizadas de ingredientes/produtos; não perder definições antigas.
-- [ ] Atualizar validação de conteúdo para conferir todos os ingredientes, produtos, tecnologias e limites de pilha.
-- [ ] Reservar buffers separados de entrada e saída no inventário da máquina.
-- [ ] Fazer pré-validação integral dos ingredientes e da capacidade de saída antes de consumir qualquer item ou energia.
+- [x] Introduzir modelo de processo de máquina com 1–6 ingredientes e 1–3 produtos.
+- [x] Manter compatibilidade de código com o construtor antigo de `MachineDefinition`.
+- [x] Migrar SQLite de schema 6 para schema 7 com tabelas normalizadas de ingredientes/produtos; não perder definições antigas.
+- [x] Atualizar validação de conteúdo para conferir todos os ingredientes, produtos, tecnologias e limites de pilha.
+- [x] Reservar buffers separados de entrada e saída no inventário da máquina.
+- [x] Fazer pré-validação integral dos ingredientes e da capacidade de saída antes de consumir qualquer item ou energia.
 - [ ] Manter progresso e propriedade seguros ao quebrar, carregar e descarregar chunks.
 - [ ] Adicionar testes de validação do modelo, persistência e migração de dados legados.
 

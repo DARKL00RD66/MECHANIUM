@@ -451,31 +451,53 @@ final class FluidPipeManager implements Listener {
             player.sendMessage("§7O tanque está vazio.");
             return;
         }
-        if (current.amountMb() < MILLIBUCKETS_PER_ITEM) {
-            player.sendMessage("§cO tanque não contém volume suficiente para retirar um item (250 mB).");
+
+        boolean administrator = player.hasPermission("mechanium.admin");
+        if (!canUseFluid(player.getUniqueId(), current.fluidId()) && !administrator) {
+            player.sendMessage("§cVocê ainda não desbloqueou o uso deste fluido.");
             return;
         }
-        FluidTankPolicy.DrainResult drained = FluidTankPolicy.drain(current, MILLIBUCKETS_PER_ITEM);
-        if (drained.removedMb() != MILLIBUCKETS_PER_ITEM) {
+
+        FluidDefinition fluid = api.getFluid(current.fluidId()).orElse(null);
+        if (fluid == null) {
+            player.sendMessage("§cEste fluido não está mais registrado; o volume foi preservado no tanque.");
+            return;
+        }
+
+        List<FluidContainerDefinition> extractionContainers = fluid.containers().stream()
+                .filter(FluidContainerDefinition::canExtract)
+                .toList();
+        if (extractionContainers.isEmpty()) {
+            player.sendMessage("§cNão existe um recipiente de saída configurado para este fluido.");
+            return;
+        }
+
+        List<FluidContainerDefinition> unlockedContainers = extractionContainers.stream()
+                .filter(container -> administrator
+                        || api.canUseItem(player.getUniqueId(), container.itemId()))
+                .toList();
+        if (unlockedContainers.isEmpty()) {
+            player.sendMessage("§cVocê ainda não desbloqueou nenhum recipiente para retirar este fluido.");
+            return;
+        }
+
+        FluidContainerDefinition outputContainer = FluidTankPolicy
+                .selectExtractionContainer(unlockedContainers, current.amountMb()).orElse(null);
+        if (outputContainer == null) {
+            int minimumVolume = unlockedContainers.stream()
+                    .mapToInt(FluidContainerDefinition::amountMb).min().orElse(0);
+            player.sendMessage("§cVolume insuficiente. São necessários pelo menos "
+                    + minimumVolume + " mB para o menor recipiente desbloqueado.");
+            return;
+        }
+
+        FluidTankPolicy.DrainResult drained = FluidTankPolicy.drain(current, outputContainer.amountMb());
+        if (drained.removedMb() != outputContainer.amountMb()) {
             player.sendMessage("§cNão foi possível calcular a retirada do fluido.");
             return;
         }
-        String outputItemId = outputItemFor(current.fluidId());
-        if (outputItemId == null) {
-            player.sendMessage("§cNão existe um item de saída configurado para este fluido.");
-            return;
-        }
-        if (!canUseFluid(player.getUniqueId(), current.fluidId())
-                && !player.hasPermission("mechanium.admin")) {
-            player.sendMessage("§cVocê ainda não desbloqueou o uso deste fluido.");
-            return;
-        }
-        if (!api.canUseItem(player.getUniqueId(), outputItemId)
-                && !player.hasPermission("mechanium.admin")) {
-            player.sendMessage("§cVocê ainda não desbloqueou o uso deste fluido.");
-            return;
-        }
-        ItemStack output = api.createItemStack(outputItemId, 1).orElse(null);
+
+        ItemStack output = api.createItemStack(outputContainer.itemId(), 1).orElse(null);
         if (output == null || !writeTankContents(tank, drained.contents())) {
             player.sendMessage("§cNão foi possível retirar o fluido do tanque.");
             return;
@@ -483,33 +505,6 @@ final class FluidPipeManager implements Listener {
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(output);
         leftover.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
         player.sendMessage("§aRetirados " + drained.removedMb() + " mB de " + current.fluidId() + ".");
-    }
-
-    private String messageError(String value) { return "§c" + value; }
-    private String messageInfo(String value) { return "§7" + value; }
-    private String messageSuccess(String value) { return "§a" + value; }
-
-    private FluidItem fluidItem(ItemStack item) {
-        String id = itemId(item);
-        if (id == null) return null;
-        for (FluidDefinition fluid : api.getFluids()) {
-            for (FluidContainerDefinition container : fluid.containers()) {
-                if (container.canFill() && container.itemId().equals(id)) {
-                    return new FluidItem(id, fluid.id(), container.amountMb());
-                }
-            }
-        }
-        return null;
-    }
-
-    private String outputItemFor(String fluidId) {
-        return api.getFluid(fluidId)
-                .flatMap(fluid -> fluid.containers().stream()
-                        .filter(FluidContainerDefinition::canExtract)
-                        .filter(container -> container.amountMb() == MILLIBUCKETS_PER_ITEM)
-                        .map(FluidContainerDefinition::itemId)
-                        .findFirst())
-                .orElse(null);
     }
 
     private boolean canUseFluid(UUID playerId, String fluidId) {

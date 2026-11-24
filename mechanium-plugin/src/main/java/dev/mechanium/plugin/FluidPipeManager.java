@@ -116,7 +116,7 @@ final class FluidPipeManager implements Listener {
             FluidTankContents restored;
             try {
                 restored = restoredAmount > 0 && restoredFluidId != null
-                        ? new FluidTankContents(restoredFluidId, Math.min(tankCapacityMb(), restoredAmount))
+                        ? new FluidTankContents(restoredFluidId, restoredAmount)
                         : FluidTankContents.empty();
             } catch (IllegalArgumentException exception) {
                 restored = FluidTankContents.empty();
@@ -360,13 +360,28 @@ final class FluidPipeManager implements Listener {
     private boolean persistTransfer(Block source, Block target, FluidTankPolicy.TransferResult plan) {
         FluidTankContents originalSource = readTankContents(source);
         FluidTankContents originalTarget = readTankContents(target);
-        if (!writeTankContents(target, plan.target())) return false;
+        if (!writeTankContents(target, plan.target())) {
+            if (!writeTankContents(target, originalTarget)) {
+                plugin.getLogger().severe("Falha ao restaurar tanque de destino após erro de gravação em "
+                        + locationLabel(target) + ".");
+            }
+            return false;
+        }
         if (!writeTankContents(source, plan.source())) {
-            writeTankContents(target, originalTarget);
-            writeTankContents(source, originalSource);
+            boolean targetRestored = writeTankContents(target, originalTarget);
+            boolean sourceRestored = writeTankContents(source, originalSource);
+            if (!targetRestored || !sourceRestored) {
+                plugin.getLogger().severe("Falha ao reverter transferência de fluido entre "
+                        + locationLabel(source) + " e " + locationLabel(target)
+                        + ". Verifique manualmente os volumes persistidos.");
+            }
             return false;
         }
         return true;
+    }
+
+    private String locationLabel(Block block) {
+        return block.getWorld().getName() + " " + block.getX() + "," + block.getY() + "," + block.getZ();
     }
 
     private void migrateLegacyTankInventory(Block block) {
@@ -382,7 +397,13 @@ final class FluidPipeManager implements Listener {
         } catch (IllegalArgumentException exception) {
             return;
         }
-        FluidTankContents current = readTankContents(block);
+        FluidTankContents originalContents = readTankContents(block);
+        FluidTankContents current = originalContents;
+        ItemStack[] originalInventory = new ItemStack[inventory.getSize()];
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            ItemStack original = inventory.getItem(slot);
+            originalInventory[slot] = original == null ? null : original.clone();
+        }
         boolean changed = false;
 
         for (int slot = 0; slot < inventory.getSize(); slot++) {
@@ -411,15 +432,27 @@ final class FluidPipeManager implements Listener {
 
         if (changed) {
             writeContents(tile.getPersistentDataContainer(), current);
-            container.update(true, false);
+            if (!container.update(true, false)) {
+                for (int slot = 0; slot < originalInventory.length; slot++) {
+                    ItemStack original = originalInventory[slot];
+                    inventory.setItem(slot, original == null ? null : original.clone());
+                }
+                writeContents(tile.getPersistentDataContainer(), originalContents);
+                if (!container.update(true, false)) {
+                    plugin.getLogger().severe("Falha ao reverter migração de itens de fluido no tanque "
+                            + locationLabel(block) + ". Inspecione o inventário e volume deste tanque.");
+                }
+                plugin.getLogger().severe("Migração de fluidos legados não foi salva no tanque "
+                        + locationLabel(block) + "; os itens originais foram restaurados quando possível.");
+            }
         }
     }
 
     private FluidTankContents readTankContents(Block block) {
         if (block == null || !(block.getState() instanceof TileState tile)) return FluidTankContents.empty();
         String id = tile.getPersistentDataContainer().get(fluidIdKey, PersistentDataType.STRING);
-        int amount = Math.max(0, Math.min(tankCapacityMb(),
-                tile.getPersistentDataContainer().getOrDefault(fluidAmountKey, PersistentDataType.INTEGER, 0)));
+        int amount = Math.max(0,
+                tile.getPersistentDataContainer().getOrDefault(fluidAmountKey, PersistentDataType.INTEGER, 0));
         if (amount == 0 || id == null) return FluidTankContents.empty();
         try {
             return new FluidTankContents(id, amount);

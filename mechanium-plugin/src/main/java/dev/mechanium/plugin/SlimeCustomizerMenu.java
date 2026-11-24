@@ -844,10 +844,15 @@ final class SlimeCustomizerMenu implements Listener {
 
     private enum ChatPrompt {
         ID, DISPLAY_NAME, MATERIAL, TECHNOLOGY, MAX_STACK,
-        EDIT_DISPLAY_NAME, EDIT_MATERIAL, EDIT_TECHNOLOGY, EDIT_MAX_STACK;
+        EDIT_DISPLAY_NAME, EDIT_MATERIAL, EDIT_TECHNOLOGY, EDIT_MAX_STACK,
+        RECIPE_ID, RECIPE_RESULT, RECIPE_AMOUNT, RECIPE_TECHNOLOGY, RECIPE_INGREDIENT;
 
         private boolean isEdit() {
             return name().startsWith("EDIT_");
+        }
+
+        private boolean isRecipe() {
+            return name().startsWith("RECIPE_");
         }
     }
 

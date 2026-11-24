@@ -25,6 +25,6 @@ final class BiofuelModule extends AbstractBuiltinModule {
         registerRecipe(api,new RecipeDefinition("biomass_pellet_recipe",RecipeDefinition.Type.SHAPELESS,"biomass_pellet",4,List.of(),Map.of('K',"DRIED_KELP",'W',"WHEAT",'S',"SUGAR_CANE"),"biomass_processing"));
         registerRecipe(api,new RecipeDefinition("biofuel_cell_recipe",RecipeDefinition.Type.SHAPELESS,"biofuel_cell",1,List.of(),Map.of('B',"mechanium:biomass_pellet",'G',"GLASS_BOTTLE",'R',"REDSTONE"),"biofuel_refining"));
         registerRecipe(api,new RecipeDefinition("biomass_processor_recipe",RecipeDefinition.Type.SHAPELESS,"biomass_processor",1,List.of(),Map.of('D',"DISPENSER",'H',"HAY_BLOCK",'I',"IRON_INGOT"),"biomass_processing"));
-        registerMachine(api,new MachineDefinition("biomass_processor","Processador de biomassa","biomass_processor","DISPENSER","WHEAT",4,"biomass_pellet",2,1200,"biomass_processing"));
+        registerMachine(api,new MachineDefinition("biomass_processor","Processador de biomassa","biomass_processor","DISPENSER","WHEAT",4,"biomass_pellet",2,1200,1,"biomass_processing"));
     }
 }

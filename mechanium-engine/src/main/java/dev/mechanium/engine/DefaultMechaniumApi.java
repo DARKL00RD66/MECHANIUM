@@ -55,6 +55,21 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     }
 
     @Override
+    public synchronized void migrateContentOwner(String previousOwnerId, String newOwnerId) {
+        if (activeContentScope != null) throw new IllegalStateException("Cannot migrate content ownership during registration.");
+        if (contentStore == null) return;
+        contentStore.beginContentTransaction();
+        try {
+            contentStore.migrateContentOwner(previousOwnerId, newOwnerId);
+            contentStore.commitContentTransaction();
+        } catch (RuntimeException exception) {
+            try { contentStore.rollbackContentTransaction(); }
+            catch (RuntimeException rollbackException) { exception.addSuppressed(rollbackException); }
+            throw exception;
+        }
+    }
+
+    @Override
     public synchronized void pruneInactiveContentOwners(Set<String> activeOwnerIds) {
         if (activeContentScope != null) throw new IllegalStateException("Cannot prune content while a registration scope is active.");
         if (contentStore == null) return;

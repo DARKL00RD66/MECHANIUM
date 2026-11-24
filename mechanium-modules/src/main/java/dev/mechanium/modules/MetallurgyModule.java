@@ -29,6 +29,6 @@ final class MetallurgyModule extends AbstractBuiltinModule {
                 Map.of('I', "IRON_INGOT", 'F', "FURNACE", 'B', "BRICKS"),
                 "advanced_metallurgy"));
         registerMachine(api, new MachineDefinition("metallurgy_furnace", "Forno metalúrgico", "metallurgy_furnace",
-                "DISPENSER", "IRON_INGOT", 2, "steel_component", 1, 2400, "advanced_metallurgy"));
+                "DISPENSER", "IRON_INGOT", 2, "steel_component", 1, 2400, 2, "advanced_metallurgy"));
     }
 }

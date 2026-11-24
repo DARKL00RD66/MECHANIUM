@@ -286,6 +286,15 @@ class DefaultMechaniumApiTest {
 
             assertThrows(IllegalArgumentException.class, () -> reloaded.registerFluid(
                     new dev.mechanium.api.model.FluidDefinition(
+                            "industrial_coolant", "Refrigerante", null,
+                            List.of(new dev.mechanium.api.model.FluidContainerDefinition(
+                                            "water_bottle", 250, true, true),
+                                    new dev.mechanium.api.model.FluidContainerDefinition(
+                                            "water_cell", 1_000, true, false)))),
+                    "A container item must identify only one fluid type.");
+
+            assertThrows(IllegalArgumentException.class, () -> reloaded.registerFluid(
+                    new dev.mechanium.api.model.FluidDefinition(
                             "unknown_container_fluid", "Fluido inválido", null,
                             List.of(new dev.mechanium.api.model.FluidContainerDefinition(
                                     "missing_item", 250, true, true)))));

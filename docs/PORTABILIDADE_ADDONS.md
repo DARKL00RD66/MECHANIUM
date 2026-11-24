@@ -34,7 +34,7 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 | FastMachines | Eficiência de máquinas | Prensa e enrolador acelerados ligados à rede energética; filas e paralelismo pendentes |
 | MapJammers | Interferência eletrônica | Não portar jamming; cartografia e informação geográfica são candidatas |
 | SensibleToolbox | Ferramentas | Ferramentas utilitárias não redundantes |
-| GeyserHeads | Cosméticos Bedrock/Geyser | Compatibilidade visual opcional |
+| Head Collection | Itens cosméticos locais e expositores | Implementação própria, sem dependências externas |
 
 ## Implementações parciais
 
@@ -49,7 +49,7 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 
 ## Implementações adicionais anteriores
 - **ExoticGarden/Gastronomicon (parcial):** expansão clean-room de agricultura e culinária com sementes, substrato, embalagens de colheita, queijo, ensopado, carne conservada e rações. Ainda não há plantas customizadas, estufas funcionais ou árvore completa de alimentos.
-- **FluffyMachines/LiteXpansion (parcial):** moinho industrial e conservadora de frutas usam o runtime de máquinas MECHANIUM e consomem energia; o runtime permanece limitado a um insumo e um produto por ciclo.
+- **FluffyMachines/LiteXpansion (parcial):** moinho industrial e conservadora de frutas usam o runtime de máquinas MECHANIUM e consomem energia; o runtime suporta até seis tipos de insumo e três produtos por lote, mas ainda não possui filas ou processamento paralelo.
 - **Networks (parcial):** rede local de depósitos face a face existente, com limite de 64 nós e paginação.
 - **DankTech2 (parcial):** armazém portátil único com inventário de 27 espaços salvo no próprio item. Não há upgrades, filtros, compressão ou busca global.
 - **GlobalWarming (parcial):** contador persistente abstrato por mundo; ciclos industriais somam impacto, e a tecnologia emissions_control interrompe novas contagens para máquinas daquele proprietário. Não simula temperatura, clima ou eventos ambientais.
@@ -57,7 +57,7 @@ A lista consolidada contém **31 projetos únicos**. URLs duplicadas foram conta
 ## Implementações 0.5.0-SNAPSHOT
 
 - **ElectricSpawners (parcial / clean-room):** quatro incubadoras construídas sobre o runtime comum de máquinas. Elas consomem sementes, feno, cenouras ou trigo e geram ovos de invocação vanilla de galinha, vaca, porco ou ovelha. Todas exigem a pesquisa `livestock_incubation` e energia de bateria adjacente. O primeiro estágio não cria criaturas hostis, não automatiza abate e não reproduz o comportamento integral do addon original.
-- **FastMachines (parcial / clean-room):** a prensa rápida transforma uma barra de ferro em duas peças mecânicas em um ciclo de 20 ticks; o enrolador transforma cobre em duas bobinas em 40 ticks. Ambos exigem energia e a pesquisa `fast_machinery`. Ainda compartilham o limite do runtime atual: dispenser, uma entrada e uma saída, sem filas nem processamento paralelo.
+- **FastMachines (parcial / clean-room):** a prensa rápida transforma uma barra de ferro em duas peças mecânicas em um ciclo de 20 ticks; o enrolador transforma cobre em duas bobinas em 40 ticks. Ambos exigem energia e a pesquisa `fast_machinery`. Agora usam o buffer 6+3 do runtime de dispenser; filas e processamento paralelo continuam pendentes.
 - **HardcoreSlimefun (parcial / clean-room):** inclui pesquisas de confiabilidade/manutenção e o item `machine_maintenance_kit`, que restaura o desgaste de uma máquina quando usado agachado sobre ela. O modo opcional `machines.hardcore.enabled` pode multiplicar o desgaste por operação e elevar o custo de reparo com ferro; vem desativado por padrão.
 
 ## Regras de portabilidade

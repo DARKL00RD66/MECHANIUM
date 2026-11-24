@@ -447,6 +447,44 @@ class DefaultMechaniumApiTest {
     }
 
     @Test
+    void itemOverridesPersistAndRejectChangesThatBreakRecipeResults() throws Exception {
+        Path database = directory.resolve("item-override.db");
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            api.registerTechnology(new TechnologyDefinition(
+                    "basic_crafting", "Artesanato básico", "ancient", 0, List.of()));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                    "custom_items", "Itens personalizados", "Conteúdo do editor"));
+            var original = new dev.mechanium.api.model.ItemDefinition(
+                    "custom_widget", "Widget antigo", "IRON_INGOT", List.of("&7Original"),
+                    0, 64, "custom_items", null);
+            assertTrue(api.registerItem(original));
+            assertTrue(api.registerRecipe(new dev.mechanium.api.model.RecipeDefinition(
+                    "custom_widget_recipe", dev.mechanium.api.model.RecipeDefinition.Type.SHAPELESS,
+                    "custom_widget", 4, List.of(), java.util.Map.of('I', "IRON_INGOT"), null)));
+
+            var invalid = new dev.mechanium.api.model.ItemDefinition(
+                    "custom_widget", "Widget inválido", "GOLD_INGOT", List.of(),
+                    0, 3, "custom_items", null);
+            assertThrows(IllegalArgumentException.class, () -> api.overrideItem(invalid));
+            assertEquals(original, api.getItem("custom_widget").orElseThrow());
+            assertEquals(original, store.loadItems().stream()
+                    .filter(item -> item.id().equals("custom_widget")).findFirst().orElseThrow());
+
+            var updated = new dev.mechanium.api.model.ItemDefinition(
+                    "custom_widget", "Widget atualizado", "COPPER_INGOT", List.of("&7Editado"),
+                    0, 64, "custom_items", "basic_crafting");
+            assertTrue(api.overrideItem(updated));
+            assertEquals(updated, api.getItem("custom_widget").orElseThrow());
+            DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
+            assertEquals(updated, reloaded.getItem("custom_widget").orElseThrow(),
+                    "Customizer item edits must survive a server restart.");
+            assertTrue(reloaded.validateContent().isEmpty());
+        }
+    }
+
+    @Test
     void uncommittedContentScopeRestoresMemoryAndDatabase() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(directory.resolve("scope-rollback.db"), Logger.getLogger("test"))) {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);

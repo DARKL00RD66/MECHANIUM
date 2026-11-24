@@ -179,8 +179,45 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                     """);
                 statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (8)");
             }
+            if (currentVersion < 9) {
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS mechanium_fluids (
+                        id TEXT PRIMARY KEY,
+                        display_name TEXT NOT NULL,
+                        required_technology_id TEXT
+                    )
+                    """);
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS mechanium_fluid_containers (
+                        fluid_id TEXT NOT NULL,
+                        ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+                        item_id TEXT NOT NULL,
+                        amount_mb INTEGER NOT NULL CHECK (amount_mb BETWEEN 250 AND 1000000 AND amount_mb % 250 = 0),
+                        can_fill INTEGER NOT NULL CHECK (can_fill IN (0,1)),
+                        can_extract INTEGER NOT NULL CHECK (can_extract IN (0,1)),
+                        PRIMARY KEY (fluid_id, ordinal),
+                        UNIQUE (fluid_id, item_id),
+                        FOREIGN KEY (fluid_id) REFERENCES mechanium_fluids(id) ON DELETE CASCADE
+                    )
+                    """);
+                statement.execute("""
+                    CREATE TABLE mechanium_content_owners_v9 (
+                        content_type TEXT NOT NULL CHECK (content_type IN ('category','item','recipe','mob_drop','machine','fluid')),
+                        content_id TEXT NOT NULL,
+                        owner_id TEXT NOT NULL,
+                        PRIMARY KEY (content_type, content_id)
+                    )
+                    """);
+                statement.execute("""
+                    INSERT INTO mechanium_content_owners_v9(content_type,content_id,owner_id)
+                    SELECT content_type,content_id,owner_id FROM mechanium_content_owners
+                    """);
+                statement.execute("DROP TABLE mechanium_content_owners");
+                statement.execute("ALTER TABLE mechanium_content_owners_v9 RENAME TO mechanium_content_owners");
+                statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (9)");
+            }
         }
-        logger.info("MECHANIUM SQLite schema até a versão 8 pronta.");
+        logger.info("MECHANIUM SQLite schema até a versão 9 pronta.");
     }
 
 
@@ -636,6 +673,78 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
         }
     }
 
+    @Override public synchronized void saveFluid(FluidDefinition v) {
+        try (PreparedStatement p = connection.prepareStatement("""
+                INSERT INTO mechanium_fluids(id,display_name,required_technology_id) VALUES(?,?,?)
+                ON CONFLICT(id) DO UPDATE SET display_name=excluded.display_name,
+                required_technology_id=excluded.required_technology_id
+                """)) {
+            p.setString(1, v.id());
+            p.setString(2, v.displayName());
+            p.setString(3, v.requiredTechnologyId());
+            p.executeUpdate();
+
+            try (PreparedStatement delete = connection.prepareStatement(
+                    "DELETE FROM mechanium_fluid_containers WHERE fluid_id=?")) {
+                delete.setString(1, v.id());
+                delete.executeUpdate();
+            }
+            try (PreparedStatement insert = connection.prepareStatement("""
+                    INSERT INTO mechanium_fluid_containers(
+                        fluid_id,ordinal,item_id,amount_mb,can_fill,can_extract
+                    ) VALUES(?,?,?,?,?,?)
+                    """)) {
+                for (int i = 0; i < v.containers().size(); i++) {
+                    FluidContainerDefinition container = v.containers().get(i);
+                    insert.setString(1, v.id());
+                    insert.setInt(2, i);
+                    insert.setString(3, container.itemId());
+                    insert.setInt(4, container.amountMb());
+                    insert.setInt(5, container.canFill() ? 1 : 0);
+                    insert.setInt(6, container.canExtract() ? 1 : 0);
+                    insert.addBatch();
+                }
+                insert.executeBatch();
+            }
+        } catch (SQLException e) {
+            throw failure("save fluid", e);
+        }
+    }
+
+    @Override public synchronized Collection<FluidDefinition> loadFluids() {
+        List<FluidDefinition> out = new ArrayList<>();
+        try (Statement s = connection.createStatement();
+             ResultSet r = s.executeQuery(
+                     "SELECT id,display_name,required_technology_id FROM mechanium_fluids ORDER BY id")) {
+            while (r.next()) {
+                String id = r.getString(1);
+                out.add(new FluidDefinition(id, r.getString(2), r.getString(3), loadFluidContainers(id)));
+            }
+            return List.copyOf(out);
+        } catch (SQLException e) {
+            throw failure("load fluids", e);
+        }
+    }
+
+    private List<FluidContainerDefinition> loadFluidContainers(String fluidId) {
+        List<FluidContainerDefinition> containers = new ArrayList<>();
+        try (PreparedStatement p = connection.prepareStatement("""
+                SELECT item_id,amount_mb,can_fill,can_extract
+                FROM mechanium_fluid_containers WHERE fluid_id=? ORDER BY ordinal
+                """)) {
+            p.setString(1, fluidId);
+            try (ResultSet r = p.executeQuery()) {
+                while (r.next()) {
+                    containers.add(new FluidContainerDefinition(r.getString(1), r.getInt(2),
+                            r.getInt(3) != 0, r.getInt(4) != 0));
+                }
+            }
+            return List.copyOf(containers);
+        } catch (SQLException e) {
+            throw failure("load fluid containers", e);
+        }
+    }
+
     @Override public synchronized void saveMachine(MachineDefinition v) {
         try (PreparedStatement p = connection.prepareStatement("""
                 INSERT INTO mechanium_machines(
@@ -792,6 +901,7 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
         String[][] orderedTypes = {
                 {RECIPE, "mechanium_recipes"},
                 {MACHINE, "mechanium_machines"},
+                {FLUID, "mechanium_fluids"},
                 {MOB_DROP, "mechanium_mob_drops"},
                 {ITEM, "mechanium_items"},
                 {CATEGORY, "mechanium_categories"}
@@ -912,6 +1022,7 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
             case RECIPE -> "mechanium_recipes";
             case MOB_DROP -> "mechanium_mob_drops";
             case MACHINE -> "mechanium_machines";
+            case FLUID -> "mechanium_fluids";
             default -> throw new IllegalArgumentException("Unknown content type: " + contentType);
         };
     }

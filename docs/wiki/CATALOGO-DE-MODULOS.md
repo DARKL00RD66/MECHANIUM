@@ -86,7 +86,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 ## Limitações comuns a vários módulos
 
 - O runtime comum de dispenser aceita até seis tipos de entrada e três produtos por lote; o custo energético por operação fica na definição de cada máquina.
-- A rede de fluidos suporta atualmente água purificada e refrigerante em volumes de mB. Válvulas, bombas, outros fluidos e API pública de registro para addons ainda não existem.
+- A rede armazena fluidos registrados pela API pública em volumes de mB; água purificada e refrigerante são exemplos padrão. Addons podem declarar novos fluidos e recipientes. Fluidos vanilla, válvulas e bombas ainda não são suportados.
 - Ter itens, categorias e receitas cadastrados não significa que o módulo possua automação completa ou todas as funcionalidades de uma referência externa.
 - Greenhouse e Agriculture ainda não representam um simulador completo de culturas customizadas.
 - Mining Automation possui componentes e receitas, mas não mineração autônoma de blocos.

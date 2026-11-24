@@ -98,9 +98,9 @@ Esta etapa amplia itens e receitas; não adiciona ainda novas plantas com cresci
 - Tanques usam barris e guardam o fluido no PDC como ID + volume em milibuckets (mB), com capacidade padrão de 16.000 mB.
 - Cada unidade `purified_water` representa 250 mB; `purified_water_cell` representa 1.000 mB; `coolant_cell` representa 250 mB de `industrial_coolant`.
 - O tanque aceita somente um tipo de fluido por vez. Água purificada e refrigerante não se misturam; o volume não ultrapassa a capacidade configurada.
-- Para abastecer, clique no tanque com um item de fluido desbloqueado. Para retirar, agache e clique com a mão vazia; cada retirada converte 250 mB em um item equivalente.
+- Para abastecer, clique no tanque com um item de fluido desbloqueado. Para retirar, agache e clique com a mão vazia; o sistema escolhe o maior recipiente de saída desbloqueado cujo volume caiba no tanque (250 mB, 500 mB, 1.000 mB ou outro volume registrado).
 - Tubulações são dispensers identificados. Tanques do mesmo proprietário conectados por faces formam uma rede; a cada dois segundos podem transferir até 250 mB para outro tanque compatível.
-- As redes examinam até 128 tubulações indexadas nos chunks carregados. Não carregam chunks automaticamente, não transportam fluidos vanilla e ainda não possuem válvulas, bombas nem API pública para addons registrarem novos fluidos.
+- As redes examinam até 128 tubulações indexadas nos chunks carregados. Não carregam chunks automaticamente, não transportam fluidos vanilla e ainda não possuem válvulas ou bombas. Módulos e addons podem registrar fluidos customizados e recipientes pela API pública.
 - Itens de fluido legados encontrados no inventário de um tanque são convertidos para volume tipado quando o tanque é acessado/inspecionado; ao desmontar o tanque, tipo e volume são preservados no PDC do próprio item de tanque.
 - O acesso aos tanques respeita o proprietário; a tubulação é um bloco de conexão, não um inventário acessível.
 
@@ -152,7 +152,7 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 
 - O build automatizado pode verificar compilação e testes unitários, mas não confirma comportamento real em Paper/Purpur 1.21.11.
 - Máquinas continuam hospedadas em dispenser; o runtime suporta até seis entradas e três saídas, mas ainda não possui filas nem processamento paralelo.
-- Energia e fluidos são redes locais tipadas e limitadas; não são simuladores universais. A energia ainda não tem telemetria, perdas ou throughput configurável; fluidos suportam apenas água purificada e refrigerante, sem válvulas/bombas nem API pública de registro.
+- Energia e fluidos são redes locais tipadas e limitadas; não são simuladores universais. A energia ainda não tem telemetria, perdas ou throughput configurável; fluidos usam definições customizadas registradas pela API pública (água purificada e refrigerante são exemplos padrão), sem fluidos vanilla, válvulas ou bombas.
 - Armazenamento conectado exige nós face a face; não é uma rede logística de longa distância.
 - Não há integração com economia para calcular preços monetários.
 - Não há filas de produção, processamento paralelo ou múltiplas receitas simultâneas; manutenção de máquinas já existe via ferro e kit pesquisável.

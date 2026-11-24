@@ -69,6 +69,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             registerConfiguredEras();
             initializeServerEra();
             migrateVanillaRecipeGateSettings();
+            migrateVanillaRecipeEraDistribution();
             seedMissingVanillaRecipeGates();
             Bukkit.getServicesManager().register(MechaniumApi.class, api, this, ServicePriority.Normal);
 
@@ -215,6 +216,46 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         }
         getConfig().set(migrationPath, true);
         saveConfig();
+    }
+
+    /**
+     * Reclassifies values that still match the previous automatic classifier. A deliberate
+     * setting that differs from the old suggestion (including "off") is preserved. Older
+     * manual overrides identical to the former automatic default cannot be distinguished,
+     * so administrators should review the logged migration summary once after upgrading.
+     */
+    private void migrateVanillaRecipeEraDistribution() {
+        String migrationPath = "vanilla-recipe-gates.migrations.historical-distribution-0-7-4-02";
+        if (getConfig().getBoolean(migrationPath, false)) return;
+
+        int updated = 0;
+        for (VanillaRecipeCatalog.Entry recipe : VanillaRecipeCatalog.discover()) {
+            String configPath = "vanilla-recipe-gates.recipes." + recipe.key();
+            String configuredEra = getConfig().getString(configPath);
+            if (configuredEra == null || configuredEra.equalsIgnoreCase("off")) continue;
+
+            String previousSuggestion = VanillaRecipeCatalog.legacyRecommendedEraId(
+                    recipe.key().getKey(), recipe.result());
+            String correctedSuggestion = recipe.suggestedEraId();
+            if (configuredEra.equalsIgnoreCase(previousSuggestion)
+                    && !configuredEra.equalsIgnoreCase(correctedSuggestion)) {
+                getConfig().set(configPath, correctedSuggestion);
+                updated++;
+            }
+        }
+
+        // This was an explicitly packaged default from the previous config, not an auto-seeded value.
+        String observerPath = "vanilla-recipe-gates.recipes.minecraft:observer";
+        if ("modern".equalsIgnoreCase(getConfig().getString(observerPath, ""))) {
+            getConfig().set(observerPath, "digital_age");
+            updated++;
+        }
+
+        getConfig().set(migrationPath, true);
+        saveConfig();
+        getLogger().info("Rebalance histórico aplicado: " + updated
+                + " regras vanilla atualizadas. Valores 'off' e escolhas diferentes da sugestão antiga foram preservados; "
+                + "revise regras que tenham sido manualmente fixadas no mesmo valor automático antigo.");
     }
 
     private void seedMissingVanillaRecipeGates() {

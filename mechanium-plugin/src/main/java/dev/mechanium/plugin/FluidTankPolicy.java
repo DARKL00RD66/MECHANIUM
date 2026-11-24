@@ -1,5 +1,12 @@
 package dev.mechanium.plugin;
 
+import dev.mechanium.api.model.FluidContainerDefinition;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 /** Pure capacity, mixing and transfer rules for typed MECHANIUM fluids. */
 final class FluidTankPolicy {
     private FluidTankPolicy() { }
@@ -27,6 +34,21 @@ final class FluidTankPolicy {
         return new DrainResult(remaining == 0
                 ? FluidTankContents.empty()
                 : new FluidTankContents(current.fluidId(), remaining), removed);
+    }
+
+    /**
+     * Selects the largest registered extraction container that fits the available tank volume.
+     * Callers may pass only containers the player is allowed to use.
+     */
+    static Optional<FluidContainerDefinition> selectExtractionContainer(
+            List<FluidContainerDefinition> containers, int availableMb) {
+        Objects.requireNonNull(containers, "containers");
+        if (availableMb < 0) throw new IllegalArgumentException("Available fluid volume cannot be negative");
+        return containers.stream()
+                .filter(Objects::nonNull)
+                .filter(FluidContainerDefinition::canExtract)
+                .filter(container -> container.amountMb() <= availableMb)
+                .max(Comparator.comparingInt(FluidContainerDefinition::amountMb));
     }
 
     static TransferResult transfer(FluidTankContents source, FluidTankContents target,

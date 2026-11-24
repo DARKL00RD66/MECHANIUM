@@ -550,7 +550,7 @@ final class SlimeCustomizerMenu implements Listener {
     }
 
     private Component legacy(String value) {
-        return LegacyComponentSerializer.legacySection().deserialize(value);
+        return LegacyComponentSerializer.legacySection().deserialize(value.replace('&', '§'));
     }
 
     @EventHandler

@@ -193,6 +193,10 @@ class DefaultMechaniumApiTest {
                     List.of(), 0, 64, "industry", "basic_mechanics"));
             api.registerItem(new dev.mechanium.api.model.ItemDefinition("chest_machine", "Máquina de baú", "CHEST",
                     List.of(), 0, 1, "industry", "basic_mechanics"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("mixing_machine", "Misturador", "DISPENSER",
+                    List.of(), 0, 1, "industry", "basic_mechanics"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("copper_coil", "Bobina", "COPPER_INGOT",
+                    List.of(), 0, 64, "industry", "basic_mechanics"));
 
             var machine = new dev.mechanium.api.model.MachineDefinition(
                     "mechanical_press", "Prensa", "mechanical_press", "DISPENSER",
@@ -204,8 +208,28 @@ class DefaultMechaniumApiTest {
             DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
             assertEquals(machine, reloaded.getMachine("mechanical_press").orElseThrow(),
                     "Machine definitions must be restored from persistent storage");
+
+            var multiIoMachine = new dev.mechanium.api.model.MachineDefinition(
+                    "multi_io_mixer", "Misturador", "mixing_machine", "DISPENSER",
+                    List.of(new dev.mechanium.api.model.MachineIngredient("IRON_INGOT", 2),
+                            new dev.mechanium.api.model.MachineIngredient("mechanium:mechanical_parts", 1)),
+                    List.of(new dev.mechanium.api.model.MachineProduct("mechanical_parts", 2),
+                            new dev.mechanium.api.model.MachineProduct("copper_coil", 1)),
+                    240, "basic_mechanics");
+            assertTrue(api.registerMachine(multiIoMachine));
+            assertEquals(multiIoMachine, new DefaultMechaniumApi(store)
+                    .getMachine("multi_io_mixer").orElseThrow(),
+                    "Multi-input/multi-output machine definitions must persist across reloads");
             assertTrue(api.validateContent().isEmpty());
 
+            assertThrows(IllegalArgumentException.class, () -> api.registerMachine(
+                    new dev.mechanium.api.model.MachineDefinition(
+                            "missing_secondary_output", "Invalid", "mixing_machine", "DISPENSER",
+                            List.of(new dev.mechanium.api.model.MachineIngredient("IRON_INGOT", 1)),
+                            List.of(new dev.mechanium.api.model.MachineProduct("mechanical_parts", 1),
+                                    new dev.mechanium.api.model.MachineProduct("unknown_output", 1)),
+                            100, "basic_mechanics")),
+                    "Every output must be registered");
             assertThrows(IllegalArgumentException.class, () -> api.registerMachine(
                     new dev.mechanium.api.model.MachineDefinition(
                             "missing_output", "Invalid", "mechanical_press", "DISPENSER",

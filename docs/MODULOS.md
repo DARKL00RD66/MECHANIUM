@@ -49,11 +49,11 @@ A ferramenta atual é uma prospecção local. Depósitos regionais, veios minera
 
 ### ElectricSpawners — incubação pecuária
 
-As quatro incubadoras usam o runtime comum de dispenser: sementes geram ovos de galinha; feno gera ovos de vaca; cenouras geram ovos de porco; trigo gera ovos de ovelha. A produção exige `livestock_incubation` e uma bateria adjacente do mesmo proprietário. O escopo é limitado a animais passivos e não inclui spawners de criaturas hostis.
+As quatro incubadoras usam o runtime comum de dispenser: sementes geram ovos de galinha; feno gera ovos de vaca; cenouras geram ovos de porco; trigo gera ovos de ovelha. A produção exige `livestock_incubation` e uma rede energética do mesmo proprietário com pelo menos uma unidade disponível por operação. O escopo é limitado a animais passivos e não inclui spawners de criaturas hostis.
 
 ### FastMachines — produção acelerada
 
-A prensa rápida consome uma barra de ferro e produz duas peças mecânicas em 20 ticks; o enrolador consome cobre e produz duas bobinas em 40 ticks. Ambos exigem energia, propriedade e a pesquisa `fast_machinery`. Ainda não há filas ou paralelismo.
+A prensa rápida consome uma barra de ferro e produz duas peças mecânicas em 20 ticks; o enrolador consome cobre e produz duas bobinas em 40 ticks. Ambos exigem energia (duas unidades por operação), propriedade e a pesquisa `fast_machinery`. Ainda não há filas ou paralelismo.
 
 ### HardcoreSlimefun — manutenção e dificuldade
 
@@ -83,13 +83,14 @@ Esta etapa amplia itens e receitas; não adiciona ainda novas plantas com cresci
 
 ### EcoPower — geração e rede de energia
 
+- O conduíte energético é colocado como funil e conecta geradores, baterias e máquinas pelas faces.
 - O gerador eólico é colocado como bloco de fornalha e produz 1 unidade de energia por segundo.
 - O gerador solar é colocado como defumador e produz 2 unidades por segundo durante o dia, sem tempestade.
 - Uma bateria é colocada como barril e armazena até 10.000 unidades.
-- Geradores carregam uma bateria adjacente do mesmo proprietário. Baterias adjacentes entre si formam uma rede local; máquinas conectadas a uma bateria dessa rede podem consumir energia.
-- O filtro de água, a montadora, o britador, a refinaria, o moinho, a conservadora, as incubadoras e as máquinas rápidas exigem energia: cada ciclo concluído consome 1 unidade.
+- Geradores carregam baterias ligadas diretamente ou por conduítes HOPPER `energy_conduit`; máquinas conectadas à rede podem consumir energia. A rede é isolada por proprietário, suporta até 256 nós e examina apenas chunks carregados.
+- Cada definição de máquina declara seu próprio `energyCostPerOperation` em `MachineDefinition`; custos típicos variam de 1 a 2 unidades por operação. A lista de máquinas não depende mais de nomes fixos em código.
 - Máquinas acumulam desgaste por ciclo até 100; ao atingir o limite, param. O proprietário pode agachar e clicar com uma barra de ferro para reparar e zerar o desgaste.
-- A rede atual é local, limitada a 64 baterias na busca por consumo e não carrega chunks automaticamente. Quebrar a bateria recupera o item, mas não preserva a carga restante.
+- A rede atual é local, limitada a 256 nós e não carrega chunks automaticamente. Ao desmontar uma bateria, a carga é preservada no PDC do item e restaurada ao recolocar.
 
 ### Liquid — distribuição de água
 

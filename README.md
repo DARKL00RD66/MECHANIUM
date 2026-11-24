@@ -79,3 +79,14 @@ A linha 0.7.0.01 amplia os módulos Forestry, Textile Industry, Biofuel, Constru
 - [Roadmap](docs/ROADMAP.md)
 - [Política de versionamento até 0.9.9](docs/VERSIONAMENTO.md)
 - [Contribuição](CONTRIBUTING.md)
+
+## Licença
+
+O MECHANIUM pode ser instalado, executado e configurado em servidores, mas seu
+código-fonte não pode ser modificado, adaptado ou redistribuído em versões
+alteradas sem autorização prévia e por escrito do titular dos direitos.
+A redistribuição gratuita de uma versão oficial sem modificações é permitida,
+desde que a licença e os avisos de autoria sejam preservados.
+
+Leia a licença completa em [LICENSE](LICENSE). Esta é uma licença proprietária
+personalizada, não uma licença open source.

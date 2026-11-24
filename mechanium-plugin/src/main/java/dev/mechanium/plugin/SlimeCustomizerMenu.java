@@ -51,6 +51,7 @@ final class SlimeCustomizerMenu implements Listener {
     private final JavaPlugin javaPlugin;
     private final MechaniumApi api;
     private final Map<UUID, Draft> drafts = new HashMap<>();
+    private final Map<UUID, ItemDefinition> editingItems = new HashMap<>();
     private final Map<UUID, ChatPrompt> prompts = new ConcurrentHashMap<>();
 
     SlimeCustomizerMenu(MechaniumPlugin plugin, MechaniumApi api) {
@@ -132,6 +133,24 @@ final class SlimeCustomizerMenu implements Listener {
                         "§7Pilha máxima: §f" + definition.maxStackSize(),
                         "§8Este item é persistido com ownership próprio."
                 )));
+        button(holder, 20, Material.NAME_TAG, "§eEditar nome", List.of(
+                "§7Altera somente o nome visível do item."
+        ), p -> beginEdit(p, definition, ChatPrompt.EDIT_DISPLAY_NAME,
+                "§eDigite o novo nome visível. Cores com & são aceitas:"));
+        button(holder, 21, Material.ANVIL, "§eEditar material", List.of(
+                "§7Troca o material base, se não invalidar",
+                "§7máquinas, receitas ou drops existentes."
+        ), p -> beginEdit(p, definition, ChatPrompt.EDIT_MATERIAL,
+                "§eDigite o novo material Minecraft (ex.: COPPER_INGOT):"));
+        button(holder, 22, Material.KNOWLEDGE_BOOK, "§eEditar pesquisa", List.of(
+                "§7Use um ID de pesquisa existente ou none."
+        ), p -> beginEdit(p, definition, ChatPrompt.EDIT_TECHNOLOGY,
+                "§eDigite o ID de uma pesquisa existente ou none:"));
+        button(holder, 23, Material.CHEST, "§eEditar pilha máxima", List.of(
+                "§7Limite de 1 a 64. A alteração é rejeitada",
+                "§7se quebrar uma receita ou máquina existente."
+        ), p -> beginEdit(p, definition, ChatPrompt.EDIT_MAX_STACK,
+                "§eDigite a nova pilha máxima (1–64):"));
         button(holder, 29, Material.CHEST, "§aEntregar uma unidade", List.of(
                 "§7Adiciona uma unidade ao seu inventário.",
                 "§7As regras de pesquisa continuam ativas."
@@ -196,6 +215,15 @@ final class SlimeCustomizerMenu implements Listener {
                 "§eCriação de item — digite um ID novo (ex.: copper_widget). Digite cancel para voltar.");
     }
 
+    private void beginEdit(Player player, ItemDefinition definition, ChatPrompt prompt, String message) {
+        if (!plugin.hasAdminAccess(player)) {
+            player.sendMessage("§cSem permissão.");
+            return;
+        }
+        editingItems.put(player.getUniqueId(), definition);
+        requestInput(player, prompt, message + " Digite cancel para voltar.");
+    }
+
     private void requestInput(Player player, ChatPrompt prompt, String message) {
         prompts.put(player.getUniqueId(), prompt);
         player.closeInventory();
@@ -223,7 +251,13 @@ final class SlimeCustomizerMenu implements Listener {
         String value = raw == null ? "" : raw.trim();
         if (value.equalsIgnoreCase("cancel")) {
             drafts.remove(player.getUniqueId());
-            openList(player, 0);
+            ItemDefinition editing = editingItems.remove(player.getUniqueId());
+            if (editing != null) openItem(player, editing, 0);
+            else openList(player, 0);
+            return;
+        }
+        if (prompt.isEdit()) {
+            handleEditInput(player, prompt, value);
             return;
         }
         Draft draft = drafts.get(player.getUniqueId());
@@ -308,6 +342,81 @@ final class SlimeCustomizerMenu implements Listener {
             drafts.remove(player.getUniqueId());
             openList(player, 0);
         }
+    }
+
+    private void handleEditInput(Player player, ChatPrompt prompt, String value) {
+        ItemDefinition current = editingItems.get(player.getUniqueId());
+        if (current == null) {
+            player.sendMessage("§cA sessão de edição expirou.");
+            openList(player, 0);
+            return;
+        }
+
+        ItemDefinition updated;
+        try {
+            String displayName = current.displayName();
+            String material = current.material();
+            String technology = current.requiredTechnologyId();
+            int maxStack = current.maxStackSize();
+
+            switch (prompt) {
+                case EDIT_DISPLAY_NAME -> {
+                    if (value.isBlank() || value.length() > 64) {
+                        requestInput(player, prompt, "§cO nome deve ter entre 1 e 64 caracteres. Digite novamente:");
+                        return;
+                    }
+                    displayName = value;
+                }
+                case EDIT_MATERIAL -> {
+                    Material selected = Material.matchMaterial(value);
+                    if (selected == null || selected.isAir() || !selected.isItem()) {
+                        requestInput(player, prompt, "§cMaterial inválido. Digite um material que seja item:");
+                        return;
+                    }
+                    material = selected.name();
+                }
+                case EDIT_TECHNOLOGY -> {
+                    if (value.equalsIgnoreCase("none")) {
+                        technology = null;
+                    } else {
+                        TechnologyDefinition selected = api.getTechnology(value).orElse(null);
+                        if (selected == null) {
+                            requestInput(player, prompt, "§cPesquisa inexistente. Digite um ID existente ou none:");
+                            return;
+                        }
+                        technology = selected.id();
+                    }
+                }
+                case EDIT_MAX_STACK -> {
+                    try {
+                        maxStack = Integer.parseInt(value);
+                    } catch (NumberFormatException exception) {
+                        requestInput(player, prompt, "§cDigite um número entre 1 e 64:");
+                        return;
+                    }
+                    if (maxStack < 1 || maxStack > 64) {
+                        requestInput(player, prompt, "§cDigite um número entre 1 e 64:");
+                        return;
+                    }
+                }
+                default -> throw new IllegalArgumentException("Prompt de edição inválido.");
+            }
+
+            updated = new ItemDefinition(current.id(), displayName, material, current.lore(),
+                    current.customModelData(), maxStack, current.categoryId(), technology);
+            if (!api.overrideItem(updated)) {
+                throw new IllegalStateException("O item deixou de estar registrado.");
+            }
+        } catch (RuntimeException exception) {
+            player.sendMessage("§cAlteração não aplicada: " + exception.getMessage());
+            editingItems.remove(player.getUniqueId());
+            openItem(player, current, 0);
+            return;
+        }
+
+        editingItems.remove(player.getUniqueId());
+        player.sendMessage("§aItem atualizado: §f" + updated.id());
+        openItem(player, updated, 0);
     }
 
     private void saveDraft(Player player, Draft draft) {
@@ -424,7 +533,14 @@ final class SlimeCustomizerMenu implements Listener {
         if (event.getView().getTopInventory().getHolder() instanceof MenuHolder) event.setCancelled(true);
     }
 
-    private enum ChatPrompt { ID, DISPLAY_NAME, MATERIAL, TECHNOLOGY, MAX_STACK }
+    private enum ChatPrompt {
+        ID, DISPLAY_NAME, MATERIAL, TECHNOLOGY, MAX_STACK,
+        EDIT_DISPLAY_NAME, EDIT_MATERIAL, EDIT_TECHNOLOGY, EDIT_MAX_STACK;
+
+        private boolean isEdit() {
+            return name().startsWith("EDIT_");
+        }
+    }
 
     private static final class Draft {
         private String id;

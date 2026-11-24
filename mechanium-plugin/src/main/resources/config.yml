@@ -159,12 +159,7 @@ modules:
     enabled: true
   electric-spawners:
     enabled: true
-  fast-fluids:
-  # Tank storage is measured in millibuckets; 1,000 mB = 1 bucket.
-  tank-capacity-mb: 16000
-  transfer-mb-per-cycle: 250
-
-machines:
+  fast-machines:
     enabled: true
   hardcore-slimefun:
     enabled: true
@@ -223,6 +218,11 @@ machines:
     enabled: true
   emc-exchange:
     enabled: true
+
+fluids:
+  # Tank storage is measured in millibuckets; 1,000 mB = 1 bucket.
+  tank-capacity-mb: 16000
+  transfer-mb-per-cycle: 250
 
 machines:
   wear:

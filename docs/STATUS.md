@@ -2,8 +2,8 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** máquinas, energia, fluidos tipados, estufa inicial e editor de itens/receitas do Slime Customizer implementados no código; CI da ampliação de receitas em execução; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer de itens/receitas shapeless implementados. O CI do commit anterior aprovou 118 testes; a ampliação do assistente de receitas ainda aguarda CI. Paper/Purpur ainda não testados.  
+**Fase atual:** máquinas, energia, fluidos tipados, estufa inicial e editor de itens/receitas do Slime Customizer implementados; CI Java 21/Maven aprovado; teste em servidor real pendente
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless implementados. CI #45510790964 aprovou 119 testes; o commit documental final também passou no CI #45510951756. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`

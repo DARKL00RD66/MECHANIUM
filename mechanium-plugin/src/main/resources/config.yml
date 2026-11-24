@@ -208,7 +208,7 @@ modules:
     enabled: true
   fn-amplifications:
     enabled: true
-  geyser-heads:
+  head-collection:
     enabled: true
   slime-customizer:
     enabled: true

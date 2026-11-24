@@ -30,8 +30,10 @@ final class GreenhouseModule extends AbstractBuiltinModule {
                 List.of("&8Insumo de cultivo hidropônico abstrato"), 0, 64, "greenhouse_goods", "hydroponic_systems"));
         registerItem(api, new ItemDefinition("hydroponic_tray", "&aBandeja hidropônica", "MANGROVE_ROOTS",
                 List.of("&8Suporte para cultivo sem solo"), 0, 32, "greenhouse_goods", "hydroponic_systems"));
-        registerItem(api, new ItemDefinition("climate_controller", "&bControlador climático", "DAYLIGHT_DETECTOR",
-                List.of("&8Componente de controle ambiental da estufa"), 0, 16, "greenhouse_goods", "controlled_environment_farming"));
+        registerItem(api, new ItemDefinition("climate_controller", "&bControlador climático", "DISPENSER",
+                List.of("&8Controla o crescimento de cultivos próximos",
+                        "&7Requer energia de uma rede MECHANIUM",
+                        "&7Não quebra nem substitui blocos"), 0, 1, "greenhouse_goods", "controlled_environment_farming"));
         registerRecipe(api, new RecipeDefinition("greenhouse_glazing_recipe", RecipeDefinition.Type.SHAPED,
                 "greenhouse_glazing", 4, List.of("GGG", "G G", "GGG"), Map.of('G', "GLASS"), "controlled_environment_farming"));
         registerRecipe(api, new RecipeDefinition("nutrient_solution_recipe", RecipeDefinition.Type.SHAPELESS,
@@ -40,7 +42,8 @@ final class GreenhouseModule extends AbstractBuiltinModule {
                 "hydroponic_tray", 1, List.of("III", "SCS", "III"),
                 Map.of('I', "IRON_INGOT", 'S', "SMOOTH_STONE", 'C', "mechanium:nutrient_solution"), "hydroponic_systems"));
         registerRecipe(api, new RecipeDefinition("climate_controller_recipe", RecipeDefinition.Type.SHAPED,
-                "climate_controller", 1, List.of("RGR", "GCG", "RGR"),
-                Map.of('R', "REDSTONE", 'G', "GLASS", 'C', "COPPER_INGOT"), "controlled_environment_farming"));
+                "climate_controller", 1, List.of("RGR", "GCD", "RGR"),
+                Map.of('R', "REDSTONE", 'G', "GLASS", 'C', "COPPER_INGOT", 'D', "DISPENSER"),
+                "controlled_environment_farming"));
     }
 }

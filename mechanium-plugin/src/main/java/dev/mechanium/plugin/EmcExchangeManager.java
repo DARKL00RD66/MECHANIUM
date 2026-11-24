@@ -33,7 +33,6 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,14 +66,14 @@ final class EmcExchangeManager implements Listener, AutoCloseable {
     };
     private static final NamespacedKey ITEM_ID = new NamespacedKey("mechanium", "item_id");
 
-    private final JavaPlugin plugin;
+    private final MechaniumPlugin plugin;
     private final MechaniumApi api;
     private final Connection connection;
     private final NamespacedKey machineIdKey;
     private final NamespacedKey ownerKey;
     private final Map<String, Long> itemValues = new LinkedHashMap<>();
 
-    EmcExchangeManager(JavaPlugin plugin, MechaniumApi api, Path databaseFile,
+    EmcExchangeManager(MechaniumPlugin plugin, MechaniumApi api, Path databaseFile,
                        ConfigurationSection configuration) throws SQLException {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.api = Objects.requireNonNull(api, "api");
@@ -402,48 +401,6 @@ final class EmcExchangeManager implements Listener, AutoCloseable {
 
     private boolean ledgerCredit(UUID playerId, String itemKey, long unitValue, long totalValue) {
         return creditAndLearn(playerId, itemKey, unitValue, totalValue);
-    }
-
-    private boolean creditAndLearn(UUID playerId, String itemKey, long unitValue, long totalValue) {
-        synchronized (connection) {
-            try {
-                ensurePlayer(playerId);
-                connection.setAutoCommit(false);
-                try {
-                    try (PreparedStatement credit = connection.prepareStatement("""
-                            UPDATE emc_player_balances
-                            SET balance = balance + ?
-                            WHERE player_uuid = ? AND balance <= ?
-                            """)) {
-                        credit.setLong(1, totalValue);
-                        credit.setString(2, playerId.toString());
-                        credit.setLong(3, Long.MAX_VALUE - totalValue);
-                        if (credit.executeUpdate() != 1) {
-                            connection.rollback();
-                            return false;
-                        }
-                    }
-                    try (PreparedStatement learn = connection.prepareStatement("""
-                            INSERT OR IGNORE INTO emc_player_learned_items(player_uuid, item_key, unit_value)
-                            VALUES (?, ?, ?)
-                            """)) {
-                        learn.setString(1, playerId.toString());
-                        learn.setString(2, itemKey);
-                        learn.setLong(3, unitValue);
-                        learn.executeUpdate();
-                    }
-                    connection.commit();
-                    return true;
-                } catch (SQLException | RuntimeException exception) {
-                    connection.rollback();
-                    throw exception;
-                } finally {
-                    connection.setAutoCommit(true);
-                }
-            } catch (SQLException exception) {
-                throw storageFailure("converter itens em EMC", exception);
-            }
-        }
     }
 
     private void openMaterializer(Player player, String machineId, int tier, int requestedPage) {

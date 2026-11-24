@@ -12,7 +12,7 @@ O projeto seguirá a sequência de snapshots definida para chegar à primeira ve
 
 ## Marco atual
 
-A linha atual documentada é `0.7.4.01-SNAPSHOT`. Correções pequenas devem avançar o sufixo incremental seguindo a convenção adotada no marco vigente; novos conjuntos de funcionalidades podem abrir um novo marco. Preserve snapshots e artefatos anteriores. Antes de publicar uma nova versão, confira todos os POMs, o addon de exemplo, README, changelog e workflow.
+A linha atual documentada é `0.7.4.02-SNAPSHOT`. Correções pequenas devem avançar o sufixo incremental seguindo a convenção adotada no marco vigente; novos conjuntos de funcionalidades podem abrir um novo marco. Preserve snapshots e artefatos anteriores. Antes de publicar uma nova versão, confira todos os POMs, o addon de exemplo, README, changelog e workflow.
 
 ## Sincronização obrigatória
 

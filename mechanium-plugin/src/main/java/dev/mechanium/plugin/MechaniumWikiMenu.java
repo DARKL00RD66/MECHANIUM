@@ -121,9 +121,10 @@ final class MechaniumWikiMenu implements Listener {
             int slot = SLOTS[i];
             holder.inventory.setItem(slot, item(machineItem == null ? Material.DISPENSER : icon(machineItem.material()),
                     "§6" + entry.displayName(), List.of(
-                            "§7Entrada: §f" + ingredientLabel(entry.inputId()) + " x" + entry.inputAmount(),
-                            "§7Saída: §f" + itemName(entry.outputItemId()) + " x" + entry.outputAmount(),
+                            "§7Entradas: §f" + machineInputsSummary(entry),
+                            "§7Saídas: §f" + machineOutputsSummary(entry),
                             "§7Ciclo: §f" + formatTicks(entry.processingTicks()),
+                            "§7Energia/operação: §f" + energyCostLabel(entry.energyCostPerOperation()),
                             "§aClique para ver detalhes."
                     )));
             holder.actions.put(slot, p -> openMachineDetail(p, entry, page));
@@ -216,15 +217,22 @@ final class MechaniumWikiMenu implements Listener {
         ItemDefinition machineItem = api.getItem(entry.machineItemId()).orElse(null);
         holder.inventory.setItem(13, item(machineItem == null ? Material.DISPENSER : icon(machineItem.material()),
                 "§6" + entry.displayName(), List.of("§7Item de máquina: §f" + entry.machineItemId())));
-        holder.inventory.setItem(22, item(Material.BOOK, "§fFicha técnica", List.of(
-                "§7Identificador: §8" + entry.id(),
-                "§7Bloco-base: §f" + entry.blockMaterial(),
-                "§7Entrada: §f" + ingredientLabel(entry.inputId()) + " x" + entry.inputAmount(),
-                "§7Saída: §f" + itemName(entry.outputItemId()) + " x" + entry.outputAmount(),
-                "§7Tempo por ciclo: §f" + formatTicks(entry.processingTicks()),
-                "§7Pesquisa necessária: §f" + entry.requiredTechnologyId(),
-                "§8O runtime atual utiliza um dispenser, uma entrada e uma saída."
-        )));
+
+        List<String> details = new ArrayList<>();
+        details.add("§7Identificador: §8" + entry.id());
+        details.add("§7Bloco-base: §f" + entry.blockMaterial());
+        details.add("§bEntradas:");
+        entry.inputs().forEach(input -> details.add("§7• §f" + ingredientLabel(input.itemId())
+                + " x" + input.amount()));
+        details.add("§aProdutos:");
+        entry.outputs().forEach(output -> details.add("§7• §f" + itemName(output.itemId())
+                + " x" + output.amount()));
+        details.add("§7Tempo por ciclo: §f" + formatTicks(entry.processingTicks()));
+        details.add("§7Energia por operação: §f" + energyCostLabel(entry.energyCostPerOperation()));
+        details.add("§7Pesquisa necessária: §f" + entry.requiredTechnologyId());
+        details.add("§8Slots 1–6 recebem os ingredientes; 7–9 armazenam os produtos.");
+
+        holder.inventory.setItem(22, item(Material.BOOK, "§fFicha técnica", details));
         button(holder, 45, Material.ARROW, "§eVoltar às máquinas", List.of(), p -> openMachines(p, page));
         button(holder, 49, Material.BARRIER, "§cFechar", List.of(), Player::closeInventory);
         open(player, holder);
@@ -239,6 +247,24 @@ final class MechaniumWikiMenu implements Listener {
                     .forEach(c -> counts.merge(recipe.ingredients().get((char) c), 1, Integer::sum)));
         }
         return counts;
+    }
+
+    private String machineInputsSummary(MachineDefinition machine) {
+        String summary = machine.inputs().stream().limit(2)
+                .map(input -> ingredientLabel(input.itemId()) + " x" + input.amount())
+                .collect(java.util.stream.Collectors.joining(", "));
+        return machine.inputs().size() > 2 ? summary + ", +" + (machine.inputs().size() - 2) : summary;
+    }
+
+    private String machineOutputsSummary(MachineDefinition machine) {
+        String summary = machine.outputs().stream().limit(2)
+                .map(output -> itemName(output.itemId()) + " x" + output.amount())
+                .collect(java.util.stream.Collectors.joining(", "));
+        return machine.outputs().size() > 2 ? summary + ", +" + (machine.outputs().size() - 2) : summary;
+    }
+
+    private String energyCostLabel(int energyCost) {
+        return energyCost == 0 ? "Não exige energia" : energyCost + " unidades";
     }
 
     private String ingredientLabel(String ingredient) {

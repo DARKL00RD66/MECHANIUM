@@ -31,6 +31,6 @@ final class AquacultureModule extends AbstractBuiltinModule {
         registerRecipe(api, new RecipeDefinition("fish_fertilizer_recipe", RecipeDefinition.Type.SHAPELESS, "fish_fertilizer", 2, List.of(), Map.of('F', "ROTTEN_FLESH", 'K', "KELP", 'B', "BONE_MEAL"), "aquaculture_processing"));
         registerRecipe(api, new RecipeDefinition("aquaculture_crate_recipe", RecipeDefinition.Type.SHAPED, "aquaculture_crate", 1, List.of("PPP", "P P", "PPP"), Map.of('P', "OAK_PLANKS"), "aquaculture_processing"));
         registerRecipe(api, new RecipeDefinition("aquaculture_hatchery_recipe", RecipeDefinition.Type.SHAPED, "aquaculture_hatchery", 1, List.of("INI", "FDF", "III"), Map.of('I', "IRON_INGOT", 'N', "NAUTILUS_SHELL", 'F', "FISHING_ROD", 'D', "DISPENSER"), "aquaculture_processing"));
-        registerMachine(api, new MachineDefinition("aquaculture_hatchery", "Incubadora aquícola", "aquaculture_hatchery", "DISPENSER", "mechanium:aquaculture_feed", 2, "fish_fertilizer", 1, 1600, "aquaculture_processing"));
+        registerMachine(api, new MachineDefinition("aquaculture_hatchery", "Incubadora aquícola", "aquaculture_hatchery", "DISPENSER", "mechanium:aquaculture_feed", 2, "fish_fertilizer", 1, 1600, 1, "aquaculture_processing"));
     }
 }

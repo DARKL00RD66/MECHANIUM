@@ -91,7 +91,7 @@ public final class IndustriaAddon implements MechaniumAddon {
 
 Use IDs estáveis e únicos para categorias, itens, receitas, máquinas, tecnologias e drops. Todo conteúdo tecnológico deve declarar era e, quando necessário, pré-requisitos. Não contorne o serviço central de progressão ao fabricar, usar itens ou operar máquinas.
 
-Para itens e receitas personalizados, use os tipos de definição da API e registre-os pelo contexto do addon. A documentação técnica completa está em [Addons externos](../ADDONS_EXTERNOS.md).
+Para itens e receitas personalizados, use os tipos de definição da API e registre-os pelo contexto do addon. A API também oferece `overrideItem(ItemDefinition)` para substituir uma definição de item existente: a alteração é persistida em transação e rejeitada se invalidar o bloco de uma máquina, quantidade de resultado/insumo de máquina, resultado de receita ou drop. O editor Slime Customizer usa essa operação para editar itens criados por administradores. A documentação técnica completa está em [Addons externos](../ADDONS_EXTERNOS.md).
 
 ## 6. Propriedade transacional do conteúdo
 
@@ -109,13 +109,14 @@ A documentação da API descreve eventos públicos para:
 - desbloqueio de tecnologia;
 - registro de categoria, item e receita;
 - registro de drop de criatura;
-- registro de máquina.
+- registro de máquina;
+- registro de fluido tipado.
 
 Os eventos são síncronos; listeners devem respeitar a thread principal do servidor. Remova listeners e tarefas em `onDisable`.
 
 ## 8. Máquinas e drops
 
-A API permite registrar máquinas com item, bloco-base, entrada, quantidade, saída, quantidade, tempo em ticks e tecnologia. O runtime genérico atual trabalha com dispenser, primeiro espaço como entrada e último como saída. Não há múltiplos insumos, múltiplas saídas, fila ou distribuição universal de energia no contrato atual.
+A API permite registrar máquinas com 1–6 tipos de insumo e 1–3 produtos, tempo em ticks, tecnologia e custo energético por operação. O runtime atual usa dispenser, seis slots de entrada e três de saída. Filas, paralelismo e tipos adicionais de bloco ainda não estão implementados.
 
 A API também permite registrar drops adicionais por tipo de entidade, item MECHANIUM, intervalo de quantidade, chance de 0 a 1 e tecnologia opcional. Os drops vanilla não são removidos.
 

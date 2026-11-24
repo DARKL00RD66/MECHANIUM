@@ -241,6 +241,36 @@ class SqliteDataStoreTest {
     }
 
 
+
+    @Test
+    void moduleOwnerCanBeRenamedWithoutDeletingRegisteredContent() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("module-owner-rename.db"), Logger.getLogger("test"))) {
+            store.saveCategory(new ContentCategory("head_goods", "Head Collection", "Preserved content"));
+            store.saveItem(new ItemDefinition("head_token", "Head Token", "PAPER",
+                    List.of(), 0, 64, "head_goods", null));
+
+            store.beginContentTransaction();
+            store.reconcileContentOwner("module:geyser-heads", Map.of(
+                    "category", Set.of("head_goods"),
+                    "item", Set.of("head_token")));
+            store.commitContentTransaction();
+
+            store.beginContentTransaction();
+            store.migrateContentOwner("module:geyser-heads", "module:head-collection");
+            store.commitContentTransaction();
+
+            store.beginContentTransaction();
+            Map<String, Set<String>> removed = store.pruneInactiveContentOwners(
+                    Set.of("module:head-collection"));
+            store.commitContentTransaction();
+
+            assertTrue(removed.isEmpty());
+            assertEquals(List.of("head_goods"), store.loadCategories().stream().map(ContentCategory::id).toList());
+            assertEquals(List.of("head_token"), store.loadItems().stream().map(ItemDefinition::id).toList());
+        }
+    }
+
     @Test
     void migrationFromSchemaThreeAdoptsOnlyExistingLegacyDefinitions() throws Exception {
         Path database = directory.resolve("legacy-v3.db");

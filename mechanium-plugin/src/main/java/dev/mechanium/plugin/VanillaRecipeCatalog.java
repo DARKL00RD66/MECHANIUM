@@ -151,9 +151,9 @@ final class VanillaRecipeCatalog {
     private static boolean isMythicOutput(String material, String path) {
         return containsAny(material, "ENCHANTING_TABLE", "BEACON", "BREWING_STAND",
                 "ENDER_CHEST", "CONDUIT", "END_CRYSTAL", "END_ROD", "DRAGON_BREATH",
-                "NETHER_STAR", "TOTEM_OF_UNDYING", "ENCHANTED_GOLDEN_APPLE")
+                "NETHER_STAR", "TOTEM_OF_UNDYING", "ENCHANTED_GOLDEN_APPLE", "ENCHANTED_BOOK", "NETHER_BRICK")
                 || containsAny(path, "enchant", "brewing_stand", "beacon", "ender_chest",
-                "conduit", "end_crystal", "dragon_breath", "nether_star", "totem");
+                "conduit", "end_crystal", "dragon_breath", "nether_star", "totem", "enchanted_book", "nether_brick");
     }
 
     private static boolean isModernOutput(String material, String path) {

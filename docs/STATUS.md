@@ -3,7 +3,7 @@
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
 **Fase atual:** fundação de máquinas, energia e fluidos implementada no código; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v8, conduítes energéticos, carga de baterias preservada, redes indexadas por chunk e tanques de fluido tipado implementados. CI #45504509829 aprovou 97 testes, mais a compilação do addon de exemplo; inclui a preservação do volume no item de tanque. Paper/Purpur ainda não testados.  
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v9, API pública de fluidos tipados, conduítes energéticos, carga de baterias preservada, redes indexadas por chunk e tanques de fluido tipado implementados. CI #45505906156 aprovou 107 testes, mais a compilação do addon de exemplo; inclui a API de fluidos tipados e a preservação do volume no item de tanque. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -13,7 +13,7 @@
 - API pública para eras, tecnologias, progressão, módulos e addons.
 - Registro persistente de categorias, itens, receitas, máquinas e regras de drops.
 - Definições de máquinas multi-entrada/multi-saída (1–6 entradas e 1–3 saídas), com runtime de dispensador e buffers dedicados.
-- Persistência SQLite com schema versionado até a versão 8; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
+- Persistência SQLite com schema versionado até a versão 9, incluindo registros de fluidos/recipientes e ownership; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
 - Criação de `ItemStack` com identificador PDC, lore, modelo customizado e limite de pilha configurável.
 - Receitas Bukkit nativas (shaped e shapeless), incluindo ingredientes MECHANIUM exatos.
 - Verificação central de tecnologia ao fabricar, usar, consumir e posicionar itens personalizados.
@@ -88,7 +88,7 @@
 
 - O runtime de máquinas usa dispenser com seis slots de entrada e três de saída; cada definição suporta até seis tipos de ingrediente e três produtos. Filas e processamento paralelo ainda não existem.
 - O sistema energético usa conduítes HOPPER identificados, até 256 nós por rede, propriedade por UUID e somente chunks carregados. Geradores distribuem carga entre baterias conectadas; máquinas debitam o custo definido em sua MachineDefinition. Baterias preservam a carga ao serem desmontadas e recolocadas. Geradores, tubos e conduítes industriais mantêm índices de nós em chunks carregados, evitando varreduras globais recorrentes.
-- O catálogo de receitas não inclui processos cujo resultado não esteja no registro de receitas suportado (por exemplo, operações especiais de bancada e cozimento em fogueira); itens sem receita registrada não recebem desbloqueio por crafting.\n- O sistema de fluidos guarda volumes tipados em mB no PDC dos tanques: água purificada e refrigerante, sem mistura, com 16.000 mB de capacidade padrão e transferência de 250 mB por ciclo. Não há suporte a fluidos vanilla, válvulas/bombas ou API pública para addons registrarem novos fluidos.
+- O sistema de fluidos guarda volumes tipados em mB no PDC dos tanques; módulos e addons podem registrar fluidos e recipientes pela API pública. Não há ainda suporte a fluidos vanilla, válvulas ou bombas; os exemplos padrão são água purificada e refrigerante, com 16.000 mB por tanque e transferência de 250 mB por ciclo.
 - O Simple Storage conecta somente nós adjacentes pelas faces e limita cada rede a 64 depósitos.
 - SFCalc calcula materiais, não valores monetários, e não altera o sistema de economia do servidor.
 - Habilidades de kits/ferramentas são utilitárias e simples; não há árvore de atributos ou durabilidade customizada.
@@ -138,7 +138,7 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 ## Expansão 0.7.3.00-SNAPSHOT
 
 - **FN Amplifications:** núcleos, bobinas, módulos e estação de amplificação; a estação usa o runtime genérico com buffers multi-entrada/multi-saída.
-- **Head Collection:** fichas cosméticas, cabeças de coleção e expositores locais; não exige nem integra serviços externos.
+- **Head Collection:** fichas cosméticas, cabeças de coleção e expositores locais; não usa Geyser/GeyserMC, Floodgate, Bedrock nem integração de plataforma externa. IDs legados são mantidos apenas por compatibilidade de dados.
 - **Slime Customizer:** páginas de modelo, projetos em branco, ferramenta e catálogo de conteúdo; a interface administrativa completa de criação/edição permanece pendente.
 - **Industrial Chemistry:** reagentes abstratos, resina, fibra sintética e misturador industrial; não simula processos químicos reais.
 - **Mining Automation:** componentes fictícios de prospecção e módulo minerador com montadora; não implementa extração autônoma de blocos nesta etapa.

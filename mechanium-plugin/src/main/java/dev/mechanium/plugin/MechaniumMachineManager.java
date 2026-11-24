@@ -2,6 +2,8 @@ package dev.mechanium.plugin;
 
 import dev.mechanium.api.MechaniumApi;
 import dev.mechanium.api.model.MachineDefinition;
+import dev.mechanium.api.model.MachineIngredient;
+import dev.mechanium.api.model.MachineProduct;
 import org.bukkit.Bukkit;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -48,8 +50,10 @@ import java.util.UUID;
  * and one output slot. Machine identity, owner and progress live in block PDC.
  */
 final class MechaniumMachineManager implements Listener {
-    private static final int INPUT_SLOT = 0;
-    private static final int OUTPUT_SLOT = 8;
+    private static final int FIRST_INPUT_SLOT = 0;
+    private static final int LAST_INPUT_SLOT = 5;
+    private static final int FIRST_OUTPUT_SLOT = 6;
+    private static final int LAST_OUTPUT_SLOT = 8;
 
     private final JavaPlugin plugin;
     private final MechaniumApi api;
@@ -122,7 +126,7 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
         loadedMachines.put(key(block.getLocation()), block.getLocation());
-        event.getPlayer().sendMessage(Component.text(definition.displayName() + " instalada. Entrada no primeiro espaço; saída no último.", NamedTextColor.GREEN));
+        event.getPlayer().sendMessage(Component.text(definition.displayName() + " instalada. Slots 1–6: entradas; slots 7–9: saídas.", NamedTextColor.GREEN));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -221,8 +225,8 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
         if (rawSlot < topSize) {
-            if (rawSlot == INPUT_SLOT) return;
-            if (rawSlot == OUTPUT_SLOT && event.getCurrentItem() != null
+            if (isInputSlot(rawSlot)) return;
+            if (isOutputSlot(rawSlot) && event.getCurrentItem() != null
                     && !event.getCurrentItem().getType().isAir()
                     && (event.getCursor() == null || event.getCursor().getType().isAir())
                     && (event.getClick().isLeftClick() || event.getClick().isRightClick()
@@ -236,7 +240,7 @@ final class MechaniumMachineManager implements Listener {
         Location location = event.getView().getTopInventory().getLocation();
         if (location == null || machineState(location.getBlock()).isEmpty()) return;
         int topSize = event.getView().getTopInventory().getSize();
-        if (event.getRawSlots().stream().anyMatch(slot -> slot < topSize && slot != INPUT_SLOT)) {
+        if (event.getRawSlots().stream().anyMatch(slot -> slot < topSize && !isInputSlot(slot))) {
             event.setCancelled(true);
         }
     }
@@ -330,20 +334,25 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
         if (!api.canUseTechnology(owner, definition.requiredTechnologyId())
-                || !api.canUseItem(owner, definition.machineItemId())
-                || !api.canUseItem(owner, definition.outputItemId())) return;
+                || !api.canUseItem(owner, definition.machineItemId())) return;
+
+        for (MachineIngredient ingredient : definition.inputs()) {
+            if (ingredient.itemId().startsWith("mechanium:")
+                    && !api.canUseItem(owner, ingredient.itemId().substring(10))) return;
+        }
+        for (MachineProduct product : definition.outputs()) {
+            if (!api.canUseItem(owner, product.itemId())) return;
+        }
 
         int wear = dispenser.getPersistentDataContainer().getOrDefault(wearKey, PersistentDataType.INTEGER, 0);
         if (wearEnabled() && wear >= maximumWear()) return;
 
         Inventory inventory = dispenser.getInventory();
-        ItemStack input = inventory.getItem(INPUT_SLOT);
-        if (!matchesInput(input, definition.inputId()) || input.getAmount() < definition.inputAmount()) {
+        Map<Integer, Integer> inputPlan = planInputConsumption(inventory, definition.inputs());
+        if (inputPlan == null) {
             setProgress(dispenser, 0);
             return;
         }
-        if (definition.inputId().startsWith("mechanium:")
-                && !api.canUseItem(owner, definition.inputId().substring(10))) return;
 
         int progress = Math.max(0, dispenser.getPersistentDataContainer()
                 .getOrDefault(progressKey, PersistentDataType.INTEGER, 0));
@@ -354,12 +363,9 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
 
-        ItemStack output = api.createItemStack(definition.outputItemId(), definition.outputAmount()).orElse(null);
-        if (output == null) return;
-        ItemStack existing = inventory.getItem(OUTPUT_SLOT);
-        if (existing != null && !existing.getType().isAir()
-                && (!existing.isSimilar(output)
-                    || existing.getAmount() + output.getAmount() > existing.getMaxStackSize())) {
+        ItemStack[] outputPlan = planOutputs(inventory, definition.outputs());
+        if (outputPlan == null) {
+            // Preserve completed progress while output slots are full.
             setProgress(dispenser, definition.processingTicks());
             return;
         }
@@ -370,21 +376,9 @@ final class MechaniumMachineManager implements Listener {
             return;
         }
 
-        int remaining = input.getAmount() - definition.inputAmount();
-        if (remaining < 0) {
-            setProgress(dispenser, 0);
-            return;
-        }
-        if (remaining == 0) inventory.setItem(INPUT_SLOT, null);
-        else {
-            input.setAmount(remaining);
-            inventory.setItem(INPUT_SLOT, input);
-        }
-
-        if (existing == null || existing.getType().isAir()) inventory.setItem(OUTPUT_SLOT, output);
-        else {
-            existing.setAmount(existing.getAmount() + output.getAmount());
-            inventory.setItem(OUTPUT_SLOT, existing);
+        applyInputConsumption(inventory, inputPlan);
+        for (int i = 0; i < outputPlan.length; i++) {
+            inventory.setItem(FIRST_OUTPUT_SLOT + i, outputPlan[i]);
         }
         setProgress(dispenser, 0);
         recordIndustrialImpact(dispenser.getWorld(), owner);
@@ -393,6 +387,81 @@ final class MechaniumMachineManager implements Listener {
                     Math.min(maximumWear(), wear + wearPerOperation()));
         }
         dispenser.update(true, false);
+    }
+
+    private Map<Integer, Integer> planInputConsumption(Inventory inventory, List<MachineIngredient> ingredients) {
+        Map<Integer, Integer> consumption = new java.util.LinkedHashMap<>();
+        for (MachineIngredient ingredient : ingredients) {
+            int remaining = ingredient.amount();
+            for (int slot = FIRST_INPUT_SLOT; slot <= LAST_INPUT_SLOT && remaining > 0; slot++) {
+                ItemStack candidate = inventory.getItem(slot);
+                if (!matchesInput(candidate, ingredient.itemId())) continue;
+                int alreadyReserved = consumption.getOrDefault(slot, 0);
+                int available = candidate.getAmount() - alreadyReserved;
+                if (available <= 0) continue;
+                int taken = Math.min(available, remaining);
+                consumption.put(slot, alreadyReserved + taken);
+                remaining -= taken;
+            }
+            if (remaining > 0) return null;
+        }
+        return consumption;
+    }
+
+    private void applyInputConsumption(Inventory inventory, Map<Integer, Integer> consumption) {
+        for (Map.Entry<Integer, Integer> entry : consumption.entrySet()) {
+            ItemStack remaining = inventory.getItem(entry.getKey()).clone();
+            int amount = remaining.getAmount() - entry.getValue();
+            if (amount <= 0) inventory.setItem(entry.getKey(), null);
+            else {
+                remaining.setAmount(amount);
+                inventory.setItem(entry.getKey(), remaining);
+            }
+        }
+    }
+
+    private ItemStack[] planOutputs(Inventory inventory, List<MachineProduct> products) {
+        ItemStack[] planned = new ItemStack[LAST_OUTPUT_SLOT - FIRST_OUTPUT_SLOT + 1];
+        for (int i = 0; i < planned.length; i++) {
+            ItemStack current = inventory.getItem(FIRST_OUTPUT_SLOT + i);
+            planned[i] = current == null || current.getType().isAir() ? null : current.clone();
+        }
+
+        for (MachineProduct product : products) {
+            ItemStack template = api.createItemStack(product.itemId(), product.amount()).orElse(null);
+            if (template == null) return null;
+            int remaining = template.getAmount();
+
+            for (int slot = 0; slot < planned.length && remaining > 0; slot++) {
+                ItemStack current = planned[slot];
+                if (current == null || !current.isSimilar(template)) continue;
+                int available = current.getMaxStackSize() - current.getAmount();
+                if (available <= 0) continue;
+                int inserted = Math.min(available, remaining);
+                current.setAmount(current.getAmount() + inserted);
+                remaining -= inserted;
+            }
+
+            for (int slot = 0; slot < planned.length && remaining > 0; slot++) {
+                if (planned[slot] != null) continue;
+                int inserted = Math.min(template.getMaxStackSize(), remaining);
+                ItemStack stack = template.clone();
+                stack.setAmount(inserted);
+                planned[slot] = stack;
+                remaining -= inserted;
+            }
+
+            if (remaining > 0) return null;
+        }
+        return planned;
+    }
+
+    private boolean isInputSlot(int slot) {
+        return slot >= FIRST_INPUT_SLOT && slot <= LAST_INPUT_SLOT;
+    }
+
+    private boolean isOutputSlot(int slot) {
+        return slot >= FIRST_OUTPUT_SLOT && slot <= LAST_OUTPUT_SLOT;
     }
 
     private boolean wearEnabled() {

@@ -64,6 +64,27 @@ class BuiltinModulesTest {
     }
 
     @Test
+    void customHistoricalTechnologyDistributionKeepsAntiquityFocusedOnFoundations() {
+        Map<String, dev.mechanium.api.model.TechnologyDefinition> technologies = new HashMap<>();
+        for (var module : BuiltinModules.create()) {
+            if (!(module instanceof AbstractBuiltinModule builtin)) continue;
+            for (var technology : builtin.technologies()) {
+                technologies.put(technology.id(), technology);
+            }
+        }
+
+        Set<String> ancientTechnologies = technologies.values().stream()
+                .filter(technology -> technology.requiredEraId().equals("ancient"))
+                .map(dev.mechanium.api.model.TechnologyDefinition::id)
+                .collect(Collectors.toSet());
+
+        assertEquals(Set.of("bronze_metallurgy", "irrigation_systems", "masonry_techniques"),
+                ancientTechnologies);
+        assertEquals("renaissance", technologies.get("basic_mechanics").requiredEraId());
+        assertEquals("industrial_revolution", technologies.get("steam_power").requiredEraId());
+    }
+
+    @Test
     void everyCrossModuleTechnologyPrerequisiteHasAnExplicitModuleDependency() {
         var modules = BuiltinModules.create();
         Map<String, String> technologyOwners = new HashMap<>();

@@ -59,6 +59,20 @@ class BuiltinModulesTest {
     }
 
     @Test
+    void legacyGeyserHeadsAreOnlyMigratedAndNeverRegisteredAsAnIntegration() {
+        var modules = BuiltinModules.create();
+        var headCollection = modules.stream()
+                .filter(module -> module.id().equals("head-collection"))
+                .findFirst()
+                .orElseThrow();
+
+        assertTrue(headCollection.optional());
+        assertEquals(Set.of("storage"), headCollection.dependencies());
+        assertFalse(modules.stream().anyMatch(module -> module.id().equals("geyser-heads")),
+                "The retired Geyser-named module must not return to the built-in catalogue.");
+    }
+
+    @Test
     void allBuiltinModuleDependenciesResolveWithoutCycles() {
         assertDoesNotThrow(() -> ModuleManager.orderByDependencies(BuiltinModules.create()));
     }

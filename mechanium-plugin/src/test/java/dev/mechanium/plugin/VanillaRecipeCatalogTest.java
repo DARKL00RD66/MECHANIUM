@@ -42,6 +42,13 @@ class VanillaRecipeCatalogTest {
     }
 
     @Test
+    void redstoneDustIsElectricalRatherThanPrimitiveStone() {
+        assertEquals("electrification", VanillaRecipeCatalog.recommendedEraId("redstone", Material.REDSTONE));
+        assertEquals("electrification", VanillaRecipeCatalog.recommendedEraId("redstone_block", Material.REDSTONE_BLOCK));
+        assertEquals("ancient", VanillaRecipeCatalog.recommendedEraId("stone", Material.STONE));
+    }
+
+    @Test
     void electricalInfrastructureBelongsToElectrification() {
         assertEquals("electrification", VanillaRecipeCatalog.recommendedEraId("redstone_lamp", Material.REDSTONE_LAMP));
         assertEquals("electrification", VanillaRecipeCatalog.recommendedEraId("repeater", Material.REPEATER));

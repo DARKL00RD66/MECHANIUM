@@ -59,7 +59,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 | `better-reactor` | Gerador cristalino fictício que abastece a rede de baterias conectada por faces/conduítes; abstração de jogo, não simulação técnica real. |
 | `material-generators` | Oito geradores passivos, com baú superior e intervalo configurável (200 ticks por padrão). |
 | `water-treatment` | Cartuchos, células de água purificada e refrigerante; os tanques armazenam os dois fluidos por volume tipado, sem misturá-los. |
-| `greenhouse` | Painéis de estufa, solução nutritiva e bandejas hidropônicas. Parcial: não equivale a crescimento de culturas customizadas automatizado. |
+| `greenhouse` | Painéis, solução nutritiva, bandejas hidropônicas e controlador climático funcional. O `greenhouse_controller` dá um estágio extra de crescimento após o crescimento normal, em plantas `Ageable` dentro do raio configurado, com energia da rede do proprietário. Ainda parcial: sem hidroponia automatizada, colheita automática ou culturas customizadas. |
 | `industrial-recycling` | Sucata mista, materiais separados e componentes de triagem/reciclagem. |
 | `ore-chunks` | Fragmentos de ferro, cobre e ouro e lotes minerais compactados. |
 | `aquaculture` | Ração aquícola, rede de criação, fertilizante reaproveitado, caixote de pescado e incubadora. |
@@ -88,7 +88,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 - O runtime comum de dispenser aceita até seis tipos de entrada e três produtos por lote; o custo energético por operação fica na definição de cada máquina.
 - A API pública `FluidDefinition`/`FluidContainerDefinition` permite registrar novos fluidos e recipientes com volumes em mB. Água purificada e refrigerante são exemplos padrão; fluidos vanilla, válvulas e bombas ainda não são suportados.
 - Ter itens, categorias e receitas cadastrados não significa que o módulo possua automação completa ou todas as funcionalidades de uma referência externa.
-- Greenhouse e Agriculture ainda não representam um simulador completo de culturas customizadas.
+- Greenhouse e Agriculture ainda não representam um simulador completo de culturas customizadas. O controlador atual apenas acelera um estágio de crescimento em plantas compatíveis e não colhe nem replanta.
 - Mining Automation possui componentes e receitas, mas não mineração autônoma de blocos.
 - Head Collection é um catálogo cosmético local. MECHANIUM não inclui nem exige Geyser e não implementa uma camada Bedrock.
 - Slime Customizer ainda não tem editor administrativo visual completo.

@@ -77,8 +77,18 @@ vanilla-recipe-gates:
     'minecraft:repeater': electrification
     'minecraft:comparator': electrification
     'minecraft:redstone_lamp': electrification
-    'minecraft:observer': modern
-    'minecraft:blast_furnace': modern
+    'minecraft:observer': digital_age
+    'minecraft:blast_furnace': industrial_revolution
+    'minecraft:copper_ingot': ancient
+    'minecraft:iron_ingot': medieval
+    'minecraft:gold_ingot': medieval
+    'minecraft:compass': renaissance
+    'minecraft:spyglass': renaissance
+    'minecraft:diamond_pickaxe': renaissance
+    'minecraft:lightning_rod': electrification
+    'minecraft:sculk_sensor': information_age
+    'minecraft:shulker_box': space_age
+    'minecraft:netherite_ingot': speculative_future
     'minecraft:smoker': modern
     'minecraft:daylight_detector': modern
     'minecraft:crafter': digital_age

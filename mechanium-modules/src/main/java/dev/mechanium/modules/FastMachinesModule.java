@@ -49,9 +49,9 @@ final class FastMachinesModule extends AbstractBuiltinModule {
 
         registerMachine(api, new MachineDefinition("rapid_press_machine", "Prensa de alta velocidade",
                 "rapid_press", "DISPENSER", "IRON_INGOT", 1,
-                "mechanical_parts", 2, 20, "fast_machinery"));
+                "mechanical_parts", 2, 20, 2, "fast_machinery"));
         registerMachine(api, new MachineDefinition("rapid_coil_winder_machine", "Enrolador rápido de bobinas",
                 "rapid_coil_winder", "DISPENSER", "COPPER_INGOT", 1,
-                "copper_coil", 2, 40, "fast_machinery"));
+                "copper_coil", 2, 40, 2, "fast_machinery"));
     }
 }

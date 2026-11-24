@@ -457,6 +457,11 @@ final class EnergyGridManager implements Listener {
         return block.getWorld().getUID() + ":" + block.getX() + ":" + block.getY() + ":" + block.getZ();
     }
 
+    private String key(Location location) {
+        return location.getWorld().getUID() + ":" + location.getBlockX() + ":"
+                + location.getBlockY() + ":" + location.getBlockZ();
+    }
+
     private record EnergyNetwork(List<Block> batteries, boolean complete) { }
     private record ChargeChange(Block block, int oldCharge, int newCharge) { }
 }

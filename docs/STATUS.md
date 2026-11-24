@@ -1,6 +1,9 @@
 # Estado real do projeto
 
-**Versão:** 0.7.4.02-SNAPSHOT  
+**Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
+**Base auditada:** 0.7.4.02-SNAPSHOT  
+**Fase atual:** planejamento 0.9.9 registrado; fundação industrial em início  
+**Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 

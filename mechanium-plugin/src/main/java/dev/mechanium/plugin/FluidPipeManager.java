@@ -33,6 +33,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.Set;
 
 /** Transfers MECHANIUM purified-water items between owner-matched tanks through connected hopper pipes. */
@@ -45,6 +48,7 @@ final class FluidPipeManager implements Listener {
     private final MechaniumApi api;
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
+    private final Map<String, Location> loadedPipes = new HashMap<>();
     private BukkitTask task;
 
     FluidPipeManager(JavaPlugin plugin, MechaniumApi api) {
@@ -55,6 +59,9 @@ final class FluidPipeManager implements Listener {
     }
 
     void start() {
+        for (World world : Bukkit.getWorlds()) {
+            for (Chunk chunk : world.getLoadedChunks()) registerChunkPipes(chunk);
+        }
         task = Bukkit.getScheduler().runTaskTimer(plugin, this::transferNetworks, 40L, 40L);
     }
 
@@ -63,6 +70,7 @@ final class FluidPipeManager implements Listener {
             task.cancel();
             task = null;
         }
+        loadedPipes.clear();
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -82,7 +90,9 @@ final class FluidPipeManager implements Listener {
         if (!tile.update(true, false)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage("§cNão foi possível registrar o componente de fluidos.");
+            return;
         }
+        if ("fluid_pipe".equals(id)) loadedPipes.put(key(block.getLocation()), block.getLocation());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -109,8 +119,10 @@ final class FluidPipeManager implements Listener {
                 .orElseGet(() -> new ItemStack(block.getType()));
         Location drop = block.getLocation().add(0.5, 0.5, 0.5);
         event.setDropItems(false);
+        String locationKey = key(block.getLocation());
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (event.isCancelled() || !block.getType().isAir()) return;
+            loadedPipes.remove(locationKey);
             for (ItemStack item : contents) block.getWorld().dropItemNaturally(drop, item);
             block.getWorld().dropItemNaturally(drop, recovered);
         });
@@ -165,22 +177,52 @@ final class FluidPipeManager implements Listener {
 
     private void transferNetworks() {
         Set<String> processed = new HashSet<>();
-        for (World world : Bukkit.getWorlds()) {
-            for (Chunk chunk : world.getLoadedChunks()) {
-                for (BlockState state : chunk.getTileEntities()) {
-                    if (!(state instanceof TileState tile)
-                            || !"fluid_pipe".equals(tile.getPersistentDataContainer()
-                            .get(itemIdKey, PersistentDataType.STRING))) continue;
-                    String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
-                    if (owner == null || processed.contains(key(state.getBlock()))) continue;
-                    Network network = collectNetwork(state.getBlock(), owner);
-                    if (network.pipes().isEmpty()) continue;
-                    boolean overlapsProcessedNetwork = network.pipes().stream().anyMatch(processed::contains);
-                    processed.addAll(network.pipes());
-                    if (!overlapsProcessedNetwork && network.complete()) moveOnePurifiedWater(network.tanks());
-                }
+        for (Location location : new ArrayList<>(loadedPipes.values())) {
+            World world = location.getWorld();
+            if (world == null || !world.isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+                loadedPipes.remove(key(location));
+                continue;
+            }
+            BlockState state = location.getBlock().getState();
+            if (!(state instanceof TileState tile)
+                    || !"fluid_pipe".equals(tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING))) {
+                loadedPipes.remove(key(location));
+                continue;
+            }
+            String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+            if (owner == null || processed.contains(key(state.getBlock()))) continue;
+            Network network = collectNetwork(state.getBlock(), owner);
+            if (network.pipes().isEmpty()) continue;
+            boolean overlapsProcessedNetwork = network.pipes().stream().anyMatch(processed::contains);
+            processed.addAll(network.pipes());
+            if (!overlapsProcessedNetwork && network.complete()) moveOnePurifiedWater(network.tanks());
+        }
+    }
+
+    private void registerChunkPipes(Chunk chunk) {
+        for (BlockState state : chunk.getTileEntities()) {
+            if (!(state instanceof TileState tile)) continue;
+            if ("fluid_pipe".equals(tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING))) {
+                loadedPipes.put(key(state.getLocation()), state.getLocation());
             }
         }
+    }
+
+    @EventHandler
+    public void onFluidChunkLoad(org.bukkit.event.world.ChunkLoadEvent event) {
+        registerChunkPipes(event.getChunk());
+    }
+
+    @EventHandler
+    public void onFluidChunkUnload(org.bukkit.event.world.ChunkUnloadEvent event) {
+        int chunkX = event.getChunk().getX();
+        int chunkZ = event.getChunk().getZ();
+        UUID worldId = event.getWorld().getUID();
+        loadedPipes.entrySet().removeIf(entry -> {
+            Location location = entry.getValue();
+            return location.getWorld() != null && location.getWorld().getUID().equals(worldId)
+                    && (location.getBlockX() >> 4) == chunkX && (location.getBlockZ() >> 4) == chunkZ;
+        });
     }
 
     private Network collectNetwork(Block firstPipe, String owner) {
@@ -310,6 +352,11 @@ final class FluidPipeManager implements Listener {
 
     private String key(Block block) {
         return block.getWorld().getUID() + ":" + block.getX() + ":" + block.getY() + ":" + block.getZ();
+    }
+
+    private String key(Location location) {
+        return location.getWorld().getUID() + ":" + location.getBlockX() + ":"
+                + location.getBlockY() + ":" + location.getBlockZ();
     }
 
     private record Network(Set<String> pipes, List<Inventory> tanks, boolean complete) { }

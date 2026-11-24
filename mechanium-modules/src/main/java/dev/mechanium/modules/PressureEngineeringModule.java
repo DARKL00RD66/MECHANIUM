@@ -30,6 +30,6 @@ final class PressureEngineeringModule extends AbstractBuiltinModule {
                 Map.of('I', "IRON_BLOCK", 'P', "PISTON", 'G', "GLASS"),
                 "pressure_engineering"));
         registerMachine(api, new MachineDefinition("pressure_chamber", "Câmara de pressão", "pressure_chamber",
-                "DISPENSER", "IRON_INGOT", 4, "compressed_plate", 1, 2400, "pressure_engineering"));
+                "DISPENSER", "IRON_INGOT", 4, "compressed_plate", 1, 2400, 2, "pressure_engineering"));
     }
 }

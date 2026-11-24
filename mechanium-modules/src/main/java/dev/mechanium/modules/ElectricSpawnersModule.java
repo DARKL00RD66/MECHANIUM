@@ -80,15 +80,15 @@ final class ElectricSpawnersModule extends AbstractBuiltinModule {
 
         registerMachine(api, new MachineDefinition("chicken_incubator_machine", "Incubadora de aves",
                 "chicken_incubator", "DISPENSER", "WHEAT_SEEDS", 8,
-                "incubated_chicken_egg", 1, 1_200, "livestock_incubation"));
+                "incubated_chicken_egg", 1, 1_200, 1, "livestock_incubation"));
         registerMachine(api, new MachineDefinition("cow_incubator_machine", "Incubadora bovina",
                 "cow_incubator", "DISPENSER", "HAY_BLOCK", 1,
-                "incubated_cow_egg", 1, 2_400, "livestock_incubation"));
+                "incubated_cow_egg", 1, 2_400, 1, "livestock_incubation"));
         registerMachine(api, new MachineDefinition("pig_incubator_machine", "Incubadora suína",
                 "pig_incubator", "DISPENSER", "CARROT", 8,
-                "incubated_pig_egg", 1, 1_800, "livestock_incubation"));
+                "incubated_pig_egg", 1, 1_800, 1, "livestock_incubation"));
         registerMachine(api, new MachineDefinition("sheep_incubator_machine", "Incubadora ovina",
                 "sheep_incubator", "DISPENSER", "WHEAT", 8,
-                "incubated_sheep_egg", 1, 1_800, "livestock_incubation"));
+                "incubated_sheep_egg", 1, 1_800, 1, "livestock_incubation"));
     }
 }

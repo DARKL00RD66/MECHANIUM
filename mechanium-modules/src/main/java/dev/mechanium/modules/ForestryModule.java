@@ -28,6 +28,6 @@ final class ForestryModule extends AbstractBuiltinModule {
         registerRecipe(api,new RecipeDefinition("tree_resin_recipe",RecipeDefinition.Type.SHAPELESS,"tree_resin",2,List.of(),Map.of('H',"HONEYCOMB",'S',"SLIME_BALL"),"resin_extraction"));
         registerRecipe(api,new RecipeDefinition("treated_planks_recipe",RecipeDefinition.Type.SHAPELESS,"treated_planks",4,List.of(),Map.of('P',"mechanium:wood_pulp",'R',"mechanium:tree_resin",'O',"OAK_PLANKS"),"industrial_sawmilling"));
         registerRecipe(api,new RecipeDefinition("forestry_station_recipe",RecipeDefinition.Type.SHAPELESS,"forestry_station",1,List.of(),Map.of('D',"DISPENSER",'I',"IRON_INGOT",'L',"OAK_LOG"),"industrial_sawmilling"));
-        registerMachine(api,new MachineDefinition("forestry_station","Estação florestal","forestry_station","DISPENSER","OAK_LOG",2,"wood_pulp",2,1200,"industrial_sawmilling"));
+        registerMachine(api,new MachineDefinition("forestry_station","Estação florestal","forestry_station","DISPENSER","OAK_LOG",2,"wood_pulp",2,1200,1,"industrial_sawmilling"));
     }
 }

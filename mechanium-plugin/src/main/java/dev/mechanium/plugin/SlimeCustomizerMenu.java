@@ -3,6 +3,7 @@ package dev.mechanium.plugin;
 import dev.mechanium.api.MechaniumApi;
 import dev.mechanium.api.MechaniumContentRegistrationScope;
 import dev.mechanium.api.model.ItemDefinition;
+import dev.mechanium.api.model.RecipeDefinition;
 import dev.mechanium.api.model.TechnologyDefinition;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -45,12 +46,14 @@ final class SlimeCustomizerMenu implements Listener {
             28, 29, 30, 31, 32, 33, 34, 37, 38, 39, 40, 41, 42, 43
     };
     private static final String USER_ITEM_IDS_PATH = "slime-customizer.user-item-ids";
+    private static final String USER_RECIPE_IDS_PATH = "slime-customizer.user-recipe-ids";
     private static final String CATEGORY_ID = "customizer_user_items";
 
     private final MechaniumPlugin plugin;
     private final JavaPlugin javaPlugin;
     private final MechaniumApi api;
     private final Map<UUID, Draft> drafts = new HashMap<>();
+    private final Map<UUID, RecipeDraft> recipeDrafts = new HashMap<>();
     private final Map<UUID, ItemDefinition> editingItems = new HashMap<>();
     private final Map<UUID, ChatPrompt> prompts = new ConcurrentHashMap<>();
 
@@ -70,6 +73,7 @@ final class SlimeCustomizerMenu implements Listener {
             return;
         }
         drafts.remove(player.getUniqueId());
+        recipeDrafts.remove(player.getUniqueId());
         editingItems.remove(player.getUniqueId());
         prompts.remove(player.getUniqueId());
         openList(player, 0);
@@ -114,6 +118,10 @@ final class SlimeCustomizerMenu implements Listener {
                 "§7Abre o assistente de criação.",
                 "§7Use um ID novo e escolha um material válido."
         ), this::beginCreate);
+        button(holder, 46, Material.BOOKSHELF, "§bReceitas personalizadas", List.of(
+                "§7Criar e remover receitas shapeless.",
+                "§7Até nove ingredientes vanilla ou MECHANIUM."
+        ), p -> openRecipes(p, 0));
         button(holder, 49, Material.ARROW, "§eVoltar ao painel administrativo", List.of(),
                 p -> p.performCommand("mechanium admin hud"));
         if (page + 1 < pageCount) button(holder, 53, Material.ARROW, "§ePróxima página", List.of(),
@@ -249,6 +257,184 @@ final class SlimeCustomizerMenu implements Listener {
                 "§eCriação de item — digite um ID novo (ex.: copper_widget). Digite cancel para voltar.");
     }
 
+    private void openRecipes(Player player, int requestedPage) {
+        List<RecipeDefinition> recipes = configuredRecipes();
+        int pageCount = Math.max(1, (recipes.size() + CONTENT_SLOTS.length - 1) / CONTENT_SLOTS.length);
+        int page = Math.max(0, Math.min(requestedPage, pageCount - 1));
+        MenuHolder holder = create("MECHANIUM • Receitas personalizadas");
+        fillFrame(holder.getInventory());
+        holder.getInventory().setItem(4, item(Material.BOOKSHELF, "§b§lReceitas do Customizer", List.of(
+                "§7Receitas personalizadas: §f" + recipes.size(),
+                "§7Tipo disponível: §fShapeless",
+                "§7Página: §f" + (page + 1) + "§7/§f" + pageCount
+        )));
+
+        int start = page * CONTENT_SLOTS.length;
+        int count = Math.min(CONTENT_SLOTS.length, recipes.size() - start);
+        for (int i = 0; i < count; i++) {
+            RecipeDefinition recipe = recipes.get(start + i);
+            ItemDefinition result = api.getItem(recipe.resultItemId()).orElse(null);
+            Material icon = result == null ? Material.BARRIER : Material.matchMaterial(result.material());
+            ItemStack stack = item(icon == null ? Material.BARRIER : icon,
+                    "§e" + recipe.id(), List.of(
+                            "§7Resultado: §f" + recipe.resultItemId() + " x" + recipe.resultAmount(),
+                            "§7Ingredientes: §f" + recipe.ingredients().size(),
+                            "§7Pesquisa: §f" + Objects.toString(recipe.requiredTechnologyId(), "Nenhuma"),
+                            "§aClique para ver detalhes."
+                    ));
+            int slot = CONTENT_SLOTS[i];
+            holder.getInventory().setItem(slot, stack);
+            holder.actions.put(slot, p -> openRecipe(p, recipe, page));
+        }
+
+        if (page > 0) button(holder, 45, Material.ARROW, "§ePágina anterior", List.of(),
+                p -> openRecipes(p, page - 1));
+        button(holder, 47, Material.WRITABLE_BOOK, "§aCriar receita", List.of(
+                "§7Receita shapeless de até nove ingredientes.",
+                "§7Aceita materiais vanilla e itens MECHANIUM."
+        ), this::beginRecipe);
+        button(holder, 49, Material.ARROW, "§eVoltar aos itens", List.of(), p -> openList(p, 0));
+        if (page + 1 < pageCount) button(holder, 53, Material.ARROW, "§ePróxima página", List.of(),
+                p -> openRecipes(p, page + 1));
+        open(player, holder);
+    }
+
+    private void openRecipe(Player player, RecipeDefinition recipe, int page) {
+        MenuHolder holder = create("MECHANIUM • Receita personalizada");
+        fillFrame(holder.getInventory());
+        holder.getInventory().setItem(13, item(Material.BOOK, "§e" + recipe.id(), List.of(
+                "§7Resultado: §f" + recipe.resultItemId() + " x" + recipe.resultAmount(),
+                "§7Tipo: §fShapeless",
+                "§7Pesquisa: §f" + Objects.toString(recipe.requiredTechnologyId(), "Nenhuma")
+        )));
+        List<String> ingredients = new ArrayList<>();
+        recipe.ingredients().entrySet().stream().sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> ingredients.add("§7• §f" + entry.getValue()));
+        holder.getInventory().setItem(22, item(Material.CRAFTING_TABLE, "§fIngredientes", ingredients));
+        button(holder, 31, Material.BARRIER, "§cRemover receita", List.of(
+                "§7Remove somente esta receita personalizada."
+        ), p -> confirmDeleteRecipe(p, recipe, page));
+        button(holder, 49, Material.ARROW, "§eVoltar às receitas", List.of(), p -> openRecipes(p, page));
+        open(player, holder);
+    }
+
+    private void confirmDeleteRecipe(Player player, RecipeDefinition recipe, int page) {
+        MenuHolder holder = create("MECHANIUM • Confirmar remoção");
+        fillFrame(holder.getInventory());
+        holder.getInventory().setItem(22, item(Material.BARRIER, "§cRemover " + recipe.id() + "?", List.of(
+                "§7Somente a receita será removida."
+        )));
+        button(holder, 29, Material.LIME_CONCRETE, "§aConfirmar remoção", List.of(), p -> {
+            if (deleteRecipe(recipe.id(), p)) openRecipes(p, page);
+        });
+        button(holder, 33, Material.RED_CONCRETE, "§cCancelar", List.of(),
+                p -> openRecipe(p, recipe, page));
+        open(player, holder);
+    }
+
+    private boolean deleteRecipe(String recipeId, Player player) {
+        try (MechaniumContentRegistrationScope scope = api.openContentScope(recipeOwnerId(recipeId))) {
+            scope.commit();
+        } catch (RuntimeException exception) {
+            player.sendMessage("§cNão foi possível remover a receita: " + exception.getMessage());
+            return false;
+        }
+        List<String> ids = configuredRecipeIds();
+        ids.removeIf(id -> id.equalsIgnoreCase(recipeId));
+        plugin.getConfig().set(USER_RECIPE_IDS_PATH, ids);
+        plugin.saveConfig();
+        player.sendMessage("§aReceita personalizada removida: §f" + recipeId);
+        return true;
+    }
+
+    private void beginRecipe(Player player) {
+        recipeDrafts.put(player.getUniqueId(), new RecipeDraft());
+        requestInput(player, ChatPrompt.RECIPE_ID,
+                "§eCriação de receita shapeless — digite um ID único. Digite cancel para voltar.");
+    }
+
+    private void addRecipeIngredient(Player player, RecipeDraft draft, String input) {
+        String ingredient = input.trim();
+        if (ingredient.regionMatches(true, 0, "mechanium:", 0, 10)) {
+            String itemId = ingredient.substring(10).toLowerCase(Locale.ROOT);
+            if (api.getItem(itemId).isEmpty()) {
+                requestInput(player, ChatPrompt.RECIPE_INGREDIENT,
+                        "§cItem MECHANIUM inexistente. Digite outro ingrediente ou done:");
+                return;
+            }
+            ingredient = "mechanium:" + itemId;
+        } else {
+            Material material = Material.matchMaterial(ingredient);
+            if (material == null || material.isAir() || !material.isItem()) {
+                requestInput(player, ChatPrompt.RECIPE_INGREDIENT,
+                        "§cMaterial inválido. Use IRON_INGOT, REDSTONE ou mechanium:item_id:");
+                return;
+            }
+            ingredient = material.name();
+        }
+        if (draft.ingredients.size() >= 9) {
+            finishRecipe(player, draft);
+            return;
+        }
+        draft.ingredients.put((char) ('A' + draft.ingredients.size()), ingredient);
+        requestInput(player, ChatPrompt.RECIPE_INGREDIENT,
+                "§aIngrediente adicionado: §f" + ingredient
+                        + "§7 (" + draft.ingredients.size() + "/9). Digite outro ou done para concluir:");
+    }
+
+    private void finishRecipe(Player player, RecipeDraft draft) {
+        if (draft.ingredients.isEmpty()) {
+            requestInput(player, ChatPrompt.RECIPE_INGREDIENT,
+                    "§cAdicione pelo menos um ingrediente antes de concluir:");
+            return;
+        }
+        RecipeDefinition definition;
+        try {
+            definition = new RecipeDefinition(draft.id, RecipeDefinition.Type.SHAPELESS,
+                    draft.resultItemId, draft.resultAmount, List.of(),
+                    Map.copyOf(draft.ingredients), draft.requiredTechnologyId);
+            List<String> ids = configuredRecipeIds();
+            if (!ids.contains(definition.id())) ids.add(definition.id());
+            try (MechaniumContentRegistrationScope scope = api.openContentScope(recipeOwnerId(definition.id()))) {
+                if (!api.registerRecipe(definition)) {
+                    throw new IllegalStateException("Já existe uma receita com esse ID.");
+                }
+                scope.commit();
+            }
+            plugin.getConfig().set(USER_RECIPE_IDS_PATH, ids);
+            plugin.saveConfig();
+        } catch (RuntimeException exception) {
+            player.sendMessage("§cFalha ao salvar a receita: " + exception.getMessage());
+            recipeDrafts.remove(player.getUniqueId());
+            openRecipes(player, 0);
+            return;
+        }
+        recipeDrafts.remove(player.getUniqueId());
+        player.sendMessage("§aReceita personalizada registrada: §f" + definition.id());
+        openRecipes(player, 0);
+    }
+
+    private List<RecipeDefinition> configuredRecipes() {
+        return configuredRecipeIds().stream()
+                .map(api::getRecipe)
+                .flatMap(java.util.Optional::stream)
+                .sorted(Comparator.comparing(RecipeDefinition::id))
+                .toList();
+    }
+
+    private List<String> configuredRecipeIds() {
+        return new ArrayList<>(plugin.getConfig().getStringList(USER_RECIPE_IDS_PATH).stream()
+                .filter(Objects::nonNull)
+                .map(id -> id.trim().toLowerCase(Locale.ROOT))
+                .filter(id -> id.matches("[a-z0-9][a-z0-9_.-]{1,95}"))
+                .distinct()
+                .toList());
+    }
+
+    static String recipeOwnerId(String recipeId) {
+        return "customizer:recipe:" + recipeId.toLowerCase(Locale.ROOT);
+    }
+
     private void beginEdit(Player player, ItemDefinition definition, ChatPrompt prompt, String message) {
         if (!plugin.hasAdminAccess(player)) {
             player.sendMessage("§cSem permissão.");
@@ -286,9 +472,14 @@ final class SlimeCustomizerMenu implements Listener {
         String value = raw == null ? "" : raw.trim();
         if (value.equalsIgnoreCase("cancel")) {
             drafts.remove(player.getUniqueId());
+            recipeDrafts.remove(player.getUniqueId());
             ItemDefinition editing = editingItems.remove(player.getUniqueId());
             if (editing != null) openItem(player, editing, 0);
             else openList(player, 0);
+            return;
+        }
+        if (prompt.isRecipe()) {
+            handleRecipeInput(player, prompt, value);
             return;
         }
         if (prompt.isEdit()) {
@@ -376,6 +567,83 @@ final class SlimeCustomizerMenu implements Listener {
             player.sendMessage("§cNão foi possível continuar: " + exception.getMessage());
             drafts.remove(player.getUniqueId());
             openList(player, 0);
+        }
+    }
+
+    private void handleRecipeInput(Player player, ChatPrompt prompt, String value) {
+        RecipeDraft draft = recipeDrafts.get(player.getUniqueId());
+        if (draft == null) {
+            player.sendMessage("§cA sessão de criação de receita expirou.");
+            openRecipes(player, 0);
+            return;
+        }
+        try {
+            switch (prompt) {
+                case RECIPE_ID -> {
+                    String id = value.toLowerCase(Locale.ROOT);
+                    if (!id.matches("[a-z0-9][a-z0-9_.-]{1,95}")
+                            || api.getRecipe(id).isPresent()
+                            || configuredRecipeIds().stream().anyMatch(id::equalsIgnoreCase)) {
+                        requestInput(player, prompt, "§cID inválido ou já existente. Digite outro ID:");
+                        return;
+                    }
+                    draft.id = id;
+                    requestInput(player, ChatPrompt.RECIPE_RESULT,
+                            "§eDigite o ID de um item de resultado que já exista no MECHANIUM:");
+                }
+                case RECIPE_RESULT -> {
+                    ItemDefinition result = api.getItem(value.toLowerCase(Locale.ROOT)).orElse(null);
+                    if (result == null) {
+                        requestInput(player, prompt, "§cItem não encontrado. Digite um ID registrado:");
+                        return;
+                    }
+                    draft.resultItemId = result.id();
+                    requestInput(player, ChatPrompt.RECIPE_AMOUNT,
+                            "§eDigite a quantidade de saída (1–" + result.maxStackSize() + "):");
+                }
+                case RECIPE_AMOUNT -> {
+                    int amount;
+                    try { amount = Integer.parseInt(value); }
+                    catch (NumberFormatException exception) {
+                        requestInput(player, prompt, "§cDigite uma quantidade numérica:");
+                        return;
+                    }
+                    ItemDefinition result = api.getItem(draft.resultItemId).orElseThrow();
+                    if (amount < 1 || amount > result.maxStackSize()) {
+                        requestInput(player, prompt, "§cA quantidade deve estar entre 1 e "
+                                + result.maxStackSize() + ":");
+                        return;
+                    }
+                    draft.resultAmount = amount;
+                    requestInput(player, ChatPrompt.RECIPE_TECHNOLOGY,
+                            "§eDigite uma pesquisa existente ou none:");
+                }
+                case RECIPE_TECHNOLOGY -> {
+                    if (value.equalsIgnoreCase("none")) draft.requiredTechnologyId = null;
+                    else {
+                        TechnologyDefinition technology = api.getTechnology(value).orElse(null);
+                        if (technology == null) {
+                            requestInput(player, prompt, "§cPesquisa inexistente. Digite um ID válido ou none:");
+                            return;
+                        }
+                        draft.requiredTechnologyId = technology.id();
+                    }
+                    requestInput(player, ChatPrompt.RECIPE_INGREDIENT,
+                            "§eDigite um ingrediente (ex.: IRON_INGOT ou mechanium:copper_widget); done conclui:");
+                }
+                case RECIPE_INGREDIENT -> {
+                    if (value.equalsIgnoreCase("done")) {
+                        finishRecipe(player, draft);
+                        return;
+                    }
+                    addRecipeIngredient(player, draft, value);
+                }
+                default -> throw new IllegalArgumentException("Etapa de receita inválida.");
+            }
+        } catch (RuntimeException exception) {
+            recipeDrafts.remove(player.getUniqueId());
+            player.sendMessage("§cNão foi possível continuar: " + exception.getMessage());
+            openRecipes(player, 0);
         }
     }
 
@@ -583,6 +851,14 @@ final class SlimeCustomizerMenu implements Listener {
         private String material;
         private String requiredTechnologyId;
         private int maxStackSize;
+    }
+
+    private static final class RecipeDraft {
+        private String id;
+        private String resultItemId;
+        private int resultAmount;
+        private String requiredTechnologyId;
+        private final Map<Character, String> ingredients = new HashMap<>();
     }
 
     private static final class MenuHolder implements InventoryHolder {

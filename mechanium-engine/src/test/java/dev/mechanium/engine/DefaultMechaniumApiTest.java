@@ -399,6 +399,53 @@ class DefaultMechaniumApiTest {
     }
 
     @Test
+    void customizerItemsHaveIndependentOwnershipAndSurviveSelectiveCleanup() throws Exception {
+        var database = directory.resolve("customizer-owned-items.db");
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            try (var scope = api.openContentScope("system:customizer")) {
+                assertTrue(api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                        "customizer_user_items", "Itens personalizados", "Categoria dos itens criados por staff")));
+                scope.commit();
+            }
+
+            var first = new dev.mechanium.api.model.ItemDefinition(
+                    "custom_widget_a", "Widget A", "COPPER_INGOT", List.of(), 0, 64,
+                    "customizer_user_items", null);
+            var second = new dev.mechanium.api.model.ItemDefinition(
+                    "custom_widget_b", "Widget B", "AMETHYST_SHARD", List.of(), 0, 16,
+                    "customizer_user_items", null);
+            try (var scope = api.openContentScope("customizer:item:custom_widget_a")) {
+                assertTrue(api.registerItem(first));
+                scope.commit();
+            }
+            try (var scope = api.openContentScope("customizer:item:custom_widget_b")) {
+                assertTrue(api.registerItem(second));
+                scope.commit();
+            }
+
+            try (var scope = api.openContentScope("customizer:item:custom_widget_a")) {
+                scope.commit();
+            }
+            assertTrue(api.getItem("custom_widget_a").isEmpty());
+            assertTrue(api.getItem("custom_widget_b").isPresent());
+            assertTrue(api.getCategory("customizer_user_items").isPresent());
+
+            DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
+            reloaded.pruneInactiveContentOwners(Set.of(
+                    "system:customizer", "customizer:item:custom_widget_b"));
+            assertTrue(reloaded.getItem("custom_widget_b").isPresent(),
+                    "A listed customizer item must survive startup ownership pruning.");
+            assertTrue(reloaded.getCategory("customizer_user_items").isPresent());
+        }
+
+        try (SqliteDataStore reopened = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            assertEquals(List.of("custom_widget_b"),
+                    reopened.loadItems().stream().map(dev.mechanium.api.model.ItemDefinition::id).toList());
+        }
+    }
+
+    @Test
     void uncommittedContentScopeRestoresMemoryAndDatabase() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(directory.resolve("scope-rollback.db"), Logger.getLogger("test"))) {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);

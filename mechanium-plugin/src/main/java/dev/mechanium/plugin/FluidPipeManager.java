@@ -187,18 +187,16 @@ final class FluidPipeManager implements Listener {
             FluidTankPolicy.FillResult filled = FluidTankPolicy.fill(
                     current, fluidItem.fluidId(), fluidItem.millibucketsPerItem(), tankCapacityMb());
             if (filled.acceptedMb() != fluidItem.millibucketsPerItem()) {
-                player.sendMessage(ComponentMessage.error(current.isEmpty()
-                        ? "O tanque está cheio."
-                        : "O tanque já contém outro fluido ou não tem espaço suficiente."));
+                player.sendMessage("§c" + (current.isEmpty() ? "O tanque está cheio." : "O tanque já contém outro fluido ou não tem espaço suficiente."));
                 return;
             }
             if (!writeTankContents(clicked, filled.contents())) {
-                player.sendMessage(ComponentMessage.error("Não foi possível salvar o volume do tanque."));
+                player.sendMessage("§cNão foi possível salvar o volume do tanque.");
                 return;
             }
             consumeOneFromHand(player, hand);
-            player.sendMessage(ComponentMessage.success("Tanque abastecido: " + filled.contents().fluidId()
-                    + " — " + filled.contents().amountMb() + "/" + tankCapacityMb() + " mB."));
+            player.sendMessage("§aTanque abastecido: " + filled.contents().fluidId()
+                    + " — " + filled.contents().amountMb() + "/" + tankCapacityMb() + " mB.");
             return;
         }
 
@@ -208,7 +206,7 @@ final class FluidPipeManager implements Listener {
             return;
         }
 
-        player.sendMessage(ComponentMessage.info(current.isEmpty()
+        player.sendMessage("§7" + (current.isEmpty()
                 ? "Tanque vazio. Coloque itens de fluido MECHANIUM no inventário do tanque ou use-os diretamente no bloco."
                 : "Tanque: " + current.fluidId() + " — " + current.amountMb() + "/" + tankCapacityMb() + " mB. Agache com a mão vazia para retirar 250 mB."));
     }
@@ -344,11 +342,12 @@ final class FluidPipeManager implements Listener {
     }
 
     private void migrateLegacyTankInventory(Block block) {
-        if (block == null || !(block.getState() instanceof Container container)) return;
+        if (block == null) return;
+        BlockState blockState = block.getState();
+        if (!(blockState instanceof Container container) || !(blockState instanceof TileState tile)) return;
         Inventory inventory = container.getInventory();
         FluidTankContents current = readTankContents(block);
-        boolean inventoryChanged = false;
-        boolean tankChanged = false;
+        boolean changed = false;
 
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             ItemStack stack = inventory.getItem(slot);
@@ -361,6 +360,7 @@ final class FluidPipeManager implements Listener {
                     maxItems * offer.millibucketsPerItem(), tankCapacityMb());
             int consumed = fill.acceptedMb() / offer.millibucketsPerItem();
             if (consumed <= 0) continue;
+
             current = fill.contents();
             int remaining = stack.getAmount() - consumed;
             if (remaining == 0) inventory.setItem(slot, null);
@@ -369,18 +369,11 @@ final class FluidPipeManager implements Listener {
                 left.setAmount(remaining);
                 inventory.setItem(slot, left);
             }
-            inventoryChanged = true;
-            tankChanged = true;
+            changed = true;
         }
 
-        if (tankChanged) {
-            BlockState state = block.getState();
-            if (state instanceof TileState tile) {
-                writeContents(tile, current);
-                tile.update(true, false);
-            }
-        }
-        if (inventoryChanged && container != block.getState()) {
+        if (changed) {
+            writeContents(tile, current);
             container.update(true, false);
         }
     }
@@ -418,27 +411,31 @@ final class FluidPipeManager implements Listener {
 
     private void extractOneFluidUnit(Player player, Block tank, FluidTankContents current) {
         if (current.isEmpty()) {
-            player.sendMessage(ComponentMessage.info("O tanque está vazio."));
+            player.sendMessage("§7O tanque está vazio.");
+            return;
+        }
+        if (current.amountMb() < MILLIBUCKETS_PER_ITEM) {
+            player.sendMessage("§cO tanque não contém volume suficiente para retirar um item (250 mB).");
             return;
         }
         FluidTankPolicy.DrainResult drained = FluidTankPolicy.drain(current, MILLIBUCKETS_PER_ITEM);
-        if (drained.removedMb() == 0) {
-            player.sendMessage(ComponentMessage.error("O tanque não contém volume suficiente para retirar um item."));
+        if (drained.removedMb() != MILLIBUCKETS_PER_ITEM) {
+            player.sendMessage("§cNão foi possível calcular a retirada do fluido.");
             return;
         }
         String outputItemId = outputItemFor(current.fluidId());
         if (outputItemId == null) {
-            player.sendMessage(ComponentMessage.error("Não existe um item de saída configurado para este fluido."));
+            player.sendMessage("§cNão existe um item de saída configurado para este fluido.");
             return;
         }
         ItemStack output = api.createItemStack(outputItemId, 1).orElse(null);
         if (output == null || !writeTankContents(tank, drained.contents())) {
-            player.sendMessage(ComponentMessage.error("Não foi possível retirar o fluido do tanque."));
+            player.sendMessage("§cNão foi possível retirar o fluido do tanque.");
             return;
         }
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(output);
         leftover.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
-        player.sendMessage(ComponentMessage.success("Retirados " + drained.removedMb() + " mB de " + current.fluidId() + "."));
+        player.sendMessage("§aRetirados " + drained.removedMb() + " mB de " + current.fluidId() + ".");
     }
 
     private List<ItemStack> fluidItemsFor(FluidTankContents contents) {
@@ -483,11 +480,13 @@ final class FluidPipeManager implements Listener {
     }
 
     private int tankCapacityMb() {
-        return Math.max(250, plugin.getConfig().getInt("fluids.tank-capacity-mb", DEFAULT_TANK_CAPACITY_MB));
+        int configured = Math.max(250, plugin.getConfig().getInt("fluids.tank-capacity-mb", DEFAULT_TANK_CAPACITY_MB));
+        return configured - configured % MILLIBUCKETS_PER_ITEM;
     }
 
     private int transferRateMb() {
-        return Math.max(250, plugin.getConfig().getInt("fluids.transfer-mb-per-cycle", DEFAULT_TRANSFER_RATE_MB));
+        int configured = Math.max(250, plugin.getConfig().getInt("fluids.transfer-mb-per-cycle", DEFAULT_TRANSFER_RATE_MB));
+        return configured - configured % MILLIBUCKETS_PER_ITEM;
     }
 
     private boolean isPipe(Block block, String owner) {

@@ -106,13 +106,14 @@ final class EnergyGridManager implements Listener {
                 return false;
             }
             tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, newCharge);
+            // Include the current tile before updating so even a failed/partial update is restored.
+            applied.add(new ChargeChange(battery, oldCharge, newCharge));
             if (!tile.update(true, false)) {
                 plugin.getLogger().severe("Falha ao gravar débito de energia em "
                         + locationLabel(battery) + "; revertendo alterações anteriores.");
                 rollbackChargeChanges(applied);
                 return false;
             }
-            applied.add(new ChargeChange(battery, oldCharge, newCharge));
         }
         return true;
     }
@@ -376,13 +377,13 @@ final class EnergyGridManager implements Listener {
                 return;
             }
             tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, newCharge);
+            applied.add(new ChargeChange(battery, oldCharge, newCharge));
             if (!tile.update(true, false)) {
                 plugin.getLogger().severe("Falha ao gravar geração de energia em "
                         + locationLabel(battery) + "; revertendo alterações anteriores.");
                 rollbackChargeChanges(applied);
                 return;
             }
-            applied.add(new ChargeChange(battery, oldCharge, newCharge));
         }
     }
 

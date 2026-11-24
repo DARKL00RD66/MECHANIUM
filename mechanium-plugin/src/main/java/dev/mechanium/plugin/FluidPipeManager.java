@@ -184,6 +184,11 @@ final class FluidPipeManager implements Listener {
 
         if (fluidItem != null) {
             event.setCancelled(true);
+            if (!api.canUseItem(player.getUniqueId(), fluidItem.itemId())
+                    && !player.hasPermission("mechanium.admin")) {
+                player.sendMessage("§cVocê ainda não desbloqueou o uso deste fluido.");
+                return;
+            }
             FluidTankPolicy.FillResult filled = FluidTankPolicy.fill(
                     current, fluidItem.fluidId(), fluidItem.millibucketsPerItem(), tankCapacityMb());
             if (filled.acceptedMb() != fluidItem.millibucketsPerItem()) {
@@ -346,13 +351,21 @@ final class FluidPipeManager implements Listener {
         BlockState blockState = block.getState();
         if (!(blockState instanceof Container container) || !(blockState instanceof TileState tile)) return;
         Inventory inventory = container.getInventory();
+        String ownerText = tileOwner(block);
+        if (ownerText == null) return;
+        UUID owner;
+        try {
+            owner = UUID.fromString(ownerText);
+        } catch (IllegalArgumentException exception) {
+            return;
+        }
         FluidTankContents current = readTankContents(block);
         boolean changed = false;
 
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             ItemStack stack = inventory.getItem(slot);
             FluidItem offer = fluidItem(stack);
-            if (offer == null) continue;
+            if (offer == null || !api.canUseItem(owner, offer.itemId())) continue;
             int room = Math.max(0, tankCapacityMb() - current.amountMb());
             int maxItems = Math.min(stack.getAmount(), room / offer.millibucketsPerItem());
             if (maxItems <= 0) continue;
@@ -428,6 +441,11 @@ final class FluidPipeManager implements Listener {
             player.sendMessage("§cNão existe um item de saída configurado para este fluido.");
             return;
         }
+        if (!api.canUseItem(player.getUniqueId(), outputItemId)
+                && !player.hasPermission("mechanium.admin")) {
+            player.sendMessage("§cVocê ainda não desbloqueou o uso deste fluido.");
+            return;
+        }
         ItemStack output = api.createItemStack(outputItemId, 1).orElse(null);
         if (output == null || !writeTankContents(tank, drained.contents())) {
             player.sendMessage("§cNão foi possível retirar o fluido do tanque.");
@@ -459,9 +477,9 @@ final class FluidPipeManager implements Listener {
         String id = itemId(item);
         if (id == null) return null;
         return switch (id) {
-            case "purified_water" -> new FluidItem("purified_water", MILLIBUCKETS_PER_ITEM);
-            case "purified_water_cell" -> new FluidItem("purified_water", 1_000);
-            case "coolant_cell" -> new FluidItem("industrial_coolant", MILLIBUCKETS_PER_ITEM);
+            case "purified_water" -> new FluidItem(id, "purified_water", MILLIBUCKETS_PER_ITEM);
+            case "purified_water_cell" -> new FluidItem(id, "purified_water", 1_000);
+            case "coolant_cell" -> new FluidItem(id, "industrial_coolant", MILLIBUCKETS_PER_ITEM);
             default -> null;
         };
     }
@@ -543,6 +561,6 @@ final class FluidPipeManager implements Listener {
                 + location.getBlockY() + ":" + location.getBlockZ();
     }
 
-    private record FluidItem(String fluidId, int millibucketsPerItem) { }
+    private record FluidItem(String itemId, String fluidId, int millibucketsPerItem) { }
     private record Network(Set<String> pipes, List<Block> tanks, boolean complete) { }
 }

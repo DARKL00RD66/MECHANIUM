@@ -37,8 +37,8 @@ jobs:
       - name: Upload distributable JAR
         uses: actions/upload-artifact@v4
         with:
-          name: MECHANIUM-0.7.4.01-SNAPSHOT
-          path: mechanium-plugin/target/MECHANIUM-0.7.4.01-SNAPSHOT.jar
+          name: MECHANIUM-0.7.4.02-SNAPSHOT
+          path: mechanium-plugin/target/MECHANIUM-0.7.4.02-SNAPSHOT.jar
           if-no-files-found: error
           retention-days: 30
 

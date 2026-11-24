@@ -82,11 +82,11 @@ Os tanques guardam volume tipado no PDC do bloco, medido em milibuckets (mB). A 
 - `purified_water_cell` representa 1.000 mB de água purificada.
 - `coolant_cell` representa 250 mB de `industrial_coolant`.
 - Um tanque só aceita um fluido por vez; água purificada e refrigerante não podem ser misturados.
-- Clique no tanque com um item de fluido desbloqueado para abastecer. Agache e clique com a mão vazia para retirar 250 mB.
+- Clique no tanque com um item de fluido desbloqueado para abastecer. Agache e clique com a mão vazia para retirar o maior recipiente de saída desbloqueado que caiba no volume disponível; o volume retirado depende do recipiente registrado (por exemplo, 250, 500 ou 1.000 mB).
 - Tubulações são dispensers identificados e conectam tanques do mesmo proprietário por faces. A rede transporta volume, não apenas um item por ciclo.
 - A rede percorre até 128 tubulações indexadas e somente chunks carregados. Não carrega chunks automaticamente.
 - Itens fluidos legados no inventário são convertidos em volume quando o tanque é acessado. Tipo e quantidade são preservados no PDC do item de tanque ao desmontar e recolocar.
-- O runtime ainda não possui válvulas, bombas, lava/água vanilla em tubulações, outros fluidos arbitrários nem API pública para addons registrarem novos fluidos.
+- Módulos e addons podem registrar fluidos customizados e recipientes pela API pública. Ainda não há válvulas, bombas nem transporte de lava/água vanilla por tubulações.
 
 ## 7. Logística industrial
 

@@ -167,47 +167,53 @@ final class EnergyGridManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInteract(PlayerInteractEvent event) {
-        if (event.getClickedBlock() == null || (event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK
-                && event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_AIR)) return;
-        String id = tileItemId(event.getClickedBlock());
+        if (event.getClickedBlock() == null || event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK
+                || event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
+        Block clicked = event.getClickedBlock();
+        String id = tileItemId(clicked);
         if (id == null || !ENERGY_ITEMS.contains(id)) return;
         event.setCancelled(true);
-        BlockState state = event.getClickedBlock().getState();
+
+        Player player = event.getPlayer();
+        String owner = tileOwner(clicked);
+        if (owner != null && !owner.equals(player.getUniqueId().toString())
+                && !player.hasPermission("mechanium.admin")) {
+            player.sendMessage("§cEste componente energético pertence a outro jogador.");
+            return;
+        }
+
+        BlockState state = clicked.getState();
         if (state instanceof TileState tile && "energy_cell".equals(id)) {
             int charge = tile.getPersistentDataContainer().getOrDefault(chargeKey, PersistentDataType.INTEGER, 0);
-            event.getPlayer().sendMessage("§eBateria MECHANIUM: §f" + charge + "§7 / " + BATTERY_CAPACITY + " unidades");
+            player.sendMessage("§eBateria MECHANIUM: §f" + charge + "§7 / " + BATTERY_CAPACITY + " unidades");
+            if (owner != null) sendNetworkSummary(player, clicked, owner);
         } else if (state instanceof TileState reactorTile && "abstract_reactor".equals(id)) {
-            ItemStack hand = event.getPlayer().getInventory().getItemInMainHand();
+            ItemStack hand = player.getInventory().getItemInMainHand();
             if ("reactor_crystal".equals(itemId(hand))) {
-                String owner = reactorTile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
-                if (owner != null && !owner.equals(event.getPlayer().getUniqueId().toString())
-                        && !event.getPlayer().hasPermission("mechanium.admin")) {
-                    event.getPlayer().sendMessage("§cEste gerador pertence a outro jogador.");
-                    return;
-                }
-                if (hand.getAmount() <= 1) event.getPlayer().getInventory().setItemInMainHand(null);
-                else hand.setAmount(hand.getAmount() - 1);
                 reactorTile.getPersistentDataContainer().set(reactorFuelUntilKey, PersistentDataType.LONG,
                         System.currentTimeMillis() + 300_000L);
-                reactorTile.update(true, false);
-                event.getPlayer().sendMessage("§dCristal energético inserido. O gerador produzirá energia por cinco minutos.");
+                if (!reactorTile.update(true, false)) {
+                    player.sendMessage("§cNão foi possível registrar o combustível do gerador.");
+                    return;
+                }
+                if (hand.getAmount() <= 1) player.getInventory().setItemInMainHand(null);
+                else hand.setAmount(hand.getAmount() - 1);
+                player.sendMessage("§dCristal energético inserido. O gerador produzirá energia por cinco minutos.");
             } else {
                 long until = reactorTile.getPersistentDataContainer().getOrDefault(reactorFuelUntilKey,
                         PersistentDataType.LONG, 0L);
                 long remaining = Math.max(0L, (until - System.currentTimeMillis()) / 1000L);
-                event.getPlayer().sendMessage("§dGerador cristalino: §f" + remaining
+                player.sendMessage("§dGerador cristalino: §f" + remaining
                         + "s de combustível restante. §7Use um cristal energético para recarregar.");
             }
+            if (owner != null) sendNetworkSummary(player, clicked, owner);
         } else if ("energy_conduit".equals(id)) {
-            String owner = tileOwner(event.getClickedBlock());
-            event.getPlayer().sendMessage("§bConduíte energético: §7conecta geradores, baterias e máquinas do mesmo proprietário.");
-            if (owner != null && !owner.equals(event.getPlayer().getUniqueId().toString())
-                    && !event.getPlayer().hasPermission("mechanium.admin")) {
-                event.getPlayer().sendMessage("§7Rede pertencente a outro jogador; não é possível retirar energia dela.");
-            }
+            player.sendMessage("§bConduíte energético: §7conecta geradores, baterias e máquinas do mesmo proprietário.");
+            if (owner != null) sendNetworkSummary(player, clicked, owner);
         } else if ("wind_rotor".equals(id) || "solar_cell".equals(id)) {
-            event.getPlayer().sendMessage("§eGerador MECHANIUM: §f" + (id.equals("wind_rotor") ? "eólico" : "solar")
-                    + " §7— conecte a bateria diretamente ou use conduítes energéticos.");
+            player.sendMessage("§eGerador MECHANIUM: §f" + (id.equals("wind_rotor") ? "eólico" : "solar")
+                    + " §7— produção depende das condições do mundo.");
+            if (owner != null) sendNetworkSummary(player, clicked, owner);
         }
     }
 
@@ -366,13 +372,34 @@ final class EnergyGridManager implements Listener {
         }
     }
 
+    private void sendNetworkSummary(Player player, Block anchor, String owner) {
+        EnergyNetwork network = collectConnectedEnergyNetwork(anchor, owner);
+        if (!network.complete()) {
+            player.sendMessage("§cRede energética incompleta: limite de " + MAX_NETWORK_NODES
+                    + " nós excedido. Reduza o tamanho da rede.");
+            return;
+        }
+        int stored = network.batteries().stream().mapToInt(this::batteryCharge).sum();
+        int capacity = network.batteries().size() * BATTERY_CAPACITY;
+        player.sendMessage("§bRede energética: §f" + network.nodes() + " nós §7| §f"
+                + network.batteries().size() + " bateria(s)");
+        player.sendMessage("§eCarga armazenada: §f" + stored + " / " + capacity + " unidades");
+        if (network.batteries().isEmpty()) {
+            player.sendMessage("§7Nenhuma bateria conectada. Conecte pelo menos uma bateria para armazenar energia.");
+        }
+    }
+
     private EnergyNetwork collectConnectedEnergyNetwork(Block anchor, String owner) {
         ArrayDeque<Block> queue = new ArrayDeque<>();
         Set<String> visited = new HashSet<>();
         List<Block> batteries = new ArrayList<>();
-        for (BlockFace face : FACES) {
-            Block adjacent = adjacentLoaded(anchor, face);
-            if (adjacent != null && isEnergyLink(adjacent, owner)) queue.addLast(adjacent);
+        if (isEnergyLink(anchor, owner)) {
+            queue.addLast(anchor);
+        } else {
+            for (BlockFace face : FACES) {
+                Block adjacent = adjacentLoaded(anchor, face);
+                if (adjacent != null && isEnergyLink(adjacent, owner)) queue.addLast(adjacent);
+            }
         }
 
         while (!queue.isEmpty() && visited.size() < MAX_NETWORK_NODES) {
@@ -386,7 +413,7 @@ final class EnergyGridManager implements Listener {
                 }
             }
         }
-        return new EnergyNetwork(List.copyOf(batteries), queue.isEmpty());
+        return new EnergyNetwork(List.copyOf(batteries), visited.size(), queue.isEmpty());
     }
 
     private boolean isEnergyLink(Block block, String owner) {
@@ -462,6 +489,6 @@ final class EnergyGridManager implements Listener {
                 + location.getBlockY() + ":" + location.getBlockZ();
     }
 
-    private record EnergyNetwork(List<Block> batteries, boolean complete) { }
+    private record EnergyNetwork(List<Block> batteries, int nodes, boolean complete) { }
     private record ChargeChange(Block block, int oldCharge, int newCharge) { }
 }

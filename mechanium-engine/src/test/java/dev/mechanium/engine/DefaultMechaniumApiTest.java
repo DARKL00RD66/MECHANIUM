@@ -478,6 +478,9 @@ class DefaultMechaniumApiTest {
             assertTrue(api.overrideItem(updated));
             assertEquals(updated, api.getItem("custom_widget").orElseThrow());
             DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
+            reloaded.registerEra(new EraDefinition("ancient", "Antiguidade", 0));
+            reloaded.registerTechnology(new TechnologyDefinition(
+                    "basic_crafting", "Artesanato básico", "ancient", 0, List.of()));
             assertEquals(updated, reloaded.getItem("custom_widget").orElseThrow(),
                     "Customizer item edits must survive a server restart.");
             assertTrue(reloaded.validateContent().isEmpty());

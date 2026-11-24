@@ -56,6 +56,8 @@ public interface MechaniumApi {
     Optional<ContentCategory> getCategory(String categoryId);
     Collection<ContentCategory> getCategories();
     boolean registerItem(ItemDefinition item);
+    /** Replaces an already registered item after validating all machine, recipe, fluid and drop references. */
+    default boolean overrideItem(ItemDefinition item) { return false; }
     Optional<ItemDefinition> getItem(String itemId);
     Collection<ItemDefinition> getItems();
     Optional<ItemStack> createItemStack(String itemId, int amount);

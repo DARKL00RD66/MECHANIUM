@@ -27,6 +27,6 @@ final class TextileIndustryModule extends AbstractBuiltinModule {
         registerRecipe(api,new RecipeDefinition("industrial_fabric_recipe",RecipeDefinition.Type.SHAPELESS,"industrial_fabric",2,List.of(),Map.of('F',"mechanium:cotton_fiber",'L',"LOOM"),"mechanized_textiles"));
         registerRecipe(api,new RecipeDefinition("reinforced_fabric_recipe",RecipeDefinition.Type.SHAPELESS,"reinforced_fabric",1,List.of(),Map.of('F',"mechanium:industrial_fabric",'I',"IRON_INGOT"),"technical_fabrics"));
         registerRecipe(api,new RecipeDefinition("textile_loom_recipe",RecipeDefinition.Type.SHAPELESS,"textile_loom",1,List.of(),Map.of('D',"DISPENSER",'S',"STRING",'I',"IRON_INGOT"),"mechanized_textiles"));
-        registerMachine(api,new MachineDefinition("textile_loom","Tear industrial","textile_loom","DISPENSER","mechanium:cotton_fiber",2,"industrial_fabric",1,1600,"mechanized_textiles"));
+        registerMachine(api,new MachineDefinition("textile_loom","Tear industrial","textile_loom","DISPENSER","mechanium:cotton_fiber",2,"industrial_fabric",1,1600,1,"mechanized_textiles"));
     }
 }

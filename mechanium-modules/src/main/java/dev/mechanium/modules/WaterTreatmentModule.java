@@ -1,6 +1,8 @@
 package dev.mechanium.modules;
 
 import dev.mechanium.api.model.ContentCategory;
+import dev.mechanium.api.model.FluidDefinition;
+import dev.mechanium.api.model.FluidContainerDefinition;
 import dev.mechanium.api.model.ItemDefinition;
 import dev.mechanium.api.model.RecipeDefinition;
 import dev.mechanium.api.model.TechnologyDefinition;
@@ -31,6 +33,12 @@ final class WaterTreatmentModule extends AbstractBuiltinModule {
                 List.of("&8Fluido de resfriamento abstrato para máquinas"), 0, 16, "water_utility_goods", "industrial_water_recycling"));
         registerItem(api, new ItemDefinition("water_reclaimer", "&9Recuperador hídrico", "CAULDRON",
                 List.of("&8Componente para recirculação de água industrial"), 0, 16, "water_utility_goods", "industrial_water_recycling"));
+
+        registerFluid(api, new FluidDefinition("purified_water", "Água purificada", "basic_water_filtration",
+                List.of(new FluidContainerDefinition("purified_water", 250, true, true),
+                        new FluidContainerDefinition("purified_water_cell", 1_000, true, false))));
+        registerFluid(api, new FluidDefinition("industrial_coolant", "Refrigerante industrial", "industrial_water_recycling",
+                List.of(new FluidContainerDefinition("coolant_cell", 250, true, true))));
         registerRecipe(api, new RecipeDefinition("water_filter_cartridge_recipe", RecipeDefinition.Type.SHAPED,
                 "water_filter_cartridge", 2, List.of("PPP", "C C", "PPP"),
                 Map.of('P', "PAPER", 'C', "CHARCOAL"), "basic_water_filtration"));

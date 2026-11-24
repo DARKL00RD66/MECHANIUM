@@ -36,7 +36,7 @@ O MECHANIUM é independente do Slimefun e do Historical Ages. Os nomes abaixo s�
 | FastMachines | Filas, desempenho e limites de processamento | Prensa e enrolador acelerados usando o runtime compartilhado; filas e paralelismo pendentes |
 | MapJammers | Interferência/jamming não será implementada; cartografia civil pode ser avaliada separadamente | Excluído o mecanismo de interferência |
 | SensibleToolbox | Ferramentas utilitárias e qualidade de vida | Kit de campo e kit de manutenção com habilidades próprias |
-| GeyserHeads | Compatibilidade de apresentação com clientes Bedrock/Geyser | Planejado |
+| Head Collection | Catálogo local de itens cosméticos e expositores | Implementado, sem integração externa |
 
 ## Funcionalidades ampliadas nesta etapa (0.3.0–0.4.0)
 
@@ -101,7 +101,7 @@ Implementações nativas e independentes; não carregam JARs de terceiros. Os qu
 ## Expansão nativa 0.7.3.00-SNAPSHOT
 
 - **FN Amplifications:** componentes de amplificação e estação de processamento; primeira etapa de conteúdo, sem upgrades dinâmicos de velocidade/energia nas máquinas existentes.
-- **Geyser Heads:** catálogo cosmético local e expositores. Não declarar compatibilidade de skins com Geyser/Bedrock até existir teste específico.
+- **Head Collection:** catálogo local de cabeças cosméticas, fichas e expositores. O plugin não inclui nem exige Geyser e não oferece integração com clientes Bedrock.
 - **SlimeCustomizer:** modelos, projetos e catálogo inicial; editor administrativo visual ainda pendente.
 - **Industrial Chemistry:** cadeia fictícia de reagentes e polímeros para progressão industrial.
 - **Mining Automation:** componentes de prospecção e montagem de módulos; mineração automática de mundo não está incluída.

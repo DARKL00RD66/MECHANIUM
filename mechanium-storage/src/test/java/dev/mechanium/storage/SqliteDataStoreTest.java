@@ -148,7 +148,7 @@ class SqliteDataStoreTest {
 
         try (SqliteDataStore reopened = new SqliteDataStore(database, Logger.getLogger("test"))) {
             assertEquals(List.of(machine), List.copyOf(reopened.loadMachines()));
-            MachineDefinition restored = reopened.loadMachines().getFirst();
+            MachineDefinition restored = reopened.loadMachines().iterator().next();
             assertEquals(machine.inputs(), restored.inputs());
             assertEquals(machine.outputs(), restored.outputs());
             assertEquals(List.of(drop), List.copyOf(reopened.loadMobDrops()));
@@ -177,7 +177,7 @@ class SqliteDataStoreTest {
 
         try (SqliteDataStore migrated = new SqliteDataStore(database, Logger.getLogger("test"))) {
             assertEquals(1, migrated.loadMachines().size());
-            MachineDefinition restored = migrated.loadMachines().getFirst();
+            MachineDefinition restored = migrated.loadMachines().iterator().next();
             assertEquals(legacy.inputs(), restored.inputs());
             assertEquals(legacy.outputs(), restored.outputs());
             assertEquals("IRON_INGOT", restored.inputId());

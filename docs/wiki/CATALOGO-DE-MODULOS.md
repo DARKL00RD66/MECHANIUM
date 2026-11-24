@@ -73,7 +73,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 
 | ID | Finalidade e estado |
 |---|---|
-| `geyser-heads` | Fichas e itens cosméticos de cabeça/coleção e expositores locais. Não possui sincronização de skins nem integração específica com Geyser/Bedrock. |
+| `head-collection` | Fichas cosméticas, cabeças de coleção e expositores locais, sem dependências externas. |
 | `slime-customizer` | Modelos, projetos em branco, ferramenta e catálogo de conteúdo. O editor administrativo visual completo ainda está pendente. |
 
 ## Módulos opcionais
@@ -85,11 +85,11 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 
 ## Limitações comuns a vários módulos
 
-- A maioria das máquinas usa o runtime comum de dispenser com uma entrada e uma saída por ciclo.
+- O runtime comum de dispenser suporta seis slots de entrada e três slots de saída; cada definição aceita até seis tipos de ingrediente e três produtos por lote.
 - Ter itens, categorias e receitas cadastrados não significa que o módulo possua automação completa ou todas as funcionalidades de uma referência externa.
 - Greenhouse e Agriculture ainda não representam um simulador completo de culturas customizadas.
 - Mining Automation possui componentes e receitas, mas não mineração autônoma de blocos.
-- Geyser Heads não sincroniza skins e não adiciona suporte Bedrock; o alvo atual do plugin é Java/Paper/Purpur 1.21.11.
+- Head Collection é um catálogo cosmético local. MECHANIUM não inclui nem exige Geyser e não implementa uma camada Bedrock.
 - Slime Customizer ainda não tem editor administrativo visual completo.
 - Rail Freight registra itens e receitas de carga, não um sistema ferroviário autônomo completo.
 - Validação real de cada cadeia precisa ocorrer em Paper/Purpur 1.21.11.

@@ -12,6 +12,7 @@ public interface MechaniumContentStore {
     String RECIPE = "recipe";
     String MOB_DROP = "mob_drop";
     String MACHINE = "machine";
+    String FLUID = "fluid";
 
     void saveCategory(ContentCategory category);
     Collection<ContentCategory> loadCategories();
@@ -23,6 +24,10 @@ public interface MechaniumContentStore {
     Collection<MobDropDefinition> loadMobDrops();
     void saveMachine(MachineDefinition machine);
     Collection<MachineDefinition> loadMachines();
+    default void saveFluid(FluidDefinition fluid) {
+        throw new UnsupportedOperationException("Typed fluids are not supported by this content store.");
+    }
+    default Collection<FluidDefinition> loadFluids() { return java.util.List.of(); }
 
     /** Begins a synchronous transaction for one module/addon registration callback. */
     void beginContentTransaction();

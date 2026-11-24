@@ -11,7 +11,7 @@
 - Interface de interação das máquinas informa entradas, saídas, duração e custo energético.
 - Módulo cosmético renomeado para Head Collection; integração Geyser/Bedrock removida, com migração de config e ownership preservando os IDs legados.
 - Corrigidos IDs de produtos das máquinas de moinho e conservadora que impediam seu registro correto.
-- CI #45504038521 aprovou Java 21/Maven `clean verify` com 97 testes e compilação do addon de exemplo. A preservação do volume de fluido no item de tanque está em um commit posterior e aguarda sua própria validação do CI.
+- CI #45504509829 aprovou Java 21/Maven `clean verify` com 97 testes e compilação do addon de exemplo; o commit validado inclui a preservação do tipo/volume de fluido no PDC do item de tanque.
 - Tanques de fluido armazenam volume em mB no PDC: 16.000 mB por padrão, transferência de 250 mB/ciclo, água purificada e refrigerante, sem mistura.
 - Itens de fluido legados no inventário do tanque são migrados para volume; tipo e volume também ficam preservados no item de tanque recuperado.
 - Índices dos tubos de fluido e conduítes industriais evitam varreduras recorrentes de todos os chunks.

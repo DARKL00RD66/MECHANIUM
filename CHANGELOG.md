@@ -3,10 +3,10 @@
 ## 0.7.4.02-SNAPSHOT
 - Reclassificado o catálogo automático de receitas vanilla para distribuir melhor os itens pelas eras; receitas não reconhecidas deixam de cair automaticamente na Antiguidade e usam Renascimento como faixa neutra para revisão administrativa.
 - Criadas classificações específicas para materiais primitivos, metalurgia medieval, navegação/óptica renascentista, maquinário industrial, eletrificação, automação digital, conteúdo mítico, Era Espacial e Futuro Especulativo.
-- Adicionada migração única das sugestões automáticas antigas; valores `off` e escolhas divergentes da sugestão anterior são preservados. O log alerta que escolhas manuais iguais ao antigo default não podem ser distinguidas.
+- Adicionada migração única das sugestões automáticas antigas e dos defaults empacotados incorretos; valores `off` são preservados. O log alerta que escolhas manuais iguais a defaults antigos não podem ser distinguidas.
 - Corrigida a regra padrão do observador para Era Digital e ampliados os exemplos de receitas por era no `config.yml`.
 - A prensa mecânica, sua receita e seu processo agora exigem `steam_power` (Revolução Industrial), alinhando o requisito ao pistão usado na receita.
-- Criada página de auditoria histórica na Wiki; adicionados testes de classificação para as eras e para o fallback neutro.
+- Criada página de auditoria histórica na Wiki; adicionados testes de classificação para eras, fallback neutro, alimentos básicos e distribuição das tecnologias próprias.
 
 ## 0.7.4.01-SNAPSHOT
 - Criada a Wiki oficial em português em `docs/wiki/`, com guia de jogador, sistemas, catálogo de módulos, comandos/configuração, administração e desenvolvimento de addons.

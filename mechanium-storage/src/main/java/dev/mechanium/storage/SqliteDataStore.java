@@ -728,6 +728,23 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
         }
     }
 
+    @Override public synchronized void migrateContentOwner(String previousOwnerId, String newOwnerId) {
+        if (connectionAutoCommit()) throw new IllegalStateException("No active MECHANIUM content transaction.");
+        if (previousOwnerId == null || previousOwnerId.isBlank()
+                || newOwnerId == null || newOwnerId.isBlank()) {
+            throw new IllegalArgumentException("Content owner IDs cannot be blank.");
+        }
+        if (previousOwnerId.equals(newOwnerId)) return;
+        try (PreparedStatement update = connection.prepareStatement(
+                "UPDATE mechanium_content_owners SET owner_id=? WHERE owner_id=?")) {
+            update.setString(1, newOwnerId);
+            update.setString(2, previousOwnerId);
+            update.executeUpdate();
+        } catch (SQLException exception) {
+            throw failure("migrate content owner", exception);
+        }
+    }
+
     @Override public synchronized Map<String, Set<String>> reconcileContentOwner(
             String ownerId, Map<String, Set<String>> activeContent) {
         if (connectionAutoCommit()) throw new IllegalStateException("No active MECHANIUM content transaction.");

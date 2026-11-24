@@ -59,20 +59,20 @@ Alguns sistemas têm blocos dedicados, como geradores, bateria, tanque, incubado
 
 ## 5. Energia — EcoPower
 
-O sistema energético é local e baseado em geradores, baterias e consumo das máquinas.
+O sistema energético é local e baseado em geradores, baterias e conduítes de conexão. Cada máquina declara seu próprio custo por operação.
 
 | Componente | Comportamento documentado |
 |---|---|
 | Gerador eólico | Representado por fornalha; gera 1 unidade de energia por segundo. |
 | Gerador solar | Representado por defumador; gera 2 unidades por segundo durante o dia e sem tempestade. |
 | Bateria | Representada por barril; capacidade de 10.000 unidades. |
-| Rede de baterias | Baterias adjacentes pelas faces, do mesmo proprietário, formam uma rede local. |
+| Conduíte energético | Funil MECHANIUM identificado; conecta baterias, geradores e máquinas do mesmo proprietário. |
 
-Geradores carregam bateria adjacente do mesmo proprietário. Máquinas compatíveis consomem 1 unidade por ciclo. A busca de consumo é limitada a 64 baterias e não carrega chunks automaticamente. Desmontar uma bateria recupera o item, mas perde a carga armazenada.
+Geradores carregam baterias ligadas diretamente ou por conduítes. Máquinas debitam o valor energyCostPerOperation de sua definição; o sistema agrega carga entre baterias conectadas e calcula o débito completo antes de atualizar cada bateria. A rede suporta até 256 nós, respeita o proprietário e examina somente chunks carregados. A carga da bateria é preservada no item ao desmontar e restaurada quando recolocada. Os geradores são indexados por chunk carregado em vez de varrer todos os chunks a cada segundo.
 
 ### Better Reactor
 
-O módulo opcional `better-reactor` usa um gerador cristalino fictício. Um cristal energético MECHANIUM abastece o bloco por cinco minutos; enquanto ativo, o gerador fornece 8 unidades por segundo a uma bateria adjacente do mesmo proprietário. É uma abstração de jogo, não uma simulação de engenharia nuclear.
+O módulo opcional `better-reactor` usa um gerador cristalino fictício. Um cristal energético MECHANIUM abastece o bloco por cinco minutos; enquanto ativo, o gerador fornece 8 unidades por segundo à rede de baterias conectada por faces/conduítes do mesmo proprietário. É uma abstração de jogo, não uma simulação de engenharia nuclear.
 
 ## 6. Fluidos — Liquid e Water Treatment
 
@@ -168,7 +168,7 @@ O valor unitário máximo aceito por tier é 16, 64, 256, 1.024 e 4.096 EMC. O s
 ## Limitações transversais
 
 - O alvo é Paper/Purpur 1.21.11 e Java 21; outros ambientes não estão declarados como suportados.
-- O runtime genérico de máquinas usa dispenser, até seis tipos de insumo e três produtos por lote; filas e processamento paralelo permanecem pendentes.
+- O runtime genérico de máquinas usa dispenser, até seis tipos de insumo e três produtos por lote; cada máquina informa ingredientes, produtos, tempo e custo de energia ao clicar com o botão direito. Filas e processamento paralelo permanecem pendentes.
 - Não existem filas de produção ou processamento paralelo no runtime genérico.
 - Energia, fluidos, armazenamento e conduítes são redes locais; não atravessam distâncias sem conexões.
 - Algumas referências/addons têm apenas uma implementação inicial, não paridade completa.

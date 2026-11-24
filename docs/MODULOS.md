@@ -191,7 +191,7 @@ Todos são opcionais e podem ser configurados individualmente.
 ## Expansão 0.7.1.00-SNAPSHOT — quatro novos addons
 
 - `water-treatment`: filtragem básica, células de água purificada, fluido refrigerante e recirculação industrial.
-- `greenhouse`: cultivo protegido, painéis de estufa, solução nutritiva e bandejas hidropônicas; depende de Agriculture e Water Treatment.
+- `greenhouse`: cultivo protegido, painéis, solução nutritiva, bandejas hidropônicas e o novo `greenhouse_controller`. O controlador dá +1 estágio de crescimento a plantas compatíveis após o crescimento normal, no raio configurado, se o proprietário tiver a pesquisa e a rede energética conseguir debitar energia. O controlador antigo `climate_controller` e sua receita são preservados como legado. Ainda não há hidroponia automatizada, colheita automática nem suporte a culturas customizadas; depende de Agriculture e Water Treatment.
 - `industrial-recycling`: sucata mista, materiais separados e triagem de resíduos para cadeias circulares.
 - `ore-chunks`: fragmentos minerais de ferro, cobre e ouro e lotes compactados; depende de Geology e Ore Processing.
 

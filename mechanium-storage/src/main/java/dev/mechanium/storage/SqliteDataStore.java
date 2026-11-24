@@ -121,8 +121,33 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                 statement.execute("CREATE INDEX IF NOT EXISTS idx_mechanium_active_researches_due ON mechanium_active_researches(player_uuid, completes_at_ms)");
                 statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (6)");
             }
+            if (currentVersion < 7) {
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS mechanium_machine_inputs (
+                        machine_id TEXT NOT NULL,
+                        ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+                        item_id TEXT NOT NULL,
+                        amount INTEGER NOT NULL CHECK (amount BETWEEN 1 AND 99),
+                        PRIMARY KEY (machine_id, ordinal),
+                        UNIQUE (machine_id, item_id),
+                        FOREIGN KEY (machine_id) REFERENCES mechanium_machines(id) ON DELETE CASCADE
+                    )
+                    """);
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS mechanium_machine_outputs (
+                        machine_id TEXT NOT NULL,
+                        ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+                        item_id TEXT NOT NULL,
+                        amount INTEGER NOT NULL CHECK (amount BETWEEN 1 AND 99),
+                        PRIMARY KEY (machine_id, ordinal),
+                        UNIQUE (machine_id, item_id),
+                        FOREIGN KEY (machine_id) REFERENCES mechanium_machines(id) ON DELETE CASCADE
+                    )
+                    """);
+                statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (7)");
+            }
         }
-        logger.info("MECHANIUM SQLite schema até a versão 6 pronta.");
+        logger.info("MECHANIUM SQLite schema até a versão 7 pronta.");
     }
 
 
@@ -588,6 +613,8 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                 processing_ticks=excluded.processing_ticks,
                 required_technology_id=excluded.required_technology_id
                 """)) {
+            // Keep the legacy columns populated so older readers can still inspect
+            // the primary input and output while new readers use the normalized tables.
             p.setString(1, v.id());
             p.setString(2, v.displayName());
             p.setString(3, v.machineItemId());
@@ -599,23 +626,95 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
             p.setInt(9, v.processingTicks());
             p.setString(10, v.requiredTechnologyId());
             p.executeUpdate();
+
+            try (PreparedStatement deleteInputs = connection.prepareStatement(
+                    "DELETE FROM mechanium_machine_inputs WHERE machine_id=?");
+                 PreparedStatement deleteOutputs = connection.prepareStatement(
+                    "DELETE FROM mechanium_machine_outputs WHERE machine_id=?")) {
+                deleteInputs.setString(1, v.id());
+                deleteInputs.executeUpdate();
+                deleteOutputs.setString(1, v.id());
+                deleteOutputs.executeUpdate();
+            }
+            try (PreparedStatement inputInsert = connection.prepareStatement(
+                    "INSERT INTO mechanium_machine_inputs(machine_id,ordinal,item_id,amount) VALUES(?,?,?,?)");
+                 PreparedStatement outputInsert = connection.prepareStatement(
+                    "INSERT INTO mechanium_machine_outputs(machine_id,ordinal,item_id,amount) VALUES(?,?,?,?)")) {
+                for (int i = 0; i < v.inputs().size(); i++) {
+                    MachineIngredient input = v.inputs().get(i);
+                    inputInsert.setString(1, v.id());
+                    inputInsert.setInt(2, i);
+                    inputInsert.setString(3, input.itemId());
+                    inputInsert.setInt(4, input.amount());
+                    inputInsert.addBatch();
+                }
+                for (int i = 0; i < v.outputs().size(); i++) {
+                    MachineProduct output = v.outputs().get(i);
+                    outputInsert.setString(1, v.id());
+                    outputInsert.setInt(2, i);
+                    outputInsert.setString(3, output.itemId());
+                    outputInsert.setInt(4, output.amount());
+                    outputInsert.addBatch();
+                }
+                inputInsert.executeBatch();
+                outputInsert.executeBatch();
+            }
         } catch (SQLException e) {
             throw failure("save machine", e);
         }
     }
 
     @Override public synchronized Collection<MachineDefinition> loadMachines() {
-        List<MachineDefinition> out = new ArrayList<>();
+        List<MachineDefinition> legacyRows = new ArrayList<>();
         try (Statement s = connection.createStatement();
              ResultSet r = s.executeQuery("SELECT id,display_name,machine_item_id,block_material,input_id,input_amount,output_item_id,output_amount,processing_ticks,required_technology_id FROM mechanium_machines ORDER BY id")) {
             while (r.next()) {
-                out.add(new MachineDefinition(r.getString(1), r.getString(2), r.getString(3),
+                legacyRows.add(new MachineDefinition(r.getString(1), r.getString(2), r.getString(3),
                         r.getString(4), r.getString(5), r.getInt(6), r.getString(7),
                         r.getInt(8), r.getInt(9), r.getString(10)));
             }
-            return List.copyOf(out);
         } catch (SQLException e) {
             throw failure("load machines", e);
+        }
+
+        List<MachineDefinition> out = new ArrayList<>(legacyRows.size());
+        for (MachineDefinition legacy : legacyRows) {
+            List<MachineIngredient> inputs = loadMachineInputs(legacy.id());
+            List<MachineProduct> outputs = loadMachineOutputs(legacy.id());
+            out.add(new MachineDefinition(legacy.id(), legacy.displayName(), legacy.machineItemId(),
+                    legacy.blockMaterial(),
+                    inputs.isEmpty() ? legacy.inputs() : inputs,
+                    outputs.isEmpty() ? legacy.outputs() : outputs,
+                    legacy.processingTicks(), legacy.requiredTechnologyId()));
+        }
+        return List.copyOf(out);
+    }
+
+    private List<MachineIngredient> loadMachineInputs(String machineId) {
+        List<MachineIngredient> inputs = new ArrayList<>();
+        try (PreparedStatement p = connection.prepareStatement(
+                "SELECT item_id,amount FROM mechanium_machine_inputs WHERE machine_id=? ORDER BY ordinal")) {
+            p.setString(1, machineId);
+            try (ResultSet r = p.executeQuery()) {
+                while (r.next()) inputs.add(new MachineIngredient(r.getString(1), r.getInt(2)));
+            }
+            return List.copyOf(inputs);
+        } catch (SQLException e) {
+            throw failure("load machine inputs", e);
+        }
+    }
+
+    private List<MachineProduct> loadMachineOutputs(String machineId) {
+        List<MachineProduct> outputs = new ArrayList<>();
+        try (PreparedStatement p = connection.prepareStatement(
+                "SELECT item_id,amount FROM mechanium_machine_outputs WHERE machine_id=? ORDER BY ordinal")) {
+            p.setString(1, machineId);
+            try (ResultSet r = p.executeQuery()) {
+                while (r.next()) outputs.add(new MachineProduct(r.getString(1), r.getInt(2)));
+            }
+            return List.copyOf(outputs);
+        } catch (SQLException e) {
+            throw failure("load machine outputs", e);
         }
     }
 

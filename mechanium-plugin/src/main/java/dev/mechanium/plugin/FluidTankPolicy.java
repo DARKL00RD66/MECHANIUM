@@ -20,7 +20,8 @@ final class FluidTankPolicy {
             return new FillResult(current, 0);
         }
 
-        int accepted = Math.min(amountMb, capacityMb - current.amountMb());
+        int availableCapacity = Math.max(0, capacityMb - current.amountMb());
+        int accepted = Math.min(amountMb, availableCapacity);
         if (accepted <= 0) return new FillResult(current, 0);
         return new FillResult(new FluidTankContents(fluidId, current.amountMb() + accepted), accepted);
     }

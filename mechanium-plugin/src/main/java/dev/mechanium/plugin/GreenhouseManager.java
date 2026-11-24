@@ -34,7 +34,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -45,7 +44,7 @@ import java.util.UUID;
  * It never places, breaks, or replaces crop blocks itself.
  */
 final class GreenhouseManager implements Listener {
-    private static final String CONTROLLER_ID = "climate_controller";
+    private static final String CONTROLLER_ID = "greenhouse_controller";
     private static final int DEFAULT_RADIUS = 4;
     private static final int MAX_RADIUS = 8;
 
@@ -129,20 +128,41 @@ final class GreenhouseManager implements Listener {
         player.sendMessage("§7Conecte uma bateria carregada por conduítes energéticos do mesmo proprietário.");
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockGrow(BlockGrowEvent event) {
-        BlockState newState = event.getNewState();
-        if (!(newState.getBlockData() instanceof Ageable ageable)) return;
+        BlockState proposedState = event.getNewState();
+        if (!(proposedState.getBlockData() instanceof Ageable proposedAge)) return;
+        if (proposedAge.getAge() >= proposedAge.getMaximumAge()) return;
 
-        int boostedAge = ClimateGrowthPolicy.boostedAge(ageable.getAge(), ageable.getMaximumAge(), 1);
-        if (boostedAge <= ageable.getAge()) return;
+        Location cropLocation = event.getBlock().getLocation();
+        Material expectedCropType = proposedState.getType();
+        int expectedAge = proposedAge.getAge();
+        // The Bukkit event may still be cancelled by another plugin at the same or a later
+        // priority. Run after event dispatch and only boost the crop if its normal growth
+        // state was actually committed to the world.
+        Bukkit.getScheduler().runTask(plugin, () ->
+                applyGrowthBonus(cropLocation, expectedCropType, expectedAge));
+    }
 
-        Location crop = event.getBlock().getLocation();
-        for (Location controller : nearbyControllers(crop, radius())) {
+    private void applyGrowthBonus(Location cropLocation, Material expectedCropType, int expectedAge) {
+        World cropWorld = cropLocation.getWorld();
+        if (cropWorld == null || !cropWorld.isChunkLoaded(
+                cropLocation.getBlockX() >> 4, cropLocation.getBlockZ() >> 4)) return;
+
+        Block cropBlock = cropWorld.getBlockAt(
+                cropLocation.getBlockX(), cropLocation.getBlockY(), cropLocation.getBlockZ());
+        if (cropBlock.getType() != expectedCropType) return;
+        if (!(cropBlock.getBlockData() instanceof Ageable currentAge)) return;
+        if (currentAge.getAge() != expectedAge) return;
+
+        int boostedAge = ClimateGrowthPolicy.boostedAge(currentAge.getAge(), currentAge.getMaximumAge(), 1);
+        if (boostedAge <= currentAge.getAge()) return;
+
+        for (Location controller : nearbyControllers(cropLocation, radius())) {
             World world = controller.getWorld();
-            if (world == null || !world.isChunkLoaded(controller.getBlockX() >> 4, controller.getBlockZ() >> 4)) {
-                continue;
-            }
+            if (world == null || !world.isChunkLoaded(
+                    controller.getBlockX() >> 4, controller.getBlockZ() >> 4)) continue;
+
             Block controllerBlock = world.getBlockAt(
                     controller.getBlockX(), controller.getBlockY(), controller.getBlockZ());
             if (!isController(controllerBlock)) {
@@ -165,8 +185,8 @@ final class GreenhouseManager implements Listener {
             if (energyGridManager == null
                     || !energyGridManager.consume(owner, controller, energyPerGrowth())) continue;
 
-            ageable.setAge(boostedAge);
-            newState.setBlockData(ageable);
+            currentAge.setAge(boostedAge);
+            cropBlock.setBlockData(currentAge, false);
             return;
         }
     }

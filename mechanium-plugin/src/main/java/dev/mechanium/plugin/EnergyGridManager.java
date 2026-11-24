@@ -82,38 +82,28 @@ final class EnergyGridManager implements Listener {
         EnergyNetwork network = collectConnectedEnergyNetwork(machine.getBlock(), owner.toString());
         if (!network.complete() || network.batteries().isEmpty()) return false;
 
-        long available = 0L;
-        for (Block battery : network.batteries()) {
-            available += batteryCharge(battery);
-            if (available >= amount) break;
-        }
-        if (available < amount) return false;
-
-        int remaining = amount;
-        List<ChargeChange> changes = new ArrayList<>();
-        for (Block battery : network.batteries()) {
-            int oldCharge = batteryCharge(battery);
-            int taken = Math.min(oldCharge, remaining);
-            if (taken <= 0) continue;
-            changes.add(new ChargeChange(battery, oldCharge, oldCharge - taken));
-            remaining -= taken;
-            if (remaining == 0) break;
-        }
-        if (remaining > 0) return false;
+        List<Integer> currentCharges = network.batteries().stream().map(this::batteryCharge).toList();
+        List<Integer> newCharges = EnergyAllocationPolicy.planConsumption(currentCharges, amount).orElse(null);
+        if (newCharges == null) return false;
 
         List<ChargeChange> applied = new ArrayList<>();
-        for (ChargeChange change : changes) {
-            BlockState state = change.block().getState();
+        for (int i = 0; i < network.batteries().size(); i++) {
+            int oldCharge = currentCharges.get(i);
+            int newCharge = newCharges.get(i);
+            if (oldCharge == newCharge) continue;
+
+            Block battery = network.batteries().get(i);
+            BlockState state = battery.getState();
             if (!(state instanceof TileState tile)) {
                 rollbackChargeChanges(applied);
                 return false;
             }
-            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, change.newCharge());
+            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, newCharge);
             if (!tile.update(true, false)) {
                 rollbackChargeChanges(applied);
                 return false;
             }
-            applied.add(change);
+            applied.add(new ChargeChange(battery, oldCharge, newCharge));
         }
         return true;
     }
@@ -286,18 +276,28 @@ final class EnergyGridManager implements Listener {
 
         List<Block> batteries = new ArrayList<>(network.batteries());
         batteries.sort(Comparator.comparingInt(this::batteryCharge));
-        int remaining = production;
-        for (Block battery : batteries) {
-            if (remaining <= 0) break;
+        List<Integer> currentCharges = batteries.stream().map(this::batteryCharge).toList();
+        List<Integer> newCharges = EnergyAllocationPolicy.planGeneration(
+                currentCharges, production, BATTERY_CAPACITY);
+
+        List<ChargeChange> applied = new ArrayList<>();
+        for (int i = 0; i < batteries.size(); i++) {
+            int oldCharge = currentCharges.get(i);
+            int newCharge = newCharges.get(i);
+            if (oldCharge == newCharge) continue;
+
+            Block battery = batteries.get(i);
             BlockState state = battery.getState();
-            if (!(state instanceof TileState tile)) continue;
-            int charge = tile.getPersistentDataContainer().getOrDefault(
-                    chargeKey, PersistentDataType.INTEGER, 0);
-            int inserted = Math.min(remaining, BATTERY_CAPACITY - charge);
-            if (inserted <= 0) continue;
-            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, charge + inserted);
-            if (tile.update(true, false)) remaining -= inserted;
-            else break;
+            if (!(state instanceof TileState tile)) {
+                rollbackChargeChanges(applied);
+                return;
+            }
+            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, newCharge);
+            if (!tile.update(true, false)) {
+                rollbackChargeChanges(applied);
+                return;
+            }
+            applied.add(new ChargeChange(battery, oldCharge, newCharge));
         }
     }
 

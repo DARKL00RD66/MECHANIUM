@@ -198,6 +198,99 @@ class SqliteDataStoreTest {
     }
 
     @Test
+    void typedFluidDefinitionsPersistContainerMappingsAcrossStoreInstances() throws Exception {
+        Path database = directory.resolve("fluid-content.db");
+        FluidDefinition fluid = new FluidDefinition(
+                "purified_water", "Água purificada", "water_filtration",
+                List.of(
+                        new FluidContainerDefinition("water_bottle", 250, true, true),
+                        new FluidContainerDefinition("water_cell", 1_000, true, false)));
+
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            store.saveFluid(fluid);
+        }
+
+        try (SqliteDataStore reopened = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            assertEquals(List.of(fluid), List.copyOf(reopened.loadFluids()));
+        }
+    }
+
+    @Test
+    void fluidContentOwnershipCanBePrunedWithoutRemovingOtherContent() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("fluid-owned-content.db"), Logger.getLogger("test"))) {
+            store.saveCategory(new ContentCategory("fluid_items", "Fluid items", "Container items"));
+            store.saveFluid(new FluidDefinition(
+                    "purified_water", "Purified water", null,
+                    List.of(new FluidContainerDefinition("water_bottle", 250, true, true))));
+
+            store.beginContentTransaction();
+            store.reconcileContentOwner("module:water-treatment", Map.of(
+                    "category", Set.of("fluid_items"),
+                    "fluid", Set.of("purified_water")));
+            store.commitContentTransaction();
+
+            store.beginContentTransaction();
+            Map<String, Set<String>> removed = store.reconcileContentOwner(
+                    "module:water-treatment", Map.of("category", Set.of("fluid_items")));
+            store.commitContentTransaction();
+
+            assertEquals(Set.of("purified_water"), removed.get("fluid"));
+            assertTrue(store.loadFluids().isEmpty());
+            assertEquals(List.of("fluid_items"),
+                    store.loadCategories().stream().map(ContentCategory::id).toList());
+        }
+    }
+
+    @Test
+    void schemaNineMigrationPreservesExistingOwnershipRowsAndEnablesFluidOwners() throws Exception {
+        Path database = directory.resolve("schema-eight-fluid-migration.db");
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            store.saveCategory(new ContentCategory("existing_category", "Existing", "Keep ownership"));
+            store.beginContentTransaction();
+            store.reconcileContentOwner("module:existing", Map.of("category", Set.of("existing_category")));
+            store.commitContentTransaction();
+        }
+
+        try (var connection = java.sql.DriverManager.getConnection("jdbc:sqlite:" + database.toAbsolutePath());
+             var statement = connection.createStatement()) {
+            statement.execute("DROP TABLE mechanium_fluid_containers");
+            statement.execute("DROP TABLE mechanium_fluids");
+            statement.execute("ALTER TABLE mechanium_content_owners RENAME TO owners_v8");
+            statement.execute("""
+                    CREATE TABLE mechanium_content_owners (
+                        content_type TEXT NOT NULL CHECK (content_type IN ('category','item','recipe','mob_drop','machine')),
+                        content_id TEXT NOT NULL,
+                        owner_id TEXT NOT NULL,
+                        PRIMARY KEY (content_type, content_id)
+                    )
+                    """);
+            statement.execute("""
+                    INSERT INTO mechanium_content_owners(content_type,content_id,owner_id)
+                    SELECT content_type,content_id,owner_id FROM owners_v8
+                    """);
+            statement.execute("DROP TABLE owners_v8");
+            statement.execute("DELETE FROM mechanium_schema_version WHERE version >= 9");
+        }
+
+        try (SqliteDataStore migrated = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            FluidDefinition fluid = new FluidDefinition(
+                    "industrial_coolant", "Industrial coolant", null,
+                    List.of(new FluidContainerDefinition("coolant_cell", 250, true, true)));
+            migrated.beginContentTransaction();
+            migrated.saveFluid(fluid);
+            Map<String, Set<String>> removed = migrated.reconcileContentOwner(
+                    "module:fluids", Map.of("fluid", Set.of("industrial_coolant")));
+            migrated.commitContentTransaction();
+
+            assertTrue(removed.isEmpty());
+            assertEquals(List.of("existing_category"),
+                    migrated.loadCategories().stream().map(ContentCategory::id).toList());
+            assertEquals(List.of(fluid), List.copyOf(migrated.loadFluids()));
+        }
+    }
+
+    @Test
     void ownedContentIsReconciledAndInactiveOwnersArePruned() throws Exception {
         Path database = directory.resolve("owned-content.db");
         try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {

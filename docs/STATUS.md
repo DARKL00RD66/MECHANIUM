@@ -86,7 +86,7 @@
 
 ## Limitações conhecidas
 
-- O runtime de máquinas ainda suporta apenas dispenser, uma entrada e uma saída; não há filas de produção nem múltiplos insumos/produtos. As incubadoras e máquinas rápidas herdam esse limite.
+- O runtime de máquinas usa dispenser com seis slots de entrada e três de saída; cada definição suporta até seis tipos de ingrediente e três produtos. Filas e processamento paralelo ainda não existem.
 - O sistema energético é uma rede local e simplificada: geradores carregam bateria adjacente; baterias face a face podem fornecer energia a máquinas próximas. A carga se perde ao desmontar a bateria.
 - O catálogo de receitas não inclui processos cujo resultado não esteja no registro de receitas suportado (por exemplo, operações especiais de bancada e cozimento em fogueira); itens sem receita registrada não recebem desbloqueio por crafting.\n- O sistema de fluidos transporta somente o item MECHANIUM `purified_water`, não líquidos vanilla ou outros fluidos.
 - O Simple Storage conecta somente nós adjacentes pelas faces e limita cada rede a 64 depósitos.
@@ -118,7 +118,7 @@ Quatro novos módulos foram registrados no catálogo: Water Treatment, Greenhous
 
 ## Snapshot 0.7.2.00-SNAPSHOT
 
-Cinco módulos adicionais foram criados e registrados: Aquaculture, Glassworks, Rail Freight, Battery Industry e Cold Chain. Cada módulo inclui tecnologias de pesquisa, categoria, itens e receitas; as dependências entre módulos foram declaradas e os cinco IDs foram adicionados ao teste do catálogo e à configuração padrão. Aquaculture, Glassworks e Cold Chain também declaram máquinas no runtime genérico de uma entrada/uma saída. Build CI e testes funcionais em Paper/Purpur 1.21.11 ainda precisam ser concluídos antes de considerar o snapshot validado.
+Cinco módulos adicionais foram criados e registrados: Aquaculture, Glassworks, Rail Freight, Battery Industry e Cold Chain. Cada módulo inclui tecnologias de pesquisa, categoria, itens e receitas; as dependências entre módulos foram declaradas e os cinco IDs foram adicionados ao teste do catálogo e à configuração padrão. Aquaculture, Glassworks e Cold Chain também declaram máquinas no runtime genérico com buffers de até seis entradas e três saídas. Build CI e testes funcionais em Paper/Purpur 1.21.11 ainda precisam ser concluídos antes de considerar o snapshot validado.
 
 
 ## Auditoria de consistência — correções aplicadas
@@ -137,8 +137,8 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 
 ## Expansão 0.7.3.00-SNAPSHOT
 
-- **FN Amplifications:** núcleos, bobinas, módulos e estação de amplificação; a estação usa o runtime genérico de uma entrada/uma saída.
-- **Geyser Heads:** fichas cosméticas, cabeça de coleção e expositores locais. Não inclui sincronização de skins ou integração específica com Geyser/Bedrock.
+- **FN Amplifications:** núcleos, bobinas, módulos e estação de amplificação; a estação usa o runtime genérico com buffers multi-entrada/multi-saída.
+- **Head Collection:** fichas cosméticas, cabeças de coleção e expositores locais; não exige nem integra serviços externos.
 - **Slime Customizer:** páginas de modelo, projetos em branco, ferramenta e catálogo de conteúdo; a interface administrativa completa de criação/edição permanece pendente.
 - **Industrial Chemistry:** reagentes abstratos, resina, fibra sintética e misturador industrial; não simula processos químicos reais.
 - **Mining Automation:** componentes fictícios de prospecção e módulo minerador com montadora; não implementa extração autônoma de blocos nesta etapa.

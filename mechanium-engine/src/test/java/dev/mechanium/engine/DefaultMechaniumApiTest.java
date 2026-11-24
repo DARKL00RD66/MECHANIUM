@@ -195,6 +195,8 @@ class DefaultMechaniumApiTest {
                     List.of(), 0, 1, "industry", "basic_mechanics"));
             api.registerItem(new dev.mechanium.api.model.ItemDefinition("mixing_machine", "Misturador", "DISPENSER",
                     List.of(), 0, 1, "industry", "basic_mechanics"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition("stackable_machine", "Máquina empilhável inválida", "DISPENSER",
+                    List.of(), 0, 64, "industry", "basic_mechanics"));
             api.registerItem(new dev.mechanium.api.model.ItemDefinition("copper_coil", "Bobina", "COPPER_INGOT",
                     List.of(), 0, 64, "industry", "basic_mechanics"));
 
@@ -244,6 +246,12 @@ class DefaultMechaniumApiTest {
                             "unsupported_chest_machine", "Baú industrial", "chest_machine", "CHEST",
                             "IRON_INGOT", 1, "mechanical_parts", 1, 100, "basic_mechanics")),
                     "The API must reject machine block types the current runtime cannot process");
+
+            assertThrows(IllegalArgumentException.class, () -> api.registerMachine(
+                    new dev.mechanium.api.model.MachineDefinition(
+                            "stackable_dispenser_machine", "Máquina empilhável", "stackable_machine", "DISPENSER",
+                            "IRON_INGOT", 1, "mechanical_parts", 1, 100, "basic_mechanics")),
+                    "Machine block items must have a maximum stack size of one");
         }
     }
 

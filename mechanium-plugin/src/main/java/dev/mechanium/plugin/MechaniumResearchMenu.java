@@ -43,12 +43,14 @@ final class MechaniumResearchMenu implements Listener {
     private final MechaniumApi api;
     private final NamespacedKey guideKey;
     private final MechaniumFabricationMenu fabricationMenu;
+    private final MechaniumWikiMenu wikiMenu;
 
     MechaniumResearchMenu(MechaniumPlugin plugin, MechaniumApi api) {
         this.plugin = plugin;
         this.api = api;
         this.guideKey = new NamespacedKey(plugin, "guide_book");
         this.fabricationMenu = new MechaniumFabricationMenu(plugin, api);
+        this.wikiMenu = new MechaniumWikiMenu(plugin, api);
     }
 
     void open(Player player) { openHome(player); }
@@ -98,23 +100,108 @@ final class MechaniumResearchMenu implements Listener {
         Inventory inv = holder.getInventory();
         fillFrame(inv);
         inv.setItem(4, item(Material.NETHER_STAR, "§6§lMECHANIUM", List.of(
-                "§7Era atual: §f" + currentEra(player),
-                "§7Pontos de pesquisa: §b" + api.getResearchPoints(player.getUniqueId()),
-                "§7Pesquisas concluídas: §a" + unlockedCount(player) + "§7/§f" + api.getTechnologies().size()
+                "§7Sua era atual: §f" + currentEra(player),
+                "§7Pontos científicos: §b" + api.getResearchPoints(player.getUniqueId()),
+                "§7Tecnologias pesquisadas: §a" + unlockedCount(player) + "§7/§f" + api.getTechnologies().size(),
+                "§8Escolha uma área para continuar."
         )));
-        button(holder, 11, Material.KNOWLEDGE_BOOK, "§eÁrvore de progressão",
-                List.of("§7Pesquisas organizadas por era.", "§7Veja custos e pré-requisitos."), p -> openEraTree(p, 0, 0));
-        button(holder, 13, Material.CHEST, "§aItens",
-                List.of("§7Consulte os itens registrados."), p -> openSimpleList(p, "itens"));
-        button(holder, 15, Material.CRAFTING_TABLE, "§bReceitas",
-                List.of("§7Consulte resultados e requisitos."), p -> openSimpleList(p, "receitas"));
-        button(holder, 29, Material.ANVIL, "§6Máquinas",
-                List.of("§7Consulte os processos industriais."), p -> openSimpleList(p, "máquinas"));
-        button(holder, 31, Material.SMITHING_TABLE, "§bFabricar itens e máquinas",
-                List.of("§7Catálogo organizado por categoria.", "§7Clique no resultado para fabricar.", "§7Os ingredientes serão consumidos."), fabricationMenu::open);
-        button(holder, 33, Material.CLOCK, "§dEras históricas",
-                List.of("§7Veja a linha do tempo."), p -> openEraTree(p, 0, 0));
+        button(holder, 20, Material.KNOWLEDGE_BOOK, "§eÁrvore de progressão",
+                List.of("§7Abre a árvore na sua era atual.", "§7Veja pesquisas, custos e pré-requisitos."),
+                this::openCurrentEraTree);
+        button(holder, 22, Material.CLOCK, "§dEras históricas",
+                List.of("§7Veja a linha do tempo completa.", "§7Selecione um relógio para consultar uma era."),
+                this::openEraSelector);
+        button(holder, 24, Material.CRAFTING_TABLE, "§bCrafting",
+                List.of("§7Fabrique itens e máquinas.", "§7Os ingredientes são consumidos somente aqui."),
+                fabricationMenu::open);
+        button(holder, 31, Material.BOOK, "§6Wiki",
+                List.of("§7Consulte itens, receitas e máquinas.", "§7A Wiki não consome ingredientes."),
+                wikiMenu::openHome);
         button(holder, 49, Material.BARRIER, "§cFechar", List.of(), Player::closeInventory);
+        animateOpen(player, holder);
+    }
+
+    private void openCurrentEraTree(Player player) {
+        List<EraDefinition> eras = api.getEras().stream()
+                .sorted(Comparator.comparingInt(EraDefinition::order)).toList();
+        String currentId = api.getPlayerEra(player.getUniqueId())
+                .orElseGet(() -> api.getServerEra().orElse(""));
+        int index = 0;
+        for (int i = 0; i < eras.size(); i++) {
+            if (eras.get(i).id().equalsIgnoreCase(currentId)) {
+                index = i;
+                break;
+            }
+        }
+        openEraTree(player, index, 0);
+    }
+
+    /**
+     * Era selector is the entry point to the progression tree. Each clock opens
+     * the corresponding era directly; the Nether Star above the active era marks
+     * the player's effective era without changing their progression state.
+     */
+    private void openEraSelector(Player player) {
+        List<EraDefinition> eras = api.getEras().stream()
+                .sorted(Comparator.comparingInt(EraDefinition::order)).toList();
+        if (eras.isEmpty()) {
+            player.sendMessage("§cNenhuma era foi configurada.");
+            return;
+        }
+
+        String currentId = api.getPlayerEra(player.getUniqueId())
+                .orElseGet(() -> api.getServerEra().orElse(""));
+        EraDefinition current = eras.stream()
+                .filter(era -> era.id().equalsIgnoreCase(currentId))
+                .findFirst().orElse(eras.getFirst());
+
+        long totalUnlocked = unlockedCount(player);
+        MenuHolder holder = create("MECHANIUM • Eras históricas");
+        Inventory inv = holder.getInventory();
+        fillFrame(inv);
+        inv.setItem(4, item(Material.NETHER_STAR, "§6§lERA ATUAL: " + current.displayName(),
+                List.of("§7Pontos científicos: §b" + api.getResearchPoints(player.getUniqueId()),
+                        "§7Tecnologias pesquisadas: §a" + totalUnlocked + "§7/§f" + api.getTechnologies().size(),
+                        "§8A estrela do Nether marca sua era atual.",
+                        "§8Selecione um relógio para abrir a árvore daquela era.")));
+
+        int[] columns = {1, 3, 5, 7};
+        for (int index = 0; index < eras.size() && index < 12; index++) {
+            EraDefinition era = eras.get(index);
+            int column = columns[index % columns.length];
+            int group = index / columns.length;
+            int starSlot = (group * 2) * 9 + column;
+            int clockSlot = (group * 2 + 1) * 9 + column;
+            boolean isCurrent = era.id().equalsIgnoreCase(current.id());
+
+            inv.setItem(starSlot, item(isCurrent ? Material.NETHER_STAR : Material.GRAY_STAINED_GLASS_PANE,
+                    isCurrent ? "§6§lERA ATUAL" : "§8 ", isCurrent
+                            ? List.of("§7" + era.displayName(), "§eVocê está nesta era.")
+                            : List.of()));
+
+            List<TechnologyDefinition> eraTechnologies = api.getTechnologies().stream()
+                    .filter(technology -> technology.requiredEraId().equals(era.id())).toList();
+            long researched = eraTechnologies.stream()
+                    .filter(technology -> api.hasUnlockedTechnology(player.getUniqueId(), technology.id())).count();
+            long researchable = eraTechnologies.stream()
+                    .filter(technology -> !api.hasUnlockedTechnology(player.getUniqueId(), technology.id()))
+                    .filter(technology -> current.order() >= era.order())
+                    .filter(technology -> technology.prerequisites().stream()
+                            .allMatch(id -> api.hasUnlockedTechnology(player.getUniqueId(), id))).count();
+
+            String title = (isCurrent ? "§6★ " : "§e") + "Era " + (era.order() + 1)
+                    + " • " + era.displayName();
+            inv.setItem(clockSlot, item(Material.CLOCK, title, List.of(
+                    "§7Tecnologias nesta era: §f" + eraTechnologies.size(),
+                    "§7Pesquisadas: §a" + researched,
+                    "§7Disponíveis para iniciar: §e" + researchable,
+                    "§7Ainda bloqueadas: §c" + (eraTechnologies.size() - researched - researchable),
+                    isCurrent ? "§6ERA ATUAL" : "§aClique para abrir esta era."
+            )));
+            holder.actions.put(clockSlot, p -> openEraTree(p, index, 0));
+        }
+
+        button(holder, 49, Material.ARROW, "§eVoltar ao menu principal", List.of(), this::openHome);
         animateOpen(player, holder);
     }
 

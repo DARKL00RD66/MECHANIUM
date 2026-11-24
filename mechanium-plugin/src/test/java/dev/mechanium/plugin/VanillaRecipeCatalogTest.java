@@ -15,6 +15,13 @@ class VanillaRecipeCatalogTest {
     }
 
     @Test
+    void basicFoodAndFishingRecipesRemainInAntiquity() {
+        assertEquals("ancient", VanillaRecipeCatalog.recommendedEraId("bread", Material.BREAD));
+        assertEquals("ancient", VanillaRecipeCatalog.recommendedEraId("cooked_beef", Material.COOKED_BEEF));
+        assertEquals("ancient", VanillaRecipeCatalog.recommendedEraId("fishing_rod", Material.FISHING_ROD));
+    }
+
+    @Test
     void ironworkingAndWorkshopToolsBelongToMedievalEra() {
         assertEquals("medieval", VanillaRecipeCatalog.recommendedEraId("iron_ingot", Material.IRON_INGOT));
         assertEquals("medieval", VanillaRecipeCatalog.recommendedEraId("anvil", Material.ANVIL));

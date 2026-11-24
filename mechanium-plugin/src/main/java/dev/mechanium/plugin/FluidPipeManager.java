@@ -1,6 +1,8 @@
 package dev.mechanium.plugin;
 
 import dev.mechanium.api.MechaniumApi;
+import dev.mechanium.api.model.FluidDefinition;
+import dev.mechanium.api.model.FluidContainerDefinition;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -204,7 +206,8 @@ final class FluidPipeManager implements Listener {
 
         if (fluidItem != null) {
             event.setCancelled(true);
-            if (!api.canUseItem(player.getUniqueId(), fluidItem.itemId())
+            if ((!api.canUseItem(player.getUniqueId(), fluidItem.itemId())
+                    || !canUseFluid(player.getUniqueId(), fluidItem.fluidId()))
                     && !player.hasPermission("mechanium.admin")) {
                 player.sendMessage("§cVocê ainda não desbloqueou o uso deste fluido.");
                 return;
@@ -385,7 +388,8 @@ final class FluidPipeManager implements Listener {
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             ItemStack stack = inventory.getItem(slot);
             FluidItem offer = fluidItem(stack);
-            if (offer == null || !api.canUseItem(owner, offer.itemId())) continue;
+            if (offer == null || !api.canUseItem(owner, offer.itemId())
+                    || !canUseFluid(owner, offer.fluidId())) continue;
             int room = Math.max(0, tankCapacityMb() - current.amountMb());
             int maxItems = Math.min(stack.getAmount(), room / offer.millibucketsPerItem());
             if (maxItems <= 0) continue;
@@ -461,6 +465,11 @@ final class FluidPipeManager implements Listener {
             player.sendMessage("§cNão existe um item de saída configurado para este fluido.");
             return;
         }
+        if (!canUseFluid(player.getUniqueId(), current.fluidId())
+                && !player.hasPermission("mechanium.admin")) {
+            player.sendMessage("§cVocê ainda não desbloqueou o uso deste fluido.");
+            return;
+        }
         if (!api.canUseItem(player.getUniqueId(), outputItemId)
                 && !player.hasPermission("mechanium.admin")) {
             player.sendMessage("§cVocê ainda não desbloqueou o uso deste fluido.");
@@ -483,20 +492,30 @@ final class FluidPipeManager implements Listener {
     private FluidItem fluidItem(ItemStack item) {
         String id = itemId(item);
         if (id == null) return null;
-        return switch (id) {
-            case "purified_water" -> new FluidItem(id, "purified_water", MILLIBUCKETS_PER_ITEM);
-            case "purified_water_cell" -> new FluidItem(id, "purified_water", 1_000);
-            case "coolant_cell" -> new FluidItem(id, "industrial_coolant", MILLIBUCKETS_PER_ITEM);
-            default -> null;
-        };
+        for (FluidDefinition fluid : api.getFluids()) {
+            for (FluidContainerDefinition container : fluid.containers()) {
+                if (container.canFill() && container.itemId().equals(id)) {
+                    return new FluidItem(id, fluid.id(), container.amountMb());
+                }
+            }
+        }
+        return null;
     }
 
     private String outputItemFor(String fluidId) {
-        return switch (fluidId) {
-            case "purified_water" -> "purified_water";
-            case "industrial_coolant" -> "coolant_cell";
-            default -> null;
-        };
+        return api.getFluid(fluidId)
+                .flatMap(fluid -> fluid.containers().stream()
+                        .filter(FluidContainerDefinition::canExtract)
+                        .filter(container -> container.amountMb() == MILLIBUCKETS_PER_ITEM)
+                        .map(FluidContainerDefinition::itemId)
+                        .findFirst())
+                .orElse(null);
+    }
+
+    private boolean canUseFluid(UUID playerId, String fluidId) {
+        FluidDefinition fluid = api.getFluid(fluidId).orElse(null);
+        return fluid != null && (fluid.requiredTechnologyId() == null
+                || api.canUseTechnology(playerId, fluid.requiredTechnologyId()));
     }
 
     private void consumeOneFromHand(Player player, ItemStack hand) {

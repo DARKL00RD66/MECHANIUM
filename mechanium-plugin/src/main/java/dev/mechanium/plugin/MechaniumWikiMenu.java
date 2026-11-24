@@ -36,7 +36,9 @@ final class MechaniumWikiMenu implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    void openHome(Player player) {
+    void openHome(Player player) { openHome(player, Player::closeInventory); }
+
+    void openHome(Player player, Consumer<Player> backAction) {
         Holder holder = create("MECHANIUM • Wiki");
         fillFrame(holder.inventory);
         holder.inventory.setItem(4, item(Material.BOOK, "§6§lWIKI DO MECHANIUM", List.of(
@@ -52,8 +54,7 @@ final class MechaniumWikiMenu implements Listener {
                 List.of("§7Veja ingredientes, resultados e requisitos."), p -> openRecipes(p, 0));
         button(holder, 24, Material.BLAST_FURNACE, "§6Máquinas",
                 List.of("§7Veja entradas, saídas e tempo de processamento."), p -> openMachines(p, 0));
-        button(holder, 49, Material.ARROW, "§eVoltar ao menu principal", List.of(),
-                p -> p.closeInventory());
+        button(holder, 49, Material.ARROW, "§eVoltar ao menu principal", List.of(), backAction);
         open(player, holder);
     }
 

@@ -26,7 +26,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 | `sensible-toolbox` | Kit de campo com efeitos temporários e kit consumível de reparo de equipamento. |
 | `sfcalc` | Comando de cálculo recursivo de materiais/lotes de receitas MECHANIUM; não calcula preços monetários. |
 | `eco-power` | Geradores eólico/solar, baterias de 10.000 unidades e conduítes energéticos; rede por proprietário de até 256 nós, somente em chunks carregados. A carga da bateria é preservada ao desmontar/recolocar. |
-| `liquid` | Filtro, tanque e tubulação para transporte local do item `purified_water`. |
+| `liquid` | Filtro, tanques de volume tipado (16.000 mB por padrão) e tubulações; água purificada e refrigerante, sem mistura de fluidos. |
 | `advanced-tech` | Britador, refinaria e montadora industrial com processamento e consumo energético. |
 | `simple-storage` | Rede de inventários virtuais paginados com até 64 nós adjacentes e controle de acesso. |
 | `dank-tech2` | Upgrade do armazém portátil de 27 para 54 espaços. |
@@ -56,9 +56,9 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 | ID | Finalidade |
 |---|---|
 | `industrial-networks` | Conduítes e caixas protegidas para transporte local de itens MECHANIUM. Limite documentado de 128 conduítes por rede. |
-| `better-reactor` | Gerador cristalino fictício que abastece uma bateria adjacente; abstração de jogo, não simulação técnica real. |
+| `better-reactor` | Gerador cristalino fictício que abastece a rede de baterias conectada por faces/conduítes; abstração de jogo, não simulação técnica real. |
 | `material-generators` | Oito geradores passivos, com baú superior e intervalo configurável (200 ticks por padrão). |
-| `water-treatment` | Cartuchos e cadeia de tratamento/recirculação de água, incluindo materiais de água purificada e refrigerante. A rede de transporte continua limitada a `purified_water`. |
+| `water-treatment` | Cartuchos, células de água purificada e refrigerante; os tanques armazenam os dois fluidos por volume tipado, sem misturá-los. |
 | `greenhouse` | Painéis de estufa, solução nutritiva e bandejas hidropônicas. Parcial: não equivale a crescimento de culturas customizadas automatizado. |
 | `industrial-recycling` | Sucata mista, materiais separados e componentes de triagem/reciclagem. |
 | `ore-chunks` | Fragmentos de ferro, cobre e ouro e lotes minerais compactados. |
@@ -86,6 +86,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 ## Limitações comuns a vários módulos
 
 - O runtime comum de dispenser aceita até seis tipos de entrada e três produtos por lote; o custo energético por operação fica na definição de cada máquina.
+- A rede de fluidos suporta atualmente água purificada e refrigerante em volumes de mB. Válvulas, bombas, outros fluidos e API pública de registro para addons ainda não existem.
 - Ter itens, categorias e receitas cadastrados não significa que o módulo possua automação completa ou todas as funcionalidades de uma referência externa.
 - Greenhouse e Agriculture ainda não representam um simulador completo de culturas customizadas.
 - Mining Automation possui componentes e receitas, mas não mineração autônoma de blocos.

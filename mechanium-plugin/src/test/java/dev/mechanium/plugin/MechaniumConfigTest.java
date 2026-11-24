@@ -27,6 +27,8 @@ class MechaniumConfigTest {
             assertEquals(100, config.getInt("machines.wear.max-cycles"));
             assertEquals(1, config.getInt("machines.wear.cycles-per-operation"));
             assertFalse(config.getBoolean("machines.hardcore.enabled"));
+            assertEquals(4, config.getInt("greenhouse.growth-radius"));
+            assertEquals(1, config.getInt("greenhouse.energy-per-growth"));
         }
     }
 }

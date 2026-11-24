@@ -22,7 +22,7 @@ final class MiningAutomationModule extends AbstractBuiltinModule {
         registerItem(api, new ItemDefinition("survey_chip", "&eChip de prospecção", "COMPASS", List.of("&8Conteúdo do módulo mining-automation"), 0, 64, "mining_automation_goods", "automated_surveying"));
         registerItem(api, new ItemDefinition("drill_casing", "&eCarcaça de perfuração", "IRON_BLOCK", List.of("&8Conteúdo do módulo mining-automation"), 0, 64, "mining_automation_goods", "automated_surveying"));
         registerItem(api, new ItemDefinition("mining_module", "&eMódulo minerador", "PISTON", List.of("&8Conteúdo do módulo mining-automation"), 0, 64, "mining_automation_goods", "automated_extraction"));
-        registerItem(api, new ItemDefinition("mining_assembler", "&eMontadora de mineração", "DISPENSER", List.of("&8Conteúdo do módulo mining-automation"), 0, 64, "mining_automation_goods", "automated_extraction"));
+        registerItem(api, new ItemDefinition("mining_assembler", "&eMontadora de mineração", "DISPENSER", List.of("&8Conteúdo do módulo mining-automation"), 0, 1, "mining_automation_goods", "automated_extraction"));
         registerRecipe(api, new RecipeDefinition("survey_chip_recipe", RecipeDefinition.Type.SHAPELESS, "survey_chip", 1, List.of(), Map.of('C', "COMPASS", 'R', "REDSTONE"), "automated_surveying"));
         registerRecipe(api, new RecipeDefinition("drill_casing_recipe", RecipeDefinition.Type.SHAPELESS, "drill_casing", 1, List.of(), Map.of('I', "IRON_INGOT", 'C', "COPPER_INGOT"), "automated_surveying"));
         registerRecipe(api, new RecipeDefinition("mining_module_recipe", RecipeDefinition.Type.SHAPED, "mining_module", 1, List.of(" I ", "RPI", " I "), Map.of('I', "IRON_INGOT", 'R', "REDSTONE", 'P', "PISTON"), "automated_extraction"));

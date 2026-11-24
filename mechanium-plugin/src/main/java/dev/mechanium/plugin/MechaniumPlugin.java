@@ -133,7 +133,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             if (moduleManager.enabledModuleIds().contains("simple-storage")) {
                 Bukkit.getPluginManager().registerEvents(new PortableStorageListener(this), this);
             }
-            researchMenu = new MechaniumResearchMenu(this, api);
+            researchMenu = new MechaniumResearchMenu(this, api, emcExchangeManager);
             Bukkit.getPluginManager().registerEvents(researchMenu, this);
             researchCompletionTask = Bukkit.getScheduler().runTaskTimer(this, () -> {
                 long now = System.currentTimeMillis();

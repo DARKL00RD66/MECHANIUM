@@ -44,13 +44,15 @@ final class MechaniumResearchMenu implements Listener {
     private final NamespacedKey guideKey;
     private final MechaniumFabricationMenu fabricationMenu;
     private final MechaniumWikiMenu wikiMenu;
+    private final EmcExchangeManager emcExchangeManager;
 
-    MechaniumResearchMenu(MechaniumPlugin plugin, MechaniumApi api) {
+    MechaniumResearchMenu(MechaniumPlugin plugin, MechaniumApi api, EmcExchangeManager emcExchangeManager) {
         this.plugin = plugin;
         this.api = api;
         this.guideKey = new NamespacedKey(plugin, "guide_book");
         this.fabricationMenu = new MechaniumFabricationMenu(plugin, api);
         this.wikiMenu = new MechaniumWikiMenu(plugin, api);
+        this.emcExchangeManager = emcExchangeManager;
     }
 
     void open(Player player) { openHome(player); }
@@ -103,6 +105,7 @@ final class MechaniumResearchMenu implements Listener {
                 "§7Sua era atual: §f" + currentEra(player),
                 "§7Pontos científicos: §b" + api.getResearchPoints(player.getUniqueId()),
                 "§7Tecnologias pesquisadas: §a" + unlockedCount(player) + "§7/§f" + api.getTechnologies().size(),
+                "§7Saldo EMC: §b" + (emcExchangeManager == null ? "desativado" : emcExchangeManager.balance(player.getUniqueId()) + " EMC"),
                 "§8Escolha uma área para continuar."
         )));
         button(holder, 20, Material.KNOWLEDGE_BOOK, "§eÁrvore de progressão",
@@ -117,6 +120,17 @@ final class MechaniumResearchMenu implements Listener {
         button(holder, 31, Material.BOOK, "§6Wiki",
                 List.of("§7Consulte itens, receitas e máquinas.", "§7A Wiki não consome ingredientes."),
                 p -> wikiMenu.openHome(p, this::openHome));
+        if (emcExchangeManager != null) {
+            button(holder, 40, Material.EMERALD, "§aCarteira EMC", List.of(
+                    "§7Seu saldo: §b" + emcExchangeManager.balance(player.getUniqueId()) + " EMC",
+                    "§7Sistema individual de equivalência.",
+                    "§7Itens aprendidos por você: §f" + emcExchangeManager.learnedCount(player.getUniqueId()),
+                    "§eClique para abrir seu ledger EMC."
+            ), emcExchangeManager::openCommand);
+        } else {
+            inv.setItem(40, item(Material.GRAY_DYE, "§7Carteira EMC desativada",
+                    List.of("§8O módulo emc-exchange está desativado.")));
+        }
         button(holder, 49, Material.BARRIER, "§cFechar", List.of(), Player::closeInventory);
         animateOpen(player, holder);
     }

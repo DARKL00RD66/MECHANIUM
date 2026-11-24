@@ -145,6 +145,8 @@ final class EmcExchangeManager implements Listener, AutoCloseable {
         }
     }
 
+    int learnedCount(UUID playerId) { return learnedItems(playerId).size(); }
+
     List<LearnedItem> learnedItems(UUID playerId) {
         Objects.requireNonNull(playerId, "playerId");
         synchronized (connection) {

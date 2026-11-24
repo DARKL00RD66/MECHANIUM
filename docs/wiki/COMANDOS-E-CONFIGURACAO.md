@@ -141,6 +141,14 @@ machines:
 
 O desgaste padrão é habilitado, com limite de 100 ciclos e um ciclo por operação. O modo hardcore é opcional e começa desabilitado. Quando ativado, aumenta o desgaste e o custo de reparação.
 
+### Slime Customizer
+
+Com o módulo `slime-customizer` ativo, administradores podem abrir `/mechanium admin customizer` ou usar o atalho no painel administrativo.
+
+O editor inicial permite criar itens com ID único, nome, material vanilla, pesquisa existente (ou nenhuma) e pilha máxima. Também permite entregar uma unidade ao administrador e remover cada item individualmente. Os itens ficam na categoria persistente `customizer_user_items` e possuem ownership SQLite separado. A lista `slime-customizer.user-item-ids` é administrada automaticamente; não a edite manualmente.
+
+Limitações desta primeira versão: não edita definições existentes e não cria receitas visuais. Para receitas registradas por módulos/addons, use `/mechanium admin custom-recipes`.
+
 ### Addons
 
 ```yaml

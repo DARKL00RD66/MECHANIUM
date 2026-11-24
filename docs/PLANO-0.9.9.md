@@ -86,7 +86,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 - [ ] Mining Automation: definir e implementar a extração de jogo prometida; não anunciar mineração automática antes do teste.
 - [ ] Slime Customizer: finalizar a interface administrativa para criação, edição e validação de conteúdo.
-- [ ] Geyser Heads: definir explicitamente o escopo Bedrock/Geyser e testar a integração real ou manter o módulo marcado como catálogo local.
+- [x] Head Collection: renomear o módulo cosmético para escopo local; remover qualquer dependência de plataforma externa e preservar os IDs persistentes legados por migração.
 - [ ] Agricultura/estufas: validar crescimento, colheita e automação, não somente receitas e itens.
 - [ ] Revisar máquinas e receitas declaradas pelos módulos para usar os novos buffers/processos.
 - [ ] Criar testes de regressão para dependências, IDs, progressão e propriedade.

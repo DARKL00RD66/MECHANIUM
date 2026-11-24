@@ -30,6 +30,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -41,15 +42,10 @@ final class EnergyGridManager implements Listener {
     private static final BlockFace[] FACES = {
             BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
-    private static final Set<String> ENERGY_ITEMS = Set.of("wind_rotor", "solar_cell", "energy_cell", "abstract_reactor");
-    private static final Set<String> POWERED_MACHINES = Set.of(
-            "water_filter_machine", "advanced_assembly_machine",
-            "industrial_crusher_machine", "industrial_smelter_machine", "industrial_mill_machine", "industrial_canner_machine",
-            "chicken_incubator_machine", "cow_incubator_machine", "pig_incubator_machine", "sheep_incubator_machine",
-            "rapid_press_machine", "rapid_coil_winder_machine", "air_purifier", "metallurgy_furnace",
-            "pressure_chamber", "auto_assembler", "cargo_router",
-            "forestry_station", "textile_loom", "biomass_processor", "industrial_mixer");
+    private static final Set<String> ENERGY_ITEMS = Set.of(
+            "wind_rotor", "solar_cell", "energy_cell", "abstract_reactor", "energy_conduit");
     private static final int BATTERY_CAPACITY = 10_000;
+    private static final int MAX_NETWORK_NODES = 256;
 
     private final JavaPlugin plugin;
     private final MechaniumApi api;
@@ -79,39 +75,58 @@ final class EnergyGridManager implements Listener {
         }
     }
 
-    boolean requiresPower(String machineId) {
-        return POWERED_MACHINES.contains(machineId);
+    boolean consume(UUID owner, Location machine, int amount) {
+        if (amount <= 0) return true;
+        if (owner == null || machine == null || machine.getWorld() == null) return false;
+
+        EnergyNetwork network = collectConnectedEnergyNetwork(machine.getBlock(), owner.toString());
+        if (!network.complete() || network.batteries().isEmpty()) return false;
+
+        long available = 0L;
+        for (Block battery : network.batteries()) {
+            available += batteryCharge(battery);
+            if (available >= amount) break;
+        }
+        if (available < amount) return false;
+
+        int remaining = amount;
+        List<ChargeChange> changes = new ArrayList<>();
+        for (Block battery : network.batteries()) {
+            int oldCharge = batteryCharge(battery);
+            int taken = Math.min(oldCharge, remaining);
+            if (taken <= 0) continue;
+            changes.add(new ChargeChange(battery, oldCharge, oldCharge - taken));
+            remaining -= taken;
+            if (remaining == 0) break;
+        }
+        if (remaining > 0) return false;
+
+        List<ChargeChange> applied = new ArrayList<>();
+        for (ChargeChange change : changes) {
+            BlockState state = change.block().getState();
+            if (!(state instanceof TileState tile)) {
+                rollbackChargeChanges(applied);
+                return false;
+            }
+            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, change.newCharge());
+            if (!tile.update(true, false)) {
+                rollbackChargeChanges(applied);
+                return false;
+            }
+            applied.add(change);
+        }
+        return true;
     }
 
-    boolean consume(UUID owner, Location machine, int amount) {
-        if (owner == null || machine == null || machine.getWorld() == null || amount < 1) return false;
-        String ownerId = owner.toString();
-        ArrayDeque<Block> queue = new ArrayDeque<>();
-        Set<String> visited = new HashSet<>();
-        for (BlockFace face : FACES) {
-            Block adjacent = adjacentLoaded(machine.getBlock(), face);
-            if (adjacent != null && isBattery(adjacent, ownerId)) queue.add(adjacent);
-        }
-        while (!queue.isEmpty() && visited.size() < 64) {
-            Block block = queue.removeFirst();
-            if (!visited.add(key(block))) continue;
-            BlockState state = block.getState();
-            if (!(state instanceof TileState tile)) continue;
-            int charge = tile.getPersistentDataContainer().getOrDefault(
-                    chargeKey, PersistentDataType.INTEGER, 0);
-            if (charge >= amount) {
-                tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, charge - amount);
+    private void rollbackChargeChanges(List<ChargeChange> applied) {
+        for (int i = applied.size() - 1; i >= 0; i--) {
+            ChargeChange change = applied.get(i);
+            BlockState state = change.block().getState();
+            if (state instanceof TileState tile) {
+                tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, change.oldCharge());
                 tile.update(true, false);
-                return true;
-            }
-            for (BlockFace face : FACES) {
-                Block adjacent = adjacentLoaded(block, face);
-                if (adjacent != null && isBattery(adjacent, ownerId) && !visited.contains(key(adjacent))) {
-                    queue.addLast(adjacent);
-                }
             }
         }
-        return false;
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -123,6 +138,7 @@ final class EnergyGridManager implements Listener {
             case "solar_cell" -> Material.SMOKER;
             case "energy_cell" -> Material.BARREL;
             case "abstract_reactor" -> Material.BLAST_FURNACE;
+            case "energy_conduit" -> Material.HOPPER;
             default -> Material.AIR;
         };
         Block block = event.getBlockPlaced();
@@ -176,9 +192,16 @@ final class EnergyGridManager implements Listener {
                 event.getPlayer().sendMessage("§dGerador cristalino: §f" + remaining
                         + "s de combustível restante. §7Use um cristal energético para recarregar.");
             }
+        } else if ("energy_conduit".equals(id)) {
+            String owner = tileOwner(event.getClickedBlock());
+            event.getPlayer().sendMessage("§bConduíte energético: §7conecta geradores, baterias e máquinas do mesmo proprietário.");
+            if (owner != null && !owner.equals(event.getPlayer().getUniqueId().toString())
+                    && !event.getPlayer().hasPermission("mechanium.admin")) {
+                event.getPlayer().sendMessage("§7Rede pertencente a outro jogador; não é possível retirar energia dela.");
+            }
         } else if ("wind_rotor".equals(id) || "solar_cell".equals(id)) {
             event.getPlayer().sendMessage("§eGerador MECHANIUM: §f" + (id.equals("wind_rotor") ? "eólico" : "solar")
-                    + " §7— conecte uma bateria por uma face.");
+                    + " §7— conecte a bateria diretamente ou use conduítes energéticos.");
         }
     }
 
@@ -251,25 +274,74 @@ final class EnergyGridManager implements Listener {
                                 reactorFuelUntilKey, PersistentDataType.LONG, 0L);
                         production = fuelUntil > System.currentTimeMillis() ? 8 : 0;
                     }
-                    if (production > 0) chargeAdjacentBattery(state.getBlock(), owner, production);
+                    if (production > 0) chargeConnectedBatteries(state.getBlock(), owner, production);
                 }
             }
         }
     }
 
-    private void chargeAdjacentBattery(Block generator, String owner, int production) {
-        for (BlockFace face : FACES) {
-            Block adjacent = adjacentLoaded(generator, face);
-            if (adjacent == null || !isBattery(adjacent, owner)) continue;
-            BlockState state = adjacent.getState();
+    private void chargeConnectedBatteries(Block generator, String owner, int production) {
+        EnergyNetwork network = collectConnectedEnergyNetwork(generator, owner);
+        if (!network.complete() || network.batteries().isEmpty()) return;
+
+        List<Block> batteries = new ArrayList<>(network.batteries());
+        batteries.sort(Comparator.comparingInt(this::batteryCharge));
+        int remaining = production;
+        for (Block battery : batteries) {
+            if (remaining <= 0) break;
+            BlockState state = battery.getState();
             if (!(state instanceof TileState tile)) continue;
-            int charge = tile.getPersistentDataContainer().getOrDefault(chargeKey, PersistentDataType.INTEGER, 0);
-            if (charge >= BATTERY_CAPACITY) continue;
-            int updated = Math.min(BATTERY_CAPACITY, charge + production);
-            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, updated);
-            tile.update(true, false);
-            return;
+            int charge = tile.getPersistentDataContainer().getOrDefault(
+                    chargeKey, PersistentDataType.INTEGER, 0);
+            int inserted = Math.min(remaining, BATTERY_CAPACITY - charge);
+            if (inserted <= 0) continue;
+            tile.getPersistentDataContainer().set(chargeKey, PersistentDataType.INTEGER, charge + inserted);
+            if (tile.update(true, false)) remaining -= inserted;
+            else break;
         }
+    }
+
+    private EnergyNetwork collectConnectedEnergyNetwork(Block anchor, String owner) {
+        ArrayDeque<Block> queue = new ArrayDeque<>();
+        Set<String> visited = new HashSet<>();
+        List<Block> batteries = new ArrayList<>();
+        for (BlockFace face : FACES) {
+            Block adjacent = adjacentLoaded(anchor, face);
+            if (adjacent != null && isEnergyLink(adjacent, owner)) queue.addLast(adjacent);
+        }
+
+        while (!queue.isEmpty() && visited.size() < MAX_NETWORK_NODES) {
+            Block block = queue.removeFirst();
+            if (!visited.add(key(block)) || !isEnergyLink(block, owner)) continue;
+            if (isBattery(block, owner)) batteries.add(block);
+            for (BlockFace face : FACES) {
+                Block adjacent = adjacentLoaded(block, face);
+                if (adjacent != null && isEnergyLink(adjacent, owner) && !visited.contains(key(adjacent))) {
+                    queue.addLast(adjacent);
+                }
+            }
+        }
+        return new EnergyNetwork(List.copyOf(batteries), queue.isEmpty());
+    }
+
+    private boolean isEnergyLink(Block block, String owner) {
+        return isBattery(block, owner) || isConduit(block, owner);
+    }
+
+    private boolean isConduit(Block block, String owner) {
+        if (block == null || block.getType() != Material.HOPPER) return false;
+        BlockState state = block.getState();
+        if (!(state instanceof TileState tile)) return false;
+        String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
+        String blockOwner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+        return "energy_conduit".equals(id) && owner.equals(blockOwner);
+    }
+
+    private int batteryCharge(Block battery) {
+        BlockState state = battery.getState();
+        if (!(state instanceof TileState tile)) return 0;
+        return Math.max(0, Math.min(BATTERY_CAPACITY,
+                tile.getPersistentDataContainer().getOrDefault(chargeKey, PersistentDataType.INTEGER, 0)));
     }
 
     private boolean isBattery(Block block, String owner) {
@@ -311,7 +383,15 @@ final class EnergyGridManager implements Listener {
         return world.getBlockAt(x, y, z);
     }
 
+    private String tileOwner(Block block) {
+        if (block == null || !(block.getState() instanceof TileState tile)) return null;
+        return tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+    }
+
     private String key(Block block) {
         return block.getWorld().getUID() + ":" + block.getX() + ":" + block.getY() + ":" + block.getZ();
     }
+
+    private record EnergyNetwork(List<Block> batteries, boolean complete) { }
+    private record ChargeChange(Block block, int oldCharge, int newCharge) { }
 }

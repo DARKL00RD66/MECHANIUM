@@ -25,7 +25,7 @@ public record MachineIngredient(String itemId, int amount) {
         }
         input = input.toUpperCase(Locale.ROOT);
         Material material = Material.matchMaterial(input);
-        if (material == null || !material.isItem() || NON_ITEMS.contains(material.name())) {
+        if (material == null || NON_ITEMS.contains(material.name())) {
             throw new IllegalArgumentException("itemId must be an item material or mechanium:<id>: " + input);
         }
         return material.name();

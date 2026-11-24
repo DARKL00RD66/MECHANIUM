@@ -9,14 +9,14 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Definition of a machine process. The current Bukkit runtime uses a dispenser,
- * with six input slots and three output slots. The legacy constructor and accessors
- * remain available for existing modules and addons.
+ * Definition of a machine process. The Bukkit runtime currently uses a dispenser,
+ * with six input slots and three output slots. Energy is charged once per completed
+ * operation. Legacy constructors and accessors remain available to older addons.
  */
 public record MachineDefinition(String id, String displayName, String machineItemId,
                                 String blockMaterial, List<MachineIngredient> inputs,
                                 List<MachineProduct> outputs, int processingTicks,
-                                String requiredTechnologyId) {
+                                int energyCostPerOperation, String requiredTechnologyId) {
     public MachineDefinition {
         id = normalize(id, "id");
         displayName = Objects.requireNonNull(displayName, "displayName").trim();
@@ -57,12 +57,22 @@ public record MachineDefinition(String id, String displayName, String machineIte
         if (processingTicks < 20 || processingTicks > 72_000) {
             throw new IllegalArgumentException("processingTicks must be between 20 and 72000");
         }
+        if (energyCostPerOperation < 0 || energyCostPerOperation > 1_000_000) {
+            throw new IllegalArgumentException("energyCostPerOperation must be 0..1000000");
+        }
         requiredTechnologyId = normalize(requiredTechnologyId, "requiredTechnologyId");
     }
 
-    /**
-     * Backwards-compatible constructor for existing single-input/single-output definitions.
-     */
+    /** Backwards-compatible multi-input/multi-output constructor with no energy requirement. */
+    public MachineDefinition(String id, String displayName, String machineItemId,
+                             String blockMaterial, List<MachineIngredient> inputs,
+                             List<MachineProduct> outputs, int processingTicks,
+                             String requiredTechnologyId) {
+        this(id, displayName, machineItemId, blockMaterial, inputs, outputs,
+                processingTicks, 0, requiredTechnologyId);
+    }
+
+    /** Backwards-compatible constructor for existing single-input/single-output definitions. */
     public MachineDefinition(String id, String displayName, String machineItemId,
                              String blockMaterial, String inputId, int inputAmount,
                              String outputItemId, int outputAmount, int processingTicks,
@@ -70,28 +80,31 @@ public record MachineDefinition(String id, String displayName, String machineIte
         this(id, displayName, machineItemId, blockMaterial,
                 List.of(new MachineIngredient(inputId, inputAmount)),
                 List.of(new MachineProduct(outputItemId, outputAmount)),
-                processingTicks, requiredTechnologyId);
+                processingTicks, 0, requiredTechnologyId);
+    }
+
+    /** Single-input/single-output constructor with an explicit energy cost per completed operation. */
+    public MachineDefinition(String id, String displayName, String machineItemId,
+                             String blockMaterial, String inputId, int inputAmount,
+                             String outputItemId, int outputAmount, int processingTicks,
+                             int energyCostPerOperation, String requiredTechnologyId) {
+        this(id, displayName, machineItemId, blockMaterial,
+                List.of(new MachineIngredient(inputId, inputAmount)),
+                List.of(new MachineProduct(outputItemId, outputAmount)),
+                processingTicks, energyCostPerOperation, requiredTechnologyId);
     }
 
     /** Legacy accessor: returns the first input type. */
-    public String inputId() {
-        return inputs.getFirst().itemId();
-    }
+    public String inputId() { return inputs.getFirst().itemId(); }
 
     /** Legacy accessor: returns the first input amount. */
-    public int inputAmount() {
-        return inputs.getFirst().amount();
-    }
+    public int inputAmount() { return inputs.getFirst().amount(); }
 
     /** Legacy accessor: returns the first output item ID. */
-    public String outputItemId() {
-        return outputs.getFirst().itemId();
-    }
+    public String outputItemId() { return outputs.getFirst().itemId(); }
 
     /** Legacy accessor: returns the first output amount. */
-    public int outputAmount() {
-        return outputs.getFirst().amount();
-    }
+    public int outputAmount() { return outputs.getFirst().amount(); }
 
     private static String normalize(String value, String field) {
         Objects.requireNonNull(value, field);

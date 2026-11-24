@@ -230,8 +230,9 @@ greenhouse:
   energy-per-growth: 1
 
 slime-customizer:
-  # IDs for administrator-created items. SQLite ownership is kept separately for each item.
+  # IDs for administrator-created items and recipes. SQLite ownership is kept separately.
   user-item-ids: []
+  user-recipe-ids: []
 
 machines:
   wear:

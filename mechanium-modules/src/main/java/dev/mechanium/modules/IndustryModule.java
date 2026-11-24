@@ -14,24 +14,25 @@ final class IndustryModule extends AbstractBuiltinModule {
         registerItem(api, new ItemDefinition("copper_coil", "&6Bobina de cobre", "COPPER_INGOT",
                 List.of("&8Componente para sistemas elétricos"), 0, 64, "industrial_components", "steam_power"));
         registerItem(api, new ItemDefinition("mechanical_press", "&6Prensa mecânica", "DISPENSER",
-                List.of("&8Máquina industrial básica", "&7Entrada: primeiro espaço", "&7Saída: último espaço"),
-                0, 1, "industrial_components", "basic_mechanics"));
+                List.of("&8Prensa mecânica a vapor", "&7Entrada: primeiro espaço", "&7Saída: último espaço"),
+                0, 1, "industrial_components", "steam_power"));
         registerRecipe(api, new RecipeDefinition("mechanical_parts_recipe", RecipeDefinition.Type.SHAPED,
                 "mechanical_parts", 4, List.of(" I ", "III"), Map.of('I', "IRON_INGOT"), "basic_mechanics"));
         registerRecipe(api, new RecipeDefinition("copper_coil_recipe", RecipeDefinition.Type.SHAPELESS,
                 "copper_coil", 1, List.of(), Map.of('C', "COPPER_INGOT"), "steam_power"));
         registerRecipe(api, new RecipeDefinition("mechanical_press_recipe", RecipeDefinition.Type.SHAPED,
                 "mechanical_press", 1, List.of("III", "IPI", "III"),
-                Map.of('I', "IRON_INGOT", 'P', "PISTON"), "basic_mechanics"));
+                Map.of('I', "IRON_INGOT", 'P', "PISTON"), "steam_power"));
         registerMachine(api, new MachineDefinition("mechanical_press", "Prensa mecânica",
                 "mechanical_press", "DISPENSER", "IRON_INGOT", 2,
-                "mechanical_parts", 1, 100, "basic_mechanics"));
+                "mechanical_parts", 1, 100, "steam_power"));
     }
     @Override protected List<TechnologyDefinition> technologies() {
         // Prerequisites are declared before dependent technologies because registration is ordered.
         return List.of(
-            // Ancient
+            // Renaissance foundations for the later steam-powered machinery chain.
             new TechnologyDefinition("basic_mechanics", "Mecânica básica", "renaissance", 10, List.of()),
+            // Ancient foundations.
             new TechnologyDefinition("bronze_metallurgy", "Metalurgia do bronze", "ancient", 10, List.of()),
             new TechnologyDefinition("irrigation_systems", "Sistemas de irrigação", "ancient", 12, List.of()),
             new TechnologyDefinition("masonry_techniques", "Técnicas de alvenaria", "ancient", 8, List.of()),

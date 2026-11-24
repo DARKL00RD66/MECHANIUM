@@ -27,6 +27,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     private final Map<String, RecipeDefinition> recipes = new ConcurrentHashMap<>();
     private final Map<String, MobDropDefinition> mobDrops = new ConcurrentHashMap<>();
     private final Map<String, MachineDefinition> machines = new ConcurrentHashMap<>();
+    private final Map<String, FluidDefinition> fluids = new ConcurrentHashMap<>();
     private final Set<String> modules = ConcurrentHashMap.newKeySet();
     private ContentScope activeContentScope;
 
@@ -39,6 +40,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             contentStore.loadRecipes().forEach(value -> recipes.put(value.id(), value));
             contentStore.loadMobDrops().forEach(value -> mobDrops.put(value.id(), value));
             contentStore.loadMachines().forEach(value -> machines.put(value.id(), value));
+            contentStore.loadFluids().forEach(value -> fluids.put(value.id(), value));
         }
         categories.putIfAbsent("general", new ContentCategory("general", "Geral", "Conteúdo geral"));
     }
@@ -104,6 +106,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         removed.getOrDefault(MechaniumContentStore.RECIPE, Set.of()).forEach(recipes::remove);
         removed.getOrDefault(MechaniumContentStore.MOB_DROP, Set.of()).forEach(mobDrops::remove);
         removed.getOrDefault(MechaniumContentStore.MACHINE, Set.of()).forEach(machines::remove);
+        removed.getOrDefault(MechaniumContentStore.FLUID, Set.of()).forEach(fluids::remove);
     }
     @Override public boolean registerEra(EraDefinition era) {
         Objects.requireNonNull(era, "era");
@@ -503,6 +506,34 @@ public final class DefaultMechaniumApi implements MechaniumApi {
     @Override public Collection<MachineDefinition> getMachines() {
         return machines.values().stream().sorted(Comparator.comparing(MachineDefinition::id)).toList();
     }
+
+    @Override public synchronized boolean registerFluid(FluidDefinition value) {
+        Objects.requireNonNull(value, "fluid");
+        if (value.requiredTechnologyId() != null) validateTechnology(value.requiredTechnologyId());
+        for (FluidContainerDefinition container : value.containers()) {
+            ItemDefinition item = items.get(container.itemId());
+            if (item == null) throw new IllegalArgumentException(
+                    "Fluid " + value.id() + " references unregistered container item: " + container.itemId());
+        }
+        FluidDefinition old = fluids.get(value.id());
+        if (old != null) {
+            if (!old.equals(value)) return false;
+            trackContent(MechaniumContentStore.FLUID, value.id());
+            return true;
+        }
+        persist(() -> contentStore.saveFluid(value));
+        fluids.put(value.id(), value);
+        trackContent(MechaniumContentStore.FLUID, value.id());
+        return true;
+    }
+
+    @Override public Optional<FluidDefinition> getFluid(String id) {
+        return Optional.ofNullable(fluids.get(normalize(id)));
+    }
+
+    @Override public Collection<FluidDefinition> getFluids() {
+        return fluids.values().stream().sorted(Comparator.comparing(FluidDefinition::id)).toList();
+    }
     @Override public boolean canCraft(UUID player, String id) {
         RecipeDefinition recipe = recipes.get(normalize(id));
         if (recipe == null) return false;
@@ -547,6 +578,16 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             if (!technologies.containsKey(machine.requiredTechnologyId()))
                 errors.add("Machine " + machine.id() + " references missing technology " + machine.requiredTechnologyId());
         }
+        for (FluidDefinition fluid : fluids.values()) {
+            if (fluid.requiredTechnologyId() != null && !technologies.containsKey(fluid.requiredTechnologyId())) {
+                errors.add("Fluid " + fluid.id() + " references missing technology " + fluid.requiredTechnologyId());
+            }
+            for (FluidContainerDefinition container : fluid.containers()) {
+                if (!items.containsKey(container.itemId())) {
+                    errors.add("Fluid " + fluid.id() + " references missing container item " + container.itemId());
+                }
+            }
+        }
         for (MobDropDefinition drop : mobDrops.values()) {
             ItemDefinition result = items.get(drop.resultItemId());
             if (result == null) errors.add("Mob drop " + drop.id() + " references missing result item " + drop.resultItemId());
@@ -581,6 +622,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         private final Map<String, RecipeDefinition> recipeSnapshot = new HashMap<>(recipes);
         private final Map<String, MobDropDefinition> mobDropSnapshot = new HashMap<>(mobDrops);
         private final Map<String, MachineDefinition> machineSnapshot = new HashMap<>(machines);
+        private final Map<String, FluidDefinition> fluidSnapshot = new HashMap<>(fluids);
         private final Set<String> moduleSnapshot = new HashSet<>(modules);
         private boolean transactionOpen;
         private boolean completed;
@@ -642,6 +684,7 @@ public final class DefaultMechaniumApi implements MechaniumApi {
                 restore(recipes, recipeSnapshot);
                 restore(mobDrops, mobDropSnapshot);
                 restore(machines, machineSnapshot);
+                restore(fluids, fluidSnapshot);
                 modules.clear();
                 modules.addAll(moduleSnapshot);
                 completed = true;

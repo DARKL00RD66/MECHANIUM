@@ -74,7 +74,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 | ID | Finalidade e estado |
 |---|---|
 | `head-collection` | Fichas cosméticas, cabeças de coleção e expositores locais, sem dependências externas. |
-| `slime-customizer` | Modelos, projetos em branco, ferramenta e catálogo de conteúdo. O editor administrativo visual completo ainda está pendente. |
+| `slime-customizer` | Modelos, projetos em branco, ferramenta e catálogo. O editor inicial `/mechanium admin customizer` cria e remove itens personalizados, escolhendo material e pesquisa existentes, com ownership SQLite individual. Edição de itens e criação visual de receitas continuam pendentes. |
 
 ## Módulos opcionais
 

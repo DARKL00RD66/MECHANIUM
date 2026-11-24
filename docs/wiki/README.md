@@ -1,6 +1,6 @@
 # Wiki oficial do MECHANIUM
 
-> Manual em português para jogadores, administradores e desenvolvedores. Esta documentação acompanha a linha **0.7.4.02-SNAPSHOT** do repositório.
+> Manual em português para jogadores, administradores e desenvolvedores. Esta documentação acompanha a linha **0.9.9.00-SNAPSHOT** (em consolidação) do repositório.
 
 ![Logo do MECHANIUM](../../assets/mechanium-logo.png)
 

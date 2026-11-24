@@ -43,6 +43,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
     private MechaniumResearchMenu researchMenu;
     private MechaniumAdminMenu adminMenu;
     private MechaniumRecipeAdminMenu recipeAdminMenu;
+    private SlimeCustomizerMenu slimeCustomizerMenu;
     private PrivateStorageListener privateStorageListener;
     private MechaniumMachineManager machineManager;
     private EmcExchangeManager emcExchangeManager;
@@ -87,9 +88,28 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     getDataFolder().toPath().resolve(getConfig().getString("addons.directory", "addons")), getLogger());
             addonLoader.loadAll(new MechaniumAddonContext(api, this,
                     getDataFolder().toPath().resolve("addons"), getLogger()));
+
+            // The customizer category is independent from the optional module. This keeps
+            // existing user-created item definitions valid when the editor is temporarily disabled.
+            try (var customizerScope = api.openContentScope("system:customizer")) {
+                if (!api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                        "customizer_user_items", "Itens personalizados",
+                        "Itens criados por administradores com o editor MECHANIUM."))) {
+                    throw new IllegalStateException("Conflito ao registrar a categoria customizer_user_items.");
+                }
+                customizerScope.commit();
+            }
+
             Set<String> activeContentOwners = new HashSet<>();
             moduleManager.enabledModuleIds().forEach(id -> activeContentOwners.add("module:" + id));
             addonLoader.loadedAddonIds().forEach(id -> activeContentOwners.add("addon:" + id));
+            activeContentOwners.add("system:customizer");
+            for (String itemId : getConfig().getStringList("slime-customizer.user-item-ids")) {
+                if (itemId != null && itemId.trim().toLowerCase(Locale.ROOT)
+                        .matches("[a-z0-9][a-z0-9_.-]{1,95}")) {
+                    activeContentOwners.add(SlimeCustomizerMenu.ownerId(itemId));
+                }
+            }
             api.pruneInactiveContentOwners(activeContentOwners);
             applyConfiguredRecipeOverrides();
             List<String> contentErrors = api.validateContent();
@@ -155,6 +175,8 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             Bukkit.getPluginManager().registerEvents(adminMenu, this);
             recipeAdminMenu = new MechaniumRecipeAdminMenu(this, api);
             Bukkit.getPluginManager().registerEvents(recipeAdminMenu, this);
+            slimeCustomizerMenu = new SlimeCustomizerMenu(this, api);
+            Bukkit.getPluginManager().registerEvents(slimeCustomizerMenu, this);
             townyNationHook = new TownyNationHook(this);
             townyNationHook.start();
             Bukkit.getServicesManager().register(NationIdentityProvider.class, townyNationHook, this, ServicePriority.Normal);
@@ -515,6 +537,18 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         recipeAdminMenu.open(player);
     }
 
+    void openSlimeCustomizerMenu(Player player) {
+        if (!hasAdminAccess(player)) {
+            player.sendMessage(ChatColor.RED + "Sem permissão.");
+            return;
+        }
+        if (slimeCustomizerMenu == null) {
+            player.sendMessage(ChatColor.RED + "O Slime Customizer ainda não está disponível.");
+            return;
+        }
+        slimeCustomizerMenu.open(player);
+    }
+
     private void registerConfiguredEras() {
         for (Map<?, ?> row : getConfig().getMapList("progression.eras")) {
             Object id = row.get("id");
@@ -815,6 +849,11 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             else sender.sendMessage(ChatColor.RED + "O editor de receitas exige um jogador.");
             return true;
         }
+        if (args.length == 2 && args[1].equalsIgnoreCase("customizer")) {
+            if (sender instanceof Player player && slimeCustomizerMenu != null) slimeCustomizerMenu.open(player);
+            else sender.sendMessage(ChatColor.RED + "O Slime Customizer exige um jogador e o módulo ativo.");
+            return true;
+        }
         if (args.length == 4 && args[1].equalsIgnoreCase("recipe")) {
             String key = args[2].toLowerCase(Locale.ROOT);
             String eraId = args[3].toLowerCase(Locale.ROOT);
@@ -907,6 +946,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin hud — abrir o painel administrativo");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipes — configurar receitas vanilla");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin custom-recipes — editar receitas MECHANIUM");
+        sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin customizer — criar e remover itens personalizados");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin recipe <minecraft:id> <era|off>");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin era <era> [jogador|todos] — sem alvo altera a era global");
         sender.sendMessage(ChatColor.YELLOW + "Uso: /mechanium admin staff <add|remove|list> [jogador]");
@@ -936,6 +976,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin hud" + ChatColor.GRAY + " — painel administrativo");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipes" + ChatColor.GRAY + " — configurar bloqueios de receitas vanilla");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin custom-recipes" + ChatColor.GRAY + " — editar receitas MECHANIUM");
+            sender.sendMessage(ChatColor.YELLOW + "/mechanium admin customizer" + ChatColor.GRAY + " — criar e remover itens personalizados");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin recipe <minecraft:id> <era|off>");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin era <era> [jogador|todos] — sem alvo altera a era global");
             sender.sendMessage(ChatColor.YELLOW + "/mechanium admin staff <add|remove|list> [jogador]");
@@ -971,7 +1012,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
                     .filter(id -> id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("admin") && hasAdminAccess(sender)) {
-            return List.of("hud", "gui", "recipes", "custom-recipes", "recipe", "era", "points", "setera", "staff");
+            return List.of("hud", "gui", "recipes", "custom-recipes", "customizer", "recipe", "era", "points", "setera", "staff");
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("admin") && args[1].equalsIgnoreCase("recipe")) {
             return List.of("minecraft:iron_pickaxe", "minecraft:piston", "minecraft:hopper", "minecraft:repeater");
@@ -1056,6 +1097,7 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
         researchMenu = null;
         adminMenu = null;
         recipeAdminMenu = null;
+        slimeCustomizerMenu = null;
         privateStorageListener = null;
         if (townyNationHook != null) {
             Bukkit.getServicesManager().unregister(NationIdentityProvider.class, townyNationHook);

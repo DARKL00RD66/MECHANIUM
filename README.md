@@ -43,10 +43,10 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.7.4.02-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.9.9.00-SNAPSHOT.jar
 ```
 
-A linha 0.7.4.02-SNAPSHOT acrescenta uma Carteira EMC diretamente no HUD. A linha 0.7.4 adiciona a primeira implementação de equivalência EMC, com saldo por jogador, dissolução, síntese, catálogo aprendido e cinco níveis de estações. Consulte [EMC Exchange](docs/EMC_EXCHANGE.md) para uso, configuração e limitações.
+A linha 0.9.9.00-SNAPSHOT acrescenta uma Carteira EMC diretamente no HUD. A linha 0.7.4 adiciona a primeira implementação de equivalência EMC, com saldo por jogador, dissolução, síntese, catálogo aprendido e cinco níveis de estações. Consulte [EMC Exchange](docs/EMC_EXCHANGE.md) para uso, configuração e limitações.
 
 ## Instalar
 
@@ -88,5 +88,5 @@ alteradas sem autorização prévia e por escrito do titular dos direitos.
 A redistribuição gratuita de uma versão oficial sem modificações é permitida,
 desde que a licença e os avisos de autoria sejam preservados.
 
-Leia a licença completa em [LICENSE](LICENSE). Esta é uma licença proprietária
+Leia a licença completa em [LICENSE.md](LICENSE.md). Esta é uma licença proprietária
 personalizada, não uma licença open source.

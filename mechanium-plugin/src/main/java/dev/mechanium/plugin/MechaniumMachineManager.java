@@ -152,11 +152,15 @@ final class MechaniumMachineManager implements Listener {
             if (player.isSneaking() && wear > 0
                     && (maintenanceKit || (ironRepair && hand.getAmount() >= ironCost))) {
                 int consumed = maintenanceKit ? 1 : ironCost;
+                dispenser.getPersistentDataContainer().set(wearKey, PersistentDataType.INTEGER, 0);
+                event.setCancelled(true);
+                if (!dispenser.update(true, false)) {
+                    player.sendMessage(Component.text(
+                            "Não foi possível salvar a manutenção; nenhum item foi consumido.", NamedTextColor.RED));
+                    return;
+                }
                 if (hand.getAmount() <= consumed) player.getInventory().setItemInMainHand(null);
                 else hand.setAmount(hand.getAmount() - consumed);
-                dispenser.getPersistentDataContainer().set(wearKey, PersistentDataType.INTEGER, 0);
-                dispenser.update(true, false);
-                event.setCancelled(true);
                 player.sendMessage(Component.text("Manutenção concluída. Desgaste zerado.", NamedTextColor.GREEN));
                 return;
             }

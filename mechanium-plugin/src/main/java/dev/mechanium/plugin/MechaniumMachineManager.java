@@ -167,6 +167,15 @@ final class MechaniumMachineManager implements Listener {
                         + ". Agache com " + ironRepairCost() + " barra(s) de ferro ou um kit de manutenção desbloqueado.",
                         NamedTextColor.GRAY));
             }
+            String machineId = dispenser.getPersistentDataContainer()
+                    .get(machineIdKey, PersistentDataType.STRING);
+            MachineDefinition definition = api.getMachine(machineId).orElse(null);
+            if (definition != null && definition.energyCostPerOperation() > 0) {
+                player.sendMessage(Component.text("Consumo energético por operação: "
+                        + definition.energyCostPerOperation() + " unidades.", NamedTextColor.AQUA));
+                player.sendMessage(Component.text("Conecte esta máquina a uma bateria carregada por conduítes energéticos do mesmo proprietário.",
+                        NamedTextColor.GRAY));
+            }
         }
     }
 

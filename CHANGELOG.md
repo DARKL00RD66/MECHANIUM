@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.9.00-SNAPSHOT — consolidação em andamento
+- Aberta a linha consolidada de desenvolvimento diretamente no alvo 0.9.9, sem publicação de snapshots intermediários 0.8.x/0.9.x.
+- Adicionado plano de execução com auditoria da arquitetura atual, marcos internos, critérios de aceite e limitações conhecidas.
+- Próxima implementação: fundação industrial com máquinas de múltiplos ingredientes/produtos e migração SQLite compatível. Itens do plano não são considerados implementados até passarem por CI e validação funcional.
+
 ## 0.7.4.02-SNAPSHOT
 - Reclassificado o catálogo automático de receitas vanilla para distribuir melhor os itens pelas eras; receitas não reconhecidas deixam de cair automaticamente na Antiguidade e usam Renascimento como faixa neutra para revisão administrativa.
 - Criadas classificações específicas para materiais primitivos, metalurgia medieval, navegação/óptica renascentista, maquinário industrial, eletrificação, automação digital, conteúdo mítico, Era Espacial e Futuro Especulativo.

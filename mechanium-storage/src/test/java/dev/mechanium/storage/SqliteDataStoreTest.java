@@ -183,7 +183,7 @@ class SqliteDataStoreTest {
         }
 
         try (SqliteDataStore migrated = new SqliteDataStore(database, Logger.getLogger("test"))) {
-            assertEquals(1, migrated.loadMachines().size());
+            assertEquals(2, migrated.loadMachines().size());
             MachineDefinition restored = migrated.loadMachines().iterator().next();
             assertEquals(legacy.inputs(), restored.inputs());
             assertEquals(legacy.outputs(), restored.outputs());
@@ -292,6 +292,7 @@ class SqliteDataStoreTest {
         try (var connection = java.sql.DriverManager.getConnection("jdbc:sqlite:" + database.toAbsolutePath());
              var statement = connection.createStatement()) {
             statement.execute("DROP TABLE mechanium_content_owners");
+            statement.execute("ALTER TABLE mechanium_machines DROP COLUMN energy_cost_per_operation");
             statement.execute("DELETE FROM mechanium_schema_version WHERE version >= 4");
         }
 

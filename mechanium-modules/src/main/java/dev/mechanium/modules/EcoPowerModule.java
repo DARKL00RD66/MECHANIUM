@@ -29,6 +29,9 @@ final class EcoPowerModule extends AbstractBuiltinModule {
         registerItem(api, new ItemDefinition("energy_cell", "&eCélula de armazenamento", "BARREL",
                 List.of("&8Bateria MECHANIUM", "&7Armazena até 10.000 unidades de energia", "&7Conecte a um gerador e a uma máquina"),
                 0, 16, "eco_power", "energy_accumulation"));
+        registerItem(api, new ItemDefinition("energy_conduit", "&bConduíte energético", "HOPPER",
+                List.of("&8Componente de rede elétrica", "&7Conecta geradores, baterias e máquinas", "&7A rede respeita o proprietário e não carrega chunks"),
+                0, 64, "eco_power", "electrical_grid"));
 
         registerRecipe(api, new RecipeDefinition("wind_rotor_recipe", RecipeDefinition.Type.SHAPED,
                 "wind_rotor", 2, List.of(" I ", "IRI", " I "),
@@ -40,5 +43,9 @@ final class EcoPowerModule extends AbstractBuiltinModule {
                 "energy_cell", 1, List.of("ACA", "RER", "ACA"),
                 Map.of('A', "AMETHYST_SHARD", 'C', "COPPER_INGOT", 'R', "REDSTONE", 'E', "mechanium:solar_cell"),
                 "energy_accumulation"));
+        registerRecipe(api, new RecipeDefinition("energy_conduit_recipe", RecipeDefinition.Type.SHAPED,
+                "energy_conduit", 8, List.of("ICI", "CRC", "ICI"),
+                Map.of('I', "IRON_INGOT", 'C', "COPPER_INGOT", 'R', "REDSTONE"),
+                "electrical_grid"));
     }
 }

@@ -76,10 +76,10 @@ final class AdvancedTechModule extends AbstractBuiltinModule {
                 "assembly_machine", "DISPENSER", "mechanium:mechanical_parts", 2, "precision_parts", 1, 160, 1,
                 "advanced_assembly"));
         registerMachine(api, new MachineDefinition("industrial_mill_machine", "Moinho industrial",
-                "industrial_mill", "DISPENSER", "WHEAT", 2, "mechanium:mechanium_flour", 2, 100, 1,
+                "industrial_mill", "DISPENSER", "WHEAT", 2, "mechanium_flour", 2, 100, 1,
                 "industrial_food_machinery"));
         registerMachine(api, new MachineDefinition("industrial_canner_machine", "Conservadora industrial",
-                "industrial_canner", "DISPENSER", "SWEET_BERRIES", 3, "mechanium:preserved_berries", 1, 120, 1,
+                "industrial_canner", "DISPENSER", "SWEET_BERRIES", 3, "preserved_berries", 1, 120, 1,
                 "industrial_food_machinery"));
     }
 }

@@ -13,10 +13,10 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 |---|---|---|
 | Definição de máquinas | Cada definição aceita 1–6 tipos de entrada e 1–3 produtos; custo energético por operação é parte da definição | Filas, processamento em lote contínuo, concorrência e blocos físicos adicionais |
 | Bloco de máquina | O runtime atual aceita dispensadores | Separar o modelo de processo do tipo de bloco e ampliar os blocos suportados com segurança |
-| Inventário de máquina | Primeiro slot é entrada e último slot é saída | Slots e buffers configuráveis para múltiplos insumos e produtos |
+| Inventário de máquina | Seis slots de entrada e três slots de saída, com planejamento do lote completo | Filas de produção e buffers/slots configuráveis |
 | Processamento | Um ciclo central por máquina, com progresso salvo no PDC | Filas, lotes, concorrência limitada e controle de throughput |
 | Energia | Geradores, baterias e máquinas podem ser conectados por conduítes energéticos do mesmo proprietário; até 256 nós, somente chunks carregados | Testes funcionais em servidor, métricas de rede, telemetria e limites de throughput configuráveis |
-| Fluidos | Tanques guardam volumes tipados no PDC; água purificada e refrigerante são suportados, com capacidade padrão de 16.000 mB e transferência de 250 mB/ciclo | API pública de registro de fluidos, válvulas, bombas, mais fluidos, telemetria e testes em servidor |
+| Fluidos | API pública registra definições tipadas e recipientes; tanques guardam mB no PDC e redes isoladas transferem fluidos compatíveis; água purificada e refrigerante são exemplos padrão | Válvulas, bombas, telemetria, integração com processos e testes em servidor |
 | Logística | Conduítes e caixas transportam itens MECHANIUM entre caixas do mesmo proprietário | Filtros, prioridades, limites de transferência, múltiplos itens por ciclo e escalabilidade |
 | Persistência | Definições ficam no SQLite; identidade, dono e progresso da máquina ficam no PDC do bloco | Migrações compatíveis, recuperação após reinício e testes de chunks/mundos |
 | EMC | Saldo individual, dissolução e síntese já existem | Integração com energia, máquinas e logística; revisar limites e operações atômicas |
@@ -28,7 +28,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 - `MachineDefinition` e o runtime agora aceitam 1–6 tipos de entrada e 1–3 tipos de saída, distribuídos em seis slots de entrada e três de saída; o bloco físico ainda é `DISPENSER`.
 - A rede elétrica agora possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga; faltam testes em servidor e telemetria da rede.
-- A rede de fluidos usa os IDs `purified_water` e `industrial_coolant`, volumes em mB no PDC de tanques, bloqueio de misturas e transferência por tubos conectados. O runtime aceita itens legados como entrada, mas não oferece ainda uma API pública de registro de novos fluidos para addons.
+- A rede de fluidos usa definições registradas via API pública, volumes em mB no PDC dos tanques, bloqueio de misturas e transferência por tubos conectados. Itens de tanque preservam tipo e volume ao serem desmontados; a retirada escolhe o maior recipiente de saída desbloqueado que caiba no volume disponível.
 - A rede industrial percorre até 128 conduítes indexados nos chunks carregados e movimenta um item MECHANIUM por ciclo; filtros e prioridades continuam pendentes.
 - O processamento atual não possui fila de ordens configurável nem um plano genérico de entradas/saídas.
 - Ainda não há confirmação de teste funcional completo em Paper e Purpur 1.21.11. As verificações Maven/CI devem ser relatadas separadamente.
@@ -41,14 +41,14 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - Tanques tipados adicionados: 16.000 mB padrão, transferência de 250 mB por ciclo, água purificada/refrigerante, bloqueio de mistura e migração de itens fluidos legados.
 - O PDC de fluido e volume agora é preservado no próprio item de tanque ao desmontar e restaurado ao recolocar, mesmo quando o registro do item não estiver ativo.
 - Redes de fluidos e conduítes industriais usam índices por chunk carregado, sem varrer todos os chunks do mundo em cada ciclo.
-- Custos energéticos por operação movidos da lista fixa de IDs para `MachineDefinition`; SQLite v8 migra as máquinas antigas e mantém o consumo anterior.
+- Custos energéticos por operação movidos da lista fixa de IDs para `MachineDefinition`; SQLite v8 migra as máquinas antigas e mantém o consumo anterior. SQLite v9 adiciona o registro persistente de fluidos, recipientes e ownership.
 - Conduíte energético adicionada como item craftável; geradores, baterias e máquinas usam rede conectada com limite de 256 nós.
 - Carga da bateria é armazenada no PDC do item quando desmontada e restaurada ao recolocar.
 - Geradores são indexados em chunks carregados, evitando a varredura de todos os chunks a cada segundo.
 - O clique na máquina mostra insumos, produtos, duração e custo de energia.
 - Produção valida todos os insumos e planeja todas as saídas antes de debitar recursos.
 - Migração SQLite v7 grava entradas/saídas normalizadas e lê linhas legadas pelos campos antigos.
-- CI GitHub Actions #45484853405 passou em Java 21/Maven `clean verify`; 84 testes automatizados passaram (API 19, Storage 13, Engine 12, Modules 9, Addon Loader 2, Plugin 29).
+- CI Java 21/Maven mais recente aprovou a API pública de fluidos, persistência SQLite v9 e os testes de registro/migração. A validação das novas correções de extração variável ainda será executada.
 
 ## 2. Marcos internos de implementação
 
@@ -76,8 +76,8 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 ### Marco C — Fluidos tipados (equivalente interno a 0.8.2)
 
 - [x] Criar modelo de fluido independente de ItemStack.
-- [x] Definir identificador, volume, capacidade, entrada/saída e compatibilidade de conexão para água purificada e refrigerante.
-- [ ] Introduzir válvulas, bombas e reservatórios com regras explícitas.
+- [x] Definir identificador, volume, capacidade, entrada/saída e compatibilidade de conexão para fluidos registrados pela API pública.
+- [ ] Introduzir válvulas e bombas com regras explícitas; os tanques já atuam como reservatórios.
 - [x] Manter compatibilidade com tanques e tubos existentes; converter itens fluidos legados no inventário do tanque para volume tipado e preservar esse estado no item de tanque recuperado.
 - [x] Testar automaticamente capacidade, mistura inválida, drenagem e transferência por meio de `FluidTankPolicyTest`.
 - [ ] Testar migração real, reinícios, chunks e bloqueios em Paper/Purpur 1.21.11.
@@ -92,6 +92,8 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [ ] Integrar máquinas, energia e logística com contratos comuns e eventos observáveis.
 
 ### Marco E — Completar módulos (equivalente interno a 0.8.5)
+
+- O módulo Head Collection é cosmético e local. Não instala, detecta nem exige Geyser, GeyserMC, Floodgate ou qualquer plataforma Bedrock. Os IDs antigos de categoria/configuração são mantidos apenas para migrar dados já existentes.
 
 - [ ] Mining Automation: definir e implementar a extração de jogo prometida; não anunciar mineração automática antes do teste.
 - [ ] Slime Customizer: finalizar a interface administrativa para criação, edição e validação de conteúdo.

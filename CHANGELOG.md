@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.4.01-SNAPSHOT
+- Adicionado ao HUD principal o item **Carteira EMC**, com saldo individual e quantidade de itens aprendidos.
+- O item abre diretamente o painel EMC existente; a área superior do HUD também mostra o saldo atual.
+- O atalho aparece como desativado quando o módulo emc-exchange está desligado.
+
+
 ## 0.7.4.00-SNAPSHOT
 - Adicionada a primeira implementação nativa de equivalência EMC: saldo por jogador, catálogo de itens aprendidos, dissolução e síntese.
 - Criadas cinco tiers de Dissolvedor e cinco tiers de Materializador, com desbloqueios por pesquisa e limites crescentes de valor por item.

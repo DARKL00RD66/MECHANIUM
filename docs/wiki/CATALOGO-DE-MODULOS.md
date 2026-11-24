@@ -25,7 +25,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 | `extra-gear` | Picareta reforçada com Haste breve e bússola de levantamento (coordenadas, bioma, direção e bloco observado). |
 | `sensible-toolbox` | Kit de campo com efeitos temporários e kit consumível de reparo de equipamento. |
 | `sfcalc` | Comando de cálculo recursivo de materiais/lotes de receitas MECHANIUM; não calcula preços monetários. |
-| `eco-power` | Geradores eólico/solar, baterias, rede local de energia e consumo por máquinas compatíveis. |
+| `eco-power` | Geradores eólico/solar, baterias de 10.000 unidades e conduítes energéticos; rede por proprietário de até 256 nós, somente em chunks carregados. A carga da bateria é preservada ao desmontar/recolocar. |
 | `liquid` | Filtro, tanque e tubulação para transporte local do item `purified_water`. |
 | `advanced-tech` | Britador, refinaria e montadora industrial com processamento e consumo energético. |
 | `simple-storage` | Rede de inventários virtuais paginados com até 64 nós adjacentes e controle de acesso. |
@@ -85,7 +85,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 
 ## Limitações comuns a vários módulos
 
-- O runtime comum de dispenser suporta seis slots de entrada e três slots de saída; cada definição aceita até seis tipos de ingrediente e três produtos por lote.
+- O runtime comum de dispenser aceita até seis tipos de entrada e três produtos por lote; o custo energético por operação fica na definição de cada máquina.
 - Ter itens, categorias e receitas cadastrados não significa que o módulo possua automação completa ou todas as funcionalidades de uma referência externa.
 - Greenhouse e Agriculture ainda não representam um simulador completo de culturas customizadas.
 - Mining Automation possui componentes e receitas, mas não mineração autônoma de blocos.

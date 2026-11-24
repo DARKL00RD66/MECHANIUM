@@ -1,6 +1,6 @@
 # Sistemas e mecânicas do MECHANIUM
 
-Este documento explica os sistemas que compõem a linha 0.7.4.02-SNAPSHOT. A lista de módulos e o estado de cada domínio também estão no [catálogo de módulos](CATALOGO-DE-MODULOS.md).
+Este documento explica os sistemas que compõem a linha 0.9.9.00-SNAPSHOT. A lista de módulos e o estado de cada domínio também estão no [catálogo de módulos](CATALOGO-DE-MODULOS.md).
 
 ## 1. Motor de progressão
 
@@ -76,15 +76,17 @@ O módulo opcional `better-reactor` usa um gerador cristalino fictício. Um cris
 
 ## 6. Fluidos — Liquid e Water Treatment
 
-A primeira rede de fluidos transporta somente o item MECHANIUM `purified_water`.
+Os tanques guardam volume tipado no PDC do bloco, medido em milibuckets (mB). A capacidade padrão é 16.000 mB; a taxa de transferência padrão é 250 mB por ciclo (dois segundos).
 
-- O filtro transforma um balde de água em água purificada.
-- O tanque usa barril.
-- A tubulação é um dispenser identificado pelo MECHANIUM.
-- Tanques do mesmo proprietário conectados por tubulações adjacentes formam uma rede.
-- A rede tenta transferir um item a cada dois segundos, examinando até 128 tubulações e apenas chunks carregados.
-
-Não há suporte genérico a lava, água vanilla em tubulações, fluidos arbitrários ou válvulas. Water Treatment expande a cadeia de água e não transforma a rede em um simulador universal de fluidos.
+- `purified_water` representa 250 mB de água purificada.
+- `purified_water_cell` representa 1.000 mB de água purificada.
+- `coolant_cell` representa 250 mB de `industrial_coolant`.
+- Um tanque só aceita um fluido por vez; água purificada e refrigerante não podem ser misturados.
+- Clique no tanque com um item de fluido desbloqueado para abastecer. Agache e clique com a mão vazia para retirar 250 mB.
+- Tubulações são dispensers identificados e conectam tanques do mesmo proprietário por faces. A rede transporta volume, não apenas um item por ciclo.
+- A rede percorre até 128 tubulações indexadas e somente chunks carregados. Não carrega chunks automaticamente.
+- Itens fluidos legados no inventário são convertidos em volume quando o tanque é acessado. Tipo e quantidade são preservados no PDC do item de tanque ao desmontar e recolocar.
+- O runtime ainda não possui válvulas, bombas, lava/água vanilla em tubulações, outros fluidos arbitrários nem API pública para addons registrarem novos fluidos.
 
 ## 7. Logística industrial
 
@@ -122,7 +124,7 @@ Electric Spawners adiciona quatro incubadoras de animais passivos:
 - Cenouras → ovo de porco;
 - Trigo → ovo de ovelha.
 
-Exigem a pesquisa `livestock_incubation` e bateria adjacente do mesmo proprietário. Não criam criaturas hostis.
+Exigem a pesquisa `livestock_incubation` e uma rede energética do mesmo proprietário com o custo declarado na definição da máquina. Não criam criaturas hostis.
 
 Fast Machines adiciona:
 - Prensa rápida: uma barra de ferro gera duas peças mecânicas em 20 ticks.

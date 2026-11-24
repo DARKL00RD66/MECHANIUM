@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O último CI concluído antes da ampliação do editor foi o commit `e657f8c1f54a4514c8982d9c89e2ceccc99a68c5` (workflow #45510163868): 118 testes automatizados, sete módulos Maven e addon de exemplo aprovados. A implementação adicional de receitas shapeless no Slime Customizer está em validação nesta revisão. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI da implementação do editor de receitas passou no commit `dc1cea4c4503d4dc6bbd2150bf3b79a02a3bcf80` (workflow #45510790964): 119 testes automatizados, sete módulos Maven e addon de exemplo aprovados. O commit documental final `fc17b0f7b38d1097c9a83ebcc8184ba6f471475c` também passou no workflow #45510951756. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 

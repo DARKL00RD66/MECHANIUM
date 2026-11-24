@@ -186,9 +186,9 @@ final class VanillaRecipeCatalog {
                 "OAK_PLANKS", "CRAFTING_TABLE", "COBBLESTONE", "STONE", "DIRT",
                 "GRAVEL", "SAND", "GLASS", "GLASS_PANE", "BRICK", "BRICKS",
                 "TERRACOTTA", "FLOWER_POT", "PAPER", "BOOK", "BREAD", "BOWL",
-                "TORCH", "FURNACE", "CHEST", "BARREL", "STICK", "LADDER")) return true;
+                "TORCH", "FURNACE", "CHEST", "BARREL", "STICK", "LADDER", "FISHING_ROD",\n                "HONEY_BOTTLE", "HONEY_BLOCK", "HONEYCOMB", "DRIED_KELP", "COOKIE", "CAKE",\n                "PUMPKIN_PIE", "MUSHROOM_STEW", "RABBIT_STEW", "BEETROOT_SOUP")) return true;
 
-        if (material.startsWith("WOODEN_") || material.startsWith("STONE_")) return true;
+        if (material.startsWith("WOODEN_") || material.startsWith("STONE_") || material.startsWith("COOKED_")) return true;
         if (material.endsWith("_PLANKS") || material.endsWith("_LOG")
                 || material.endsWith("_WOOD") || material.endsWith("_WOOL")
                 || material.endsWith("_CARPET") || material.endsWith("_BED")
@@ -204,7 +204,7 @@ final class VanillaRecipeCatalog {
     private static boolean isElectricalOutput(String material) {
         return containsAny(material, "REDSTONE_LAMP", "REPEATER", "COMPARATOR",
                 "REDSTONE_TORCH", "REDSTONE_BLOCK", "DAYLIGHT_DETECTOR",
-                "LIGHTNING_ROD", "COPPER_BULB");
+                "LIGHTNING_ROD", "COPPER_BULB", "NOTE_BLOCK");
     }
 
     private static String typeOf(Recipe recipe) {

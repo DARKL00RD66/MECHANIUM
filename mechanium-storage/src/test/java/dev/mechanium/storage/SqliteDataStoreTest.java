@@ -137,7 +137,7 @@ class SqliteDataStoreTest {
                         new MachineIngredient("mechanium:industrial_resin", 3)),
                 List.of(new MachineProduct("mechanical_parts", 2),
                         new MachineProduct("copper_coil", 1)),
-                240, "basic_mechanics");
+                240, 4, "basic_mechanics");
         MobDropDefinition drop = new MobDropDefinition(
                 "cow_animal_fat", "COW", "animal_fat", 1, 2, 0.35, "crop_rotation");
 
@@ -151,6 +151,7 @@ class SqliteDataStoreTest {
             MachineDefinition restored = reopened.loadMachines().iterator().next();
             assertEquals(machine.inputs(), restored.inputs());
             assertEquals(machine.outputs(), restored.outputs());
+            assertEquals(4, restored.energyCostPerOperation());
             assertEquals(List.of(drop), List.copyOf(reopened.loadMobDrops()));
         }
     }
@@ -163,15 +164,21 @@ class SqliteDataStoreTest {
         MachineDefinition legacy = new MachineDefinition(
                 "mechanical_press", "Prensa mecânica", "mechanical_press", "DISPENSER",
                 "IRON_INGOT", 2, "mechanical_parts", 1, 100, "basic_mechanics");
+        MachineDefinition previouslyPowered = new MachineDefinition(
+                "industrial_mill_machine", "Moinho industrial", "industrial_mill",
+                "DISPENSER", "WHEAT", 2, "mechanium:mechanium_flour", 2,
+                100, "industrial_food_machinery");
 
         try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
             store.saveMachine(legacy);
+            store.saveMachine(previouslyPowered);
         }
 
         try (var connection = java.sql.DriverManager.getConnection("jdbc:sqlite:" + database.toAbsolutePath());
              var statement = connection.createStatement()) {
             statement.execute("DROP TABLE mechanium_machine_inputs");
             statement.execute("DROP TABLE mechanium_machine_outputs");
+            statement.execute("ALTER TABLE mechanium_machines DROP COLUMN energy_cost_per_operation");
             statement.execute("DELETE FROM mechanium_schema_version WHERE version >= 7");
         }
 
@@ -182,6 +189,10 @@ class SqliteDataStoreTest {
             assertEquals(legacy.outputs(), restored.outputs());
             assertEquals("IRON_INGOT", restored.inputId());
             assertEquals("mechanical_parts", restored.outputItemId());
+            MachineDefinition restoredPowered = migrated.loadMachines().stream()
+                    .filter(machine -> machine.id().equals("industrial_mill_machine")).findFirst().orElseThrow();
+            assertEquals(1, restoredPowered.energyCostPerOperation(),
+                    "The v8 migration retains energy consumption for previously powered machines.");
         }
     }
 

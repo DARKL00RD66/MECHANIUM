@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.7.4.01-SNAPSHOT  
+**Versão:** 0.7.4.02-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -170,3 +170,13 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - Ao clicar, abre o painel EMC com catálogo aprendido e acesso às regras de dissolução e síntese.
 - Se `emc-exchange` estiver desativado, o item aparece como indisponível.
 - O saldo continua pessoal, isolado por UUID e persistido em `emc-exchange.db`.
+
+
+## Auditoria de distribuição histórica — 0.7.4.02-SNAPSHOT
+
+- Corrigido o classificador vanilla: antes, qualquer resultado não reconhecido caía em Antiguidade; agora itens desconhecidos usam Renascimento como faixa neutra, enquanto materiais e tecnologias conhecidos recebem uma era específica.
+- A nova classificação separa Antiguidade, Idade Média, Renascimento, Revolução Industrial, Eletrificação, Era Moderna, Informação, Digital, Espacial, Mítica e Futuro Especulativo.
+- Adicionada migração única para corrigir regras já semeadas pelo classificador antigo. O console informa a quantidade de regras alteradas e a limitação de não distinguir antigas escolhas manuais que coincidiam com o default automático.
+- Nos módulos próprios, as três tecnologias explicitamente antigas no núcleo industrial são Bronze, Irrigação e Alvenaria. O comentário incorreto que classificava Mecânica básica como Antiga foi corrigido; ela permanece na Renascença.
+- Prensa mecânica, receita e máquina agora exigem Energia a vapor, da Revolução Industrial, porque a receita depende de pistão.
+- Testes unitários cobrem classificação por era e o fallback neutro. A validação de servidor Paper/Purpur 1.21.11 ainda é necessária.

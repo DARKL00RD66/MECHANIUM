@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `9215d46967a246e559dae60e5802026d05c9e2e6` com 97 testes automatizados e compilação do addon de exemplo, incluindo a preservação do volume de fluido no item de tanque. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `95fbf0d6a9d6805a01fa01536d803e87015ccbdc` (workflow #45505906156): 107 testes automatizados e compilação do addon de exemplo, incluindo API pública de fluidos e preservação do volume de fluido no item de tanque. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 
@@ -41,7 +41,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - Tanques tipados adicionados: 16.000 mB padrão, transferência de 250 mB por ciclo, água purificada/refrigerante, bloqueio de mistura e migração de itens fluidos legados.
 - O PDC de fluido e volume agora é preservado no próprio item de tanque ao desmontar e restaurado ao recolocar, mesmo quando o registro do item não estiver ativo.
 - Redes de fluidos e conduítes industriais usam índices por chunk carregado, sem varrer todos os chunks do mundo em cada ciclo.
-- Custos energéticos por operação movidos da lista fixa de IDs para `MachineDefinition`; SQLite v8 migra as máquinas antigas e mantém o consumo anterior. SQLite v9 adiciona o registro persistente de fluidos, recipientes e ownership.
+- Custos energéticos por operação movidos da lista fixa de IDs para `MachineDefinition`; SQLite v8 migra as máquinas antigas e mantém o consumo anterior. SQLite v9 adiciona registro persistente de fluidos, recipientes e ownership. SQLite v9 adiciona o registro persistente de fluidos, recipientes e ownership.
 - Conduíte energético adicionada como item craftável; geradores, baterias e máquinas usam rede conectada com limite de 256 nós.
 - Carga da bateria é armazenada no PDC do item quando desmontada e restaurada ao recolocar.
 - Geradores são indexados em chunks carregados, evitando a varredura de todos os chunks a cada segundo.
@@ -77,6 +77,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 - [x] Criar modelo de fluido independente de ItemStack.
 - [x] Definir identificador, volume, capacidade, entrada/saída e compatibilidade de conexão para fluidos registrados pela API pública.
+- [x] Expor registro de fluidos/recipientes na API pública e persistir definições e ownership no SQLite schema v9.
 - [ ] Introduzir válvulas e bombas com regras explícitas; os tanques já atuam como reservatórios.
 - [x] Manter compatibilidade com tanques e tubos existentes; converter itens fluidos legados no inventário do tanque para volume tipado e preservar esse estado no item de tanque recuperado.
 - [x] Testar automaticamente capacidade, mistura inválida, drenagem e transferência por meio de `FluidTankPolicyTest`.
@@ -97,7 +98,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 - [ ] Mining Automation: definir e implementar a extração de jogo prometida; não anunciar mineração automática antes do teste.
 - [ ] Slime Customizer: finalizar a interface administrativa para criação, edição e validação de conteúdo.
-- [x] Head Collection: renomear o módulo cosmético para escopo local; remover qualquer dependência de plataforma externa e preservar os IDs persistentes legados por migração.
+- [x] Head Collection: manter o módulo como cosmético local sem integração Geyser/Bedrock; IDs antigos de categoria/config são preservados somente para migração.
 - [ ] Agricultura/estufas: validar crescimento, colheita e automação, não somente receitas e itens.
 - [ ] Revisar máquinas e receitas declaradas pelos módulos para usar os novos buffers/processos.
 - [ ] Criar testes de regressão para dependências, IDs, progressão e propriedade.

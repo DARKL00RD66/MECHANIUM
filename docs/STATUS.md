@@ -2,7 +2,8 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** planejamento 0.9.9 registrado; fundação industrial em início  
+**Fase atual:** primeira entrega da fundação industrial implementada no código; CI e runtime ainda pendentes
+**Progresso 0.9.9:** API de máquinas multi-entrada/multi-saída, buffers 6+3, validação integral e migração SQLite v7 adicionados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`

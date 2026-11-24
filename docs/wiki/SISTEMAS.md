@@ -1,6 +1,6 @@
 # Sistemas e mecânicas do MECHANIUM
 
-Este documento explica os sistemas que compõem a linha 0.7.4.01-SNAPSHOT. A lista de módulos e o estado de cada domínio também estão no [catálogo de módulos](CATALOGO-DE-MODULOS.md).
+Este documento explica os sistemas que compõem a linha 0.7.4.02-SNAPSHOT. A lista de módulos e o estado de cada domínio também estão no [catálogo de módulos](CATALOGO-DE-MODULOS.md).
 
 ## 1. Motor de progressão
 

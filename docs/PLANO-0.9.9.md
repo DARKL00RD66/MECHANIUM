@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `0708da367851d63413655ee6599306a4a09abff9` com 97 testes automatizados e compilação do addon de exemplo. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `9215d46967a246e559dae60e5802026d05c9e2e6` com 97 testes automatizados e compilação do addon de exemplo, incluindo a preservação do volume de fluido no item de tanque. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 

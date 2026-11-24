@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `332aafeed233b8f8adb7209233a58f8c42dc6a09` (workflow #45506733683): 111 testes automatizados, compilação dos sete módulos Maven e do addon de exemplo. Inclui a API pública de fluidos, SQLite v9 e recipientes de extração de volume variável. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `8e2c78264cf3470a6f11813ac0c8d1296e75d8cc` (workflow #45508690080): 116 testes automatizados, compilação dos sete módulos Maven e do addon de exemplo. Inclui o controlador inicial de estufa, mantendo o item climático legado e adicionando o item separado `greenhouse_controller`. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 
@@ -48,7 +48,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - O clique na máquina mostra insumos, produtos, duração e custo de energia.
 - Produção valida todos os insumos e planeja todas as saídas antes de debitar recursos.
 - Migração SQLite v7 grava entradas/saídas normalizadas e lê linhas legadas pelos campos antigos.
-- CI Java 21/Maven #45506733683 aprovou a API pública de fluidos, persistência SQLite v9, seleção de recipientes de extração variável e a suíte completa de 111 testes.
+- O `greenhouse_controller` foi adicionado sem alterar o item/receita legado `climate_controller`; o controlador acelera em um estágio plantas `Ageable` somente depois de um crescimento normal aceito, dentro do raio configurado e com energia da rede do proprietário.
 
 ## 2. Marcos internos de implementação
 
@@ -70,7 +70,8 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [x] Permitir geradores, baterias e máquinas conectados através de conduítes.
 - [ ] Definir capacidade, taxa de transferência, perda/eficiência de gameplay e política de distribuição.
 - [ ] Garantir débito atômico: uma máquina não pode consumir parcialmente energia nem duplicar energia em uma falha.
-- [ ] Exibir carga, geração, consumo e bloqueios da rede para jogadores autorizados.
+- [x] Exibir para o proprietário o número de nós/baterias e a carga/capacidade agregada da rede.
+- [ ] Exibir geração, consumo instantâneo e motivos detalhados de bloqueio.
 - [ ] Testar redes fragmentadas, limite de tamanho, chunks, explosões, pistões e propriedade.
 
 ### Marco C — Fluidos tipados (equivalente interno a 0.8.2)
@@ -99,7 +100,8 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [ ] Mining Automation: definir e implementar a extração de jogo prometida; não anunciar mineração automática antes do teste.
 - [ ] Slime Customizer: finalizar a interface administrativa para criação, edição e validação de conteúdo.
 - [x] Head Collection: manter o módulo como cosmético local sem integração Geyser/Bedrock; IDs antigos de categoria/config são preservados somente para migração.
-- [ ] Agricultura/estufas: validar crescimento, colheita e automação, não somente receitas e itens.
+- [x] Implementar controlador `greenhouse_controller` que aplica +1 estágio a plantas `Ageable` após crescimento normal aceito, dentro do raio configurado e com energia da rede do proprietário; preservar `climate_controller` legado.
+- [ ] Validar o controlador em Paper/Purpur e completar hidroponia, nutrientes, colheita/replantio e culturas customizadas.
 - [ ] Revisar máquinas e receitas declaradas pelos módulos para usar os novos buffers/processos.
 - [ ] Criar testes de regressão para dependências, IDs, progressão e propriedade.
 

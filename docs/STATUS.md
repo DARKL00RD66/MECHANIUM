@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.7.3.00-SNAPSHOT  
+**Versão:** 0.7.3.01-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -139,3 +139,13 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - **Mining Automation:** componentes fictícios de prospecção e módulo minerador com montadora; não implementa extração autônoma de blocos nesta etapa.
 - Os cinco módulos são opcionais, ativados por padrão e podem ser desligados individualmente em `config.yml`. Cada um registra duas tecnologias, uma categoria, quatro itens e quatro receitas. Três declaram máquinas no runtime genérico.
 - Build Maven/CI e testes reais em Paper/Purpur 1.21.11 ainda precisam ser confirmados.
+
+
+## Atualização de interface 0.7.3.01-SNAPSHOT
+
+- Menu principal reorganizado com quatro entradas: Árvore de progressão, Eras históricas, Crafting e Wiki.
+- Árvore de progressão abre na era efetiva do jogador. A tela Eras históricas organiza as eras em relógios selecionáveis; o item Estrela do Nether é exibido acima do relógio da era atual.
+- A seleção de outra era permite consultar a respectiva árvore, sem conceder avanço ou alterar a era efetiva do jogador.
+- Wiki de consulta separada, com listas paginadas e telas de detalhe para itens, receitas e máquinas. Ela não fabrica itens nem consome materiais.
+- Crafting permanece como a única área da interface que efetua fabricação e consome ingredientes.
+- A atualização foi compilada para validação por CI; teste visual e funcional dentro de Paper/Purpur 1.21.11 permanece necessário.

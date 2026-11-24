@@ -1,11 +1,19 @@
 # Changelog
 
-## 0.7.3.00-SNAPSHOT
+## 0.7.3.01-SNAPSHOT
+- Reorganizado o Guia do MECHANIUM: menu principal com Árvore de progressão, Eras históricas, Crafting e Wiki.
+- Árvore de progressão abre diretamente na era efetiva do jogador; Eras históricas apresenta relógios selecionáveis e marca a era atual com uma Estrela do Nether acima do relógio correspondente. A seleção altera apenas a visualização da árvore, não a era/progressão do jogador.
+- Wiki separada e somente de consulta, com seções paginadas para itens, receitas e máquinas e telas detalhadas de composição, requisitos, entradas, saídas e tempo de processo.
+- Crafting permanece separado e conserva a fabricação com verificação e consumo de ingredientes.
+- Atualização incremental de interface; build CI e verificação em servidor Paper/Purpur 1.21.11 devem confirmar esta revisão.
+
+
+## 0.7.3.01-SNAPSHOT
 - Adicionados cinco módulos nativos opcionais: FN Amplifications, Geyser Heads (catálogo cosmético local), Slime Customizer, Industrial Chemistry e Mining Automation.
 - Cada módulo registra duas tecnologias, uma categoria, quatro itens e quatro receitas; FN Amplifications, Industrial Chemistry e Mining Automation também declaram máquinas no runtime genérico.
 - Os módulos foram registrados no catálogo oficial, nos testes de presença e na configuração padrão.
 - Geyser Heads ainda não implementa sincronização de skins nem integração específica com Geyser/Bedrock; Slime Customizer ainda não possui editor administrativo visual completo.
-- Atualizado o reactor Maven para 0.7.3.00-SNAPSHOT. Build/CI e validação em Paper/Purpur 1.21.11 ainda precisam concluir.
+- Atualizado o reactor Maven para 0.7.3.01-SNAPSHOT. Build/CI e validação em Paper/Purpur 1.21.11 ainda precisam concluir.
 
 
 ## 0.7.2.01-SNAPSHOT

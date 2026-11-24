@@ -27,6 +27,6 @@ final class FNAmplificationsModule extends AbstractBuiltinModule {
         registerRecipe(api, new RecipeDefinition("reinforced_coil_recipe", RecipeDefinition.Type.SHAPELESS, "reinforced_coil", 2, List.of(), Map.of('C', "COPPER_INGOT", 'I', "IRON_INGOT"), "fn_amplification_basics"));
         registerRecipe(api, new RecipeDefinition("amplification_module_recipe", RecipeDefinition.Type.SHAPED, "amplification_module", 1, List.of("CRC", "RAR", "CRC"), Map.of('C', "mechanium:reinforced_coil", 'R', "REDSTONE", 'A', "mechanium:amplifier_core"), "fn_amplification_tuning"));
         registerRecipe(api, new RecipeDefinition("amplification_station_recipe", RecipeDefinition.Type.SHAPED, "amplification_station", 1, List.of("ICI", "RDR", "III"), Map.of('I', "IRON_INGOT", 'C', "mechanium:amplifier_core", 'R', "REDSTONE", 'D', "DISPENSER"), "fn_amplification_tuning"));
-        registerMachine(api, new MachineDefinition("amplification_station", "Estação de amplificação", "amplification_station", "DISPENSER", "mechanium:amplifier_core", 1, "amplification_module", 1, 1000, "fn_amplification_tuning"));
+        registerMachine(api, new MachineDefinition("amplification_station", "Estação de amplificação", "amplification_station", "DISPENSER", "mechanium:amplifier_core", 1, "amplification_module", 1, 1000, 2, "fn_amplification_tuning"));
     }
 }

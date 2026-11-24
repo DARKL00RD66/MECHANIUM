@@ -70,6 +70,7 @@ final class SlimeCustomizerMenu implements Listener {
             return;
         }
         drafts.remove(player.getUniqueId());
+        editingItems.remove(player.getUniqueId());
         prompts.remove(player.getUniqueId());
         openList(player, 0);
     }
@@ -244,6 +245,7 @@ final class SlimeCustomizerMenu implements Listener {
     private void handleInput(Player player, ChatPrompt prompt, String raw) {
         if (!plugin.hasAdminAccess(player)) {
             drafts.remove(player.getUniqueId());
+            editingItems.remove(player.getUniqueId());
             prompts.remove(player.getUniqueId());
             player.sendMessage("§cSua permissão administrativa não está mais ativa.");
             return;

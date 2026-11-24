@@ -145,9 +145,11 @@ O desgaste padrão é habilitado, com limite de 100 ciclos e um ciclo por opera�
 
 Com o módulo `slime-customizer` ativo, administradores podem abrir `/mechanium admin customizer` ou usar o atalho no painel administrativo.
 
-O editor inicial permite criar itens com ID único, nome, material vanilla, pesquisa existente (ou nenhuma) e pilha máxima. Também permite entregar uma unidade ao administrador e remover cada item individualmente. Os itens ficam na categoria persistente `customizer_user_items` e possuem ownership SQLite separado. A lista `slime-customizer.user-item-ids` é administrada automaticamente; não a edite manualmente.
+O editor permite criar itens com ID único, nome, material vanilla, pesquisa existente (ou nenhuma) e pilha máxima; listar e entregar uma unidade; editar nome, material, pesquisa e pilha; e remover itens. Cada item possui ownership SQLite individual. A exclusão é bloqueada enquanto o item for referenciado por uma receita, máquina, drop ou recipiente de fluido.
 
-Limitações desta primeira versão: não edita definições existentes e não cria receitas visuais. Para receitas registradas por módulos/addons, use `/mechanium admin custom-recipes`.
+A área **Receitas personalizadas** permite criar e remover receitas shapeless de até nove ingredientes. Ingredientes aceitam materiais vanilla (por exemplo `IRON_INGOT`) ou IDs MECHANIUM (`mechanium:item_id`); resultado e pesquisa devem existir previamente. Cada receita tem ownership SQLite separado. As listas `slime-customizer.user-item-ids` e `slime-customizer.user-recipe-ids` são administradas automaticamente; não as edite manualmente.
+
+Limitações: o editor ainda não cria receitas shaped nem categorias/tecnologias, e não edita receitas existentes. Para overrides de receitas registradas por módulos/addons, use `/mechanium admin custom-recipes`.
 
 ### Addons
 

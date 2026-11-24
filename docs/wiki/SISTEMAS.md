@@ -46,14 +46,14 @@ Limitações: receitas de fogueira são omitidas por não haver cancelamento con
 
 ## 4. Máquinas e processos
 
-O runtime genérico de máquina registra item, bloco-base, entrada, quantidade de entrada, saída, quantidade, duração e tecnologia requerida. A primeira implementação de runtime usa dispenser como bloco hospedeiro, primeiro espaço como entrada e último espaço como saída.
+O runtime genérico de máquina registra item, bloco-base, lista de ingredientes, lista de produtos, duração e tecnologia requerida. O dispenser é o bloco hospedeiro; os seis primeiros slots são buffers de entrada e os três últimos são buffers de saída.
 
 Características documentadas:
 - Progresso e UUID do proprietário ficam associados ao bloco em dados persistentes.
 - Máquinas com propriedade validam o dono e administradores antes de operar ou desmontar.
 - Processos podem exigir era, pesquisa e energia.
 - O desgaste padrão máximo é 100 ciclos; ao atingir o limite, a máquina para.
-- O runtime não possui filas, múltiplas entradas, múltiplas saídas ou processamento paralelo.
+- O runtime aceita até seis tipos de entrada e três produtos por lote; filas e processamento paralelo ainda não estão implementados.
 
 Alguns sistemas têm blocos dedicados, como geradores, bateria, tanque, incubadora e estações EMC. Verifique a página de cada módulo para o comportamento específico.
 
@@ -168,7 +168,7 @@ O valor unitário máximo aceito por tier é 16, 64, 256, 1.024 e 4.096 EMC. O s
 ## Limitações transversais
 
 - O alvo é Paper/Purpur 1.21.11 e Java 21; outros ambientes não estão declarados como suportados.
-- O runtime genérico de máquinas usa dispenser, um insumo e um produto por ciclo.
+- O runtime genérico de máquinas usa dispenser, até seis tipos de insumo e três produtos por lote; filas e processamento paralelo permanecem pendentes.
 - Não existem filas de produção ou processamento paralelo no runtime genérico.
 - Energia, fluidos, armazenamento e conduítes são redes locais; não atravessam distâncias sem conexões.
 - Algumas referências/addons têm apenas uma implementação inicial, não paridade completa.

@@ -395,15 +395,19 @@ final class SlimeCustomizerMenu implements Listener {
                     Map.copyOf(draft.ingredients), draft.requiredTechnologyId);
             List<String> ids = configuredRecipeIds();
             if (!ids.contains(definition.id())) ids.add(definition.id());
+            plugin.getConfig().set(USER_RECIPE_IDS_PATH, ids);
+            plugin.saveConfig();
             try (MechaniumContentRegistrationScope scope = api.openContentScope(recipeOwnerId(definition.id()))) {
                 if (!api.registerRecipe(definition)) {
                     throw new IllegalStateException("Já existe uma receita com esse ID.");
                 }
                 scope.commit();
             }
+        } catch (RuntimeException exception) {
+            List<String> ids = configuredRecipeIds();
+            ids.removeIf(id -> id.equalsIgnoreCase(draft.id));
             plugin.getConfig().set(USER_RECIPE_IDS_PATH, ids);
             plugin.saveConfig();
-        } catch (RuntimeException exception) {
             player.sendMessage("§cFalha ao salvar a receita: " + exception.getMessage());
             recipeDrafts.remove(player.getUniqueId());
             openRecipes(player, 0);
@@ -787,7 +791,9 @@ final class SlimeCustomizerMenu implements Listener {
     }
 
     private MenuHolder create(String title) {
-        return new MenuHolder(Bukkit.createInventory(null, SIZE, legacy(title)));
+        MenuHolder holder = new MenuHolder();
+        holder.inventory = Bukkit.createInventory(holder, SIZE, legacy(title));
+        return holder;
     }
 
     private void fillFrame(Inventory inventory) {
@@ -862,12 +868,10 @@ final class SlimeCustomizerMenu implements Listener {
     }
 
     private static final class MenuHolder implements InventoryHolder {
-        private final Inventory inventory;
+        private Inventory inventory;
         private final Map<Integer, Consumer<Player>> actions = new HashMap<>();
 
-        private MenuHolder(Inventory inventory) {
-            this.inventory = inventory;
-        }
+        private MenuHolder() { }
 
         @Override public Inventory getInventory() { return inventory; }
     }

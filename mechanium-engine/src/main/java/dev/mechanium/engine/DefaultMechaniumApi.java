@@ -346,6 +346,73 @@ public final class DefaultMechaniumApi implements MechaniumApi {
         publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumItemRegisterEvent(value)));
         return true;
     }
+    @Override
+    public synchronized boolean overrideItem(ItemDefinition value) {
+        Objects.requireNonNull(value, "item");
+        if (activeContentScope != null) {
+            throw new IllegalStateException("Administrative item overrides cannot run inside a content registration scope.");
+        }
+        ItemDefinition previous = items.get(value.id());
+        if (previous == null) return false;
+        if (previous.equals(value)) return true;
+        if (!categories.containsKey(value.categoryId())) {
+            throw new IllegalArgumentException("Unknown item category: " + value.categoryId());
+        }
+        validateTechnology(value.requiredTechnologyId());
+
+        for (MachineDefinition machine : machines.values()) {
+            if (machine.machineItemId().equals(value.id())
+                    && (!machine.blockMaterial().equals(value.material()) || value.maxStackSize() != 1)) {
+                throw new IllegalArgumentException("Item " + value.id()
+                        + " is a machine block and must keep material " + machine.blockMaterial()
+                        + " with maxStackSize 1.");
+            }
+            for (MachineProduct product : machine.outputs()) {
+                if (product.itemId().equals(value.id()) && product.amount() > value.maxStackSize()) {
+                    throw new IllegalArgumentException("Item " + value.id()
+                            + " maxStackSize is below a machine output amount.");
+                }
+            }
+            for (MachineIngredient ingredient : machine.inputs()) {
+                if (ingredient.itemId().equals("mechanium:" + value.id())
+                        && ingredient.amount() > value.maxStackSize()) {
+                    throw new IllegalArgumentException("Item " + value.id()
+                            + " maxStackSize is below a machine input amount.");
+                }
+            }
+        }
+        for (RecipeDefinition recipe : recipes.values()) {
+            if (recipe.resultItemId().equals(value.id()) && recipe.resultAmount() > value.maxStackSize()) {
+                throw new IllegalArgumentException("Item " + value.id()
+                        + " maxStackSize is below a registered recipe result amount.");
+            }
+        }
+        for (MobDropDefinition drop : mobDrops.values()) {
+            if (drop.resultItemId().equals(value.id()) && drop.maxAmount() > value.maxStackSize()) {
+                throw new IllegalArgumentException("Item " + value.id()
+                        + " maxStackSize is below a registered mob drop amount.");
+            }
+        }
+
+        if (contentStore != null) {
+            contentStore.beginContentTransaction();
+            try {
+                contentStore.saveItem(value);
+                contentStore.commitContentTransaction();
+            } catch (RuntimeException exception) {
+                try {
+                    contentStore.rollbackContentTransaction();
+                } catch (RuntimeException rollbackException) {
+                    exception.addSuppressed(rollbackException);
+                }
+                throw exception;
+            }
+        }
+        items.put(value.id(), value);
+        publishContentEvent(() -> Bukkit.getPluginManager().callEvent(new MechaniumItemRegisterEvent(value)));
+        return true;
+    }
+
     @Override public Optional<ItemDefinition> getItem(String id) { return Optional.ofNullable(items.get(normalize(id))); }
     @Override public Collection<ItemDefinition> getItems() { return items.values().stream().sorted(Comparator.comparing(ItemDefinition::id)).toList(); }
     @Override public Optional<ItemStack> createItemStack(String id, int amount) {

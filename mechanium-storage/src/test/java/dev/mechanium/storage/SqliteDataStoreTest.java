@@ -166,7 +166,7 @@ class SqliteDataStoreTest {
                 "IRON_INGOT", 2, "mechanical_parts", 1, 100, "basic_mechanics");
         MachineDefinition previouslyPowered = new MachineDefinition(
                 "industrial_mill_machine", "Moinho industrial", "industrial_mill",
-                "DISPENSER", "WHEAT", 2, "mechanium:mechanium_flour", 2,
+                "DISPENSER", "WHEAT", 2, "mechanium_flour", 2,
                 100, "industrial_food_machinery");
 
         try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {

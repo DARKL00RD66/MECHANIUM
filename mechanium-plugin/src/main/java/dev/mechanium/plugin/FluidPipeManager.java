@@ -102,8 +102,23 @@ final class FluidPipeManager implements Listener {
         tile.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,
                 event.getPlayer().getUniqueId().toString());
         if ("liquid_tank".equals(id)) {
-            tile.getPersistentDataContainer().set(fluidAmountKey, PersistentDataType.INTEGER, 0);
-            tile.getPersistentDataContainer().remove(fluidIdKey);
+            ItemStack placedItem = event.getItemInHand();
+            String restoredFluidId = null;
+            int restoredAmount = 0;
+            if (placedItem.hasItemMeta()) {
+                var itemData = placedItem.getItemMeta().getPersistentDataContainer();
+                restoredFluidId = itemData.get(fluidIdKey, PersistentDataType.STRING);
+                restoredAmount = itemData.getOrDefault(fluidAmountKey, PersistentDataType.INTEGER, 0);
+            }
+            FluidTankContents restored;
+            try {
+                restored = restoredAmount > 0 && restoredFluidId != null
+                        ? new FluidTankContents(restoredFluidId, Math.min(tankCapacityMb(), restoredAmount))
+                        : FluidTankContents.empty();
+            } catch (IllegalArgumentException exception) {
+                restored = FluidTankContents.empty();
+            }
+            writeContents(tile, restored);
         }
         if (!tile.update(true, false)) {
             event.setCancelled(true);
@@ -142,7 +157,12 @@ final class FluidPipeManager implements Listener {
         }
 
         ItemStack recovered = api.createItemStack(id, 1).orElseGet(() -> new ItemStack(block.getType()));
-        List<ItemStack> fluidDrops = fluidItemsFor(storedFluid);
+        if ("liquid_tank".equals(id)) {
+            var meta = recovered.getItemMeta();
+            meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, "liquid_tank");
+            writeContents(meta, storedFluid);
+            recovered.setItemMeta(meta);
+        }
         Location drop = block.getLocation().add(0.5, 0.5, 0.5);
         event.setDropItems(false);
         String locationKey = key(block.getLocation());
@@ -150,7 +170,6 @@ final class FluidPipeManager implements Listener {
             if (event.isCancelled() || !block.getType().isAir()) return;
             loadedPipes.remove(locationKey);
             for (ItemStack item : contents) block.getWorld().dropItemNaturally(drop, item);
-            for (ItemStack item : fluidDrops) block.getWorld().dropItemNaturally(drop, item);
             block.getWorld().dropItemNaturally(drop, recovered);
         });
     }
@@ -454,23 +473,6 @@ final class FluidPipeManager implements Listener {
         Map<Integer, ItemStack> leftover = player.getInventory().addItem(output);
         leftover.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
         player.sendMessage("§aRetirados " + drained.removedMb() + " mB de " + current.fluidId() + ".");
-    }
-
-    private List<ItemStack> fluidItemsFor(FluidTankContents contents) {
-        List<ItemStack> drops = new ArrayList<>();
-        if (contents.isEmpty()) return drops;
-        String itemId = outputItemFor(contents.fluidId());
-        if (itemId == null) return drops;
-        int units = contents.amountMb() / MILLIBUCKETS_PER_ITEM;
-        int maxStackSize = api.getItem(itemId).map(item -> item.maxStackSize()).orElse(16);
-        while (units > 0) {
-            int stackSize = Math.min(maxStackSize, units);
-            ItemStack stack = api.createItemStack(itemId, stackSize).orElse(null);
-            if (stack == null) break;
-            drops.add(stack);
-            units -= stackSize;
-        }
-        return drops;
     }
 
     private String messageError(String value) { return "§c" + value; }

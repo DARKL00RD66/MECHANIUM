@@ -224,6 +224,11 @@ fluids:
   tank-capacity-mb: 16000
   transfer-mb-per-cycle: 250
 
+greenhouse:
+  # A climate controller boosts a compatible crop by one growth stage after a normal growth event.
+  growth-radius: 4
+  energy-per-growth: 1
+
 machines:
   wear:
     enabled: true

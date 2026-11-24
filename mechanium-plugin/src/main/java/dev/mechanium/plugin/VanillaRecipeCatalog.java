@@ -186,7 +186,9 @@ final class VanillaRecipeCatalog {
                 "OAK_PLANKS", "CRAFTING_TABLE", "COBBLESTONE", "STONE", "DIRT",
                 "GRAVEL", "SAND", "GLASS", "GLASS_PANE", "BRICK", "BRICKS",
                 "TERRACOTTA", "FLOWER_POT", "PAPER", "BOOK", "BREAD", "BOWL",
-                "TORCH", "FURNACE", "CHEST", "BARREL", "STICK", "LADDER", "FISHING_ROD",\n                "HONEY_BOTTLE", "HONEY_BLOCK", "HONEYCOMB", "DRIED_KELP", "COOKIE", "CAKE",\n                "PUMPKIN_PIE", "MUSHROOM_STEW", "RABBIT_STEW", "BEETROOT_SOUP")) return true;
+                "TORCH", "FURNACE", "CHEST", "BARREL", "STICK", "LADDER", "FISHING_ROD",
+                "HONEY_BOTTLE", "HONEY_BLOCK", "HONEYCOMB", "DRIED_KELP", "COOKIE", "CAKE",
+                "PUMPKIN_PIE", "MUSHROOM_STEW", "RABBIT_STEW", "BEETROOT_SOUP")) return true;
 
         if (material.startsWith("WOODEN_") || material.startsWith("STONE_") || material.startsWith("COOKED_")) return true;
         if (material.endsWith("_PLANKS") || material.endsWith("_LOG")

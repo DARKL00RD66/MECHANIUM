@@ -248,6 +248,82 @@ class DefaultMechaniumApiTest {
     }
 
     @Test
+    void registersAndPersistsOwnedFluidDefinitions() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("fluids.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("industrial_revolution", "Revolução Industrial", 3));
+            api.registerTechnology(new TechnologyDefinition(
+                    "water_filtration", "Filtragem de água", "industrial_revolution", 10, List.of()));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                    "fluid_items", "Recipientes", "Itens de fluido"));
+
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                    "water_bottle", "Água purificada", "POTION", List.of(), 0, 16,
+                    "fluid_items", "water_filtration"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                    "water_cell", "Célula de água", "WATER_BUCKET", List.of(), 0, 16,
+                    "fluid_items", "water_filtration"));
+
+            var fluid = new dev.mechanium.api.model.FluidDefinition(
+                    "purified_water", "Água purificada", "water_filtration",
+                    List.of(
+                            new dev.mechanium.api.model.FluidContainerDefinition("water_bottle", 250, true, true),
+                            new dev.mechanium.api.model.FluidContainerDefinition("water_cell", 1_000, true, false)));
+
+            try (var scope = api.openContentScope("module:water")) {
+                assertTrue(api.registerFluid(fluid));
+                scope.commit();
+            }
+            assertTrue(api.registerFluid(fluid), "Identical fluid registration must be idempotent");
+            assertEquals(fluid, api.getFluid("PURIFIED_WATER").orElseThrow());
+            assertEquals(List.of(fluid), List.copyOf(api.getFluids()));
+            assertTrue(api.validateContent().isEmpty());
+
+            DefaultMechaniumApi reloaded = new DefaultMechaniumApi(store);
+            assertEquals(fluid, reloaded.getFluid("purified_water").orElseThrow(),
+                    "Fluid definitions and their container mappings must survive reloads.");
+
+            assertThrows(IllegalArgumentException.class, () -> reloaded.registerFluid(
+                    new dev.mechanium.api.model.FluidDefinition(
+                            "unknown_container_fluid", "Fluido inválido", null,
+                            List.of(new dev.mechanium.api.model.FluidContainerDefinition(
+                                    "missing_item", 250, true, true)))));
+        }
+    }
+
+    @Test
+    void removingAFluidFromAnOwnerScopePrunesOnlyThatFluid() throws Exception {
+        try (SqliteDataStore store = new SqliteDataStore(
+                directory.resolve("fluid-owner-reconcile.db"), Logger.getLogger("test"))) {
+            DefaultMechaniumApi api = new DefaultMechaniumApi(store);
+            api.registerEra(new EraDefinition("industrial_revolution", "Revolução Industrial", 3));
+            api.registerTechnology(new TechnologyDefinition(
+                    "water_filtration", "Filtragem de água", "industrial_revolution", 10, List.of()));
+            api.registerCategory(new dev.mechanium.api.model.ContentCategory(
+                    "fluid_items", "Recipientes", "Itens de fluido"));
+            api.registerItem(new dev.mechanium.api.model.ItemDefinition(
+                    "water_bottle", "Água", "POTION", List.of(), 0, 16, "fluid_items", "water_filtration"));
+
+            var fluid = new dev.mechanium.api.model.FluidDefinition(
+                    "purified_water", "Água", "water_filtration",
+                    List.of(new dev.mechanium.api.model.FluidContainerDefinition(
+                            "water_bottle", 250, true, true)));
+            try (var scope = api.openContentScope("module:water")) {
+                assertTrue(api.registerFluid(fluid));
+                scope.commit();
+            }
+            assertTrue(api.getFluid("purified_water").isPresent());
+
+            try (var scope = api.openContentScope("module:water")) {
+                scope.commit();
+            }
+            assertTrue(api.getFluid("purified_water").isEmpty());
+            assertTrue(store.loadFluids().isEmpty());
+        }
+    }
+
+    @Test
     void refusesTechnologyWithUnknownEra() throws Exception {
         try (SqliteDataStore store = new SqliteDataStore(directory.resolve("unknown-era.db"), Logger.getLogger("test"))) {
             DefaultMechaniumApi api = new DefaultMechaniumApi(store);

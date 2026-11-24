@@ -184,7 +184,8 @@ class SqliteDataStoreTest {
 
         try (SqliteDataStore migrated = new SqliteDataStore(database, Logger.getLogger("test"))) {
             assertEquals(2, migrated.loadMachines().size());
-            MachineDefinition restored = migrated.loadMachines().iterator().next();
+            MachineDefinition restored = migrated.loadMachines().stream()
+                    .filter(machine -> machine.id().equals("mechanical_press")).findFirst().orElseThrow();
             assertEquals(legacy.inputs(), restored.inputs());
             assertEquals(legacy.outputs(), restored.outputs());
             assertEquals("IRON_INGOT", restored.inputId());

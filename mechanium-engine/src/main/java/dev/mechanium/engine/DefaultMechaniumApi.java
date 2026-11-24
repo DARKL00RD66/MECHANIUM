@@ -450,17 +450,20 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             throw new IllegalArgumentException("Machine item must use block material " + value.blockMaterial()
                     + " and maxStackSize 1: " + machineItem.id());
         }
-        ItemDefinition resultItem = items.get(value.outputItemId());
-        if (resultItem == null) throw new IllegalArgumentException(
-                "Machine references unregistered output item: " + value.outputItemId());
-        if (value.outputAmount() > resultItem.maxStackSize()) {
-            throw new IllegalArgumentException("Machine output exceeds max stack size for " + resultItem.id());
+        for (MachineProduct product : value.outputs()) {
+            ItemDefinition resultItem = items.get(product.itemId());
+            if (resultItem == null) throw new IllegalArgumentException(
+                    "Machine references unregistered output item: " + product.itemId());
+            if (product.amount() > resultItem.maxStackSize()) {
+                throw new IllegalArgumentException("Machine output exceeds max stack size for " + resultItem.id());
+            }
         }
-        if (value.inputId().startsWith("mechanium:")) {
-            ItemDefinition inputItem = items.get(value.inputId().substring(10));
+        for (MachineIngredient ingredient : value.inputs()) {
+            if (!ingredient.itemId().startsWith("mechanium:")) continue;
+            ItemDefinition inputItem = items.get(ingredient.itemId().substring(10));
             if (inputItem == null) throw new IllegalArgumentException(
-                    "Machine references unregistered input item: " + value.inputId());
-            if (value.inputAmount() > inputItem.maxStackSize()) {
+                    "Machine references unregistered input item: " + ingredient.itemId());
+            if (ingredient.amount() > inputItem.maxStackSize()) {
                 throw new IllegalArgumentException("Machine input amount exceeds max stack size for " + inputItem.id());
             }
         }
@@ -511,13 +514,20 @@ public final class DefaultMechaniumApi implements MechaniumApi {
             if (machineItem == null) errors.add("Machine " + machine.id() + " references missing machine item " + machine.machineItemId());
             else if (!machineItem.material().equals(machine.blockMaterial()) || machineItem.maxStackSize() != 1)
                 errors.add("Machine " + machine.id() + " has an invalid machine item definition");
-            ItemDefinition output = items.get(machine.outputItemId());
-            if (output == null) errors.add("Machine " + machine.id() + " references missing output item " + machine.outputItemId());
-            else if (machine.outputAmount() > output.maxStackSize()) errors.add("Machine " + machine.id() + " output exceeds item max stack size");
-            if (machine.inputId().startsWith("mechanium:")) {
-                ItemDefinition input = items.get(machine.inputId().substring(10));
-                if (input == null) errors.add("Machine " + machine.id() + " references missing custom input " + machine.inputId());
-                else if (machine.inputAmount() > input.maxStackSize()) errors.add("Machine " + machine.id() + " input exceeds item max stack size");
+            for (MachineProduct product : machine.outputs()) {
+                ItemDefinition output = items.get(product.itemId());
+                if (output == null) errors.add("Machine " + machine.id() + " references missing output item " + product.itemId());
+                else if (product.amount() > output.maxStackSize()) {
+                    errors.add("Machine " + machine.id() + " output " + product.itemId() + " exceeds item max stack size");
+                }
+            }
+            for (MachineIngredient ingredient : machine.inputs()) {
+                if (!ingredient.itemId().startsWith("mechanium:")) continue;
+                ItemDefinition input = items.get(ingredient.itemId().substring(10));
+                if (input == null) errors.add("Machine " + machine.id() + " references missing custom input " + ingredient.itemId());
+                else if (ingredient.amount() > input.maxStackSize()) {
+                    errors.add("Machine " + machine.id() + " input " + ingredient.itemId() + " exceeds item max stack size");
+                }
             }
             if (!technologies.containsKey(machine.requiredTechnologyId()))
                 errors.add("Machine " + machine.id() + " references missing technology " + machine.requiredTechnologyId());

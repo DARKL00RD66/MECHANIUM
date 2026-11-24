@@ -12,9 +12,11 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.TileState;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
@@ -23,6 +25,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -31,23 +34,32 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Set;
+import java.util.UUID;
 
-/** Transfers MECHANIUM purified-water items between owner-matched tanks through connected hopper pipes. */
+/**
+ * Typed-fluid tanks connected by owner-matched conduits.
+ * Legacy MECHANIUM fluid items stored in tank inventories are converted to millibuckets.
+ */
 final class FluidPipeManager implements Listener {
     private static final BlockFace[] FACES = {
             BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
     };
     private static final int MAX_PIPE_NETWORK = 128;
+    private static final int MILLIBUCKETS_PER_ITEM = 250;
+    private static final int DEFAULT_TANK_CAPACITY_MB = 16_000;
+    private static final int DEFAULT_TRANSFER_RATE_MB = 250;
+
     private final JavaPlugin plugin;
     private final MechaniumApi api;
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
+    private final NamespacedKey fluidIdKey;
+    private final NamespacedKey fluidAmountKey;
     private final Map<String, Location> loadedPipes = new HashMap<>();
     private BukkitTask task;
 
@@ -56,6 +68,8 @@ final class FluidPipeManager implements Listener {
         this.api = api;
         this.itemIdKey = NamespacedKey.fromString("mechanium:item_id");
         this.ownerKey = new NamespacedKey(plugin, "fluid_network_owner");
+        this.fluidIdKey = new NamespacedKey(plugin, "tank_fluid_id");
+        this.fluidAmountKey = new NamespacedKey(plugin, "tank_fluid_amount_mb");
     }
 
     void start() {
@@ -87,6 +101,10 @@ final class FluidPipeManager implements Listener {
         tile.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, id);
         tile.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,
                 event.getPlayer().getUniqueId().toString());
+        if ("liquid_tank".equals(id)) {
+            tile.getPersistentDataContainer().set(fluidAmountKey, PersistentDataType.INTEGER, 0);
+            tile.getPersistentDataContainer().remove(fluidIdKey);
+        }
         if (!tile.update(true, false)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage("§cNão foi possível registrar o componente de fluidos.");
@@ -109,14 +127,22 @@ final class FluidPipeManager implements Listener {
             event.getPlayer().sendMessage("§cSomente o proprietário ou um administrador pode desmontar este componente.");
             return;
         }
+
         List<ItemStack> contents = new ArrayList<>();
-        if (state instanceof Container container && "liquid_tank".equals(id)) {
-            for (ItemStack item : container.getInventory().getContents()) {
-                if (item != null && !item.getType().isAir()) contents.add(item.clone());
+        FluidTankContents storedFluid = FluidTankContents.empty();
+        if ("liquid_tank".equals(id)) {
+            migrateLegacyTankInventory(block);
+            BlockState currentState = block.getState();
+            if (currentState instanceof Container container) {
+                for (ItemStack item : container.getInventory().getContents()) {
+                    if (item != null && !item.getType().isAir()) contents.add(item.clone());
+                }
             }
+            storedFluid = readTankContents(block);
         }
-        ItemStack recovered = api.createItemStack(id, 1)
-                .orElseGet(() -> new ItemStack(block.getType()));
+
+        ItemStack recovered = api.createItemStack(id, 1).orElseGet(() -> new ItemStack(block.getType()));
+        List<ItemStack> fluidDrops = fluidItemsFor(storedFluid);
         Location drop = block.getLocation().add(0.5, 0.5, 0.5);
         event.setDropItems(false);
         String locationKey = key(block.getLocation());
@@ -124,33 +150,73 @@ final class FluidPipeManager implements Listener {
             if (event.isCancelled() || !block.getType().isAir()) return;
             loadedPipes.remove(locationKey);
             for (ItemStack item : contents) block.getWorld().dropItemNaturally(drop, item);
+            for (ItemStack item : fluidDrops) block.getWorld().dropItemNaturally(drop, item);
             block.getWorld().dropItemNaturally(drop, recovered);
         });
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPipeInteract(PlayerInteractEvent event) {
-        if (event.getClickedBlock() == null
-                || event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
-        String id = tileItemId(event.getClickedBlock());
+        if (event.getClickedBlock() == null || event.getAction() != Action.RIGHT_CLICK_BLOCK
+                || event.getHand() != EquipmentSlot.HAND) return;
+        Block clicked = event.getClickedBlock();
+        String id = tileItemId(clicked);
         if ("fluid_pipe".equals(id)) {
             event.setCancelled(true);
-            event.getPlayer().sendMessage("§bTubulação MECHANIUM: §7conecte tanques pelas faces para transportar água purificada.");
+            event.getPlayer().sendMessage("§bTubulação MECHANIUM: §7conecta tanques pelas faces e transporta fluidos compatíveis.");
             return;
         }
-        if ("liquid_tank".equals(id)) {
-            String owner = tileOwner(event.getClickedBlock());
-            if (owner != null && !event.getPlayer().hasPermission("mechanium.admin")
-                    && !owner.equals(event.getPlayer().getUniqueId().toString())) {
-                event.setCancelled(true);
-                event.getPlayer().sendMessage("§cEste tanque pertence a outro jogador.");
-            }
+        if (!"liquid_tank".equals(id)) return;
+
+        Player player = event.getPlayer();
+        String owner = tileOwner(clicked);
+        if (owner != null && !player.hasPermission("mechanium.admin")
+                && !owner.equals(player.getUniqueId().toString())) {
+            event.setCancelled(true);
+            player.sendMessage("§cEste tanque pertence a outro jogador.");
+            return;
         }
+
+        migrateLegacyTankInventory(clicked);
+        FluidTankContents current = readTankContents(clicked);
+        ItemStack hand = player.getInventory().getItemInMainHand();
+        FluidItem fluidItem = fluidItem(hand);
+
+        if (fluidItem != null) {
+            event.setCancelled(true);
+            FluidTankPolicy.FillResult filled = FluidTankPolicy.fill(
+                    current, fluidItem.fluidId(), fluidItem.millibucketsPerItem(), tankCapacityMb());
+            if (filled.acceptedMb() != fluidItem.millibucketsPerItem()) {
+                player.sendMessage(ComponentMessage.error(current.isEmpty()
+                        ? "O tanque está cheio."
+                        : "O tanque já contém outro fluido ou não tem espaço suficiente."));
+                return;
+            }
+            if (!writeTankContents(clicked, filled.contents())) {
+                player.sendMessage(ComponentMessage.error("Não foi possível salvar o volume do tanque."));
+                return;
+            }
+            consumeOneFromHand(player, hand);
+            player.sendMessage(ComponentMessage.success("Tanque abastecido: " + filled.contents().fluidId()
+                    + " — " + filled.contents().amountMb() + "/" + tankCapacityMb() + " mB."));
+            return;
+        }
+
+        if (player.isSneaking() && hand.getType().isAir()) {
+            event.setCancelled(true);
+            extractOneFluidUnit(player, clicked, current);
+            return;
+        }
+
+        player.sendMessage(ComponentMessage.info(current.isEmpty()
+                ? "Tanque vazio. Coloque itens de fluido MECHANIUM no inventário do tanque ou use-os diretamente no bloco."
+                : "Tanque: " + current.fluidId() + " — " + current.amountMb() + "/" + tankCapacityMb() + " mB. Agache com a mão vazia para retirar 250 mB."));
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryMove(InventoryMoveItemEvent event) {
-        if (isTransportNodeAt(event.getSource().getLocation()) || isTransportNodeAt(event.getDestination().getLocation())) {
+        if (isTransportNodeAt(event.getSource().getLocation())
+                || isTransportNodeAt(event.getDestination().getLocation())) {
             event.setCancelled(true);
         }
     }
@@ -195,7 +261,7 @@ final class FluidPipeManager implements Listener {
             if (network.pipes().isEmpty()) continue;
             boolean overlapsProcessedNetwork = network.pipes().stream().anyMatch(processed::contains);
             processed.addAll(network.pipes());
-            if (!overlapsProcessedNetwork && network.complete()) moveOnePurifiedWater(network.tanks());
+            if (!overlapsProcessedNetwork && network.complete()) moveFluid(network.tanks());
         }
     }
 
@@ -228,7 +294,7 @@ final class FluidPipeManager implements Listener {
     private Network collectNetwork(Block firstPipe, String owner) {
         ArrayDeque<Block> queue = new ArrayDeque<>();
         Set<String> visited = new HashSet<>();
-        List<Inventory> tanks = new ArrayList<>();
+        List<Block> tanks = new ArrayList<>();
         queue.add(firstPipe);
         while (!queue.isEmpty() && visited.size() < MAX_PIPE_NETWORK) {
             Block pipe = queue.removeFirst();
@@ -239,65 +305,189 @@ final class FluidPipeManager implements Listener {
                 if (isPipe(adjacent, owner)) {
                     if (!visited.contains(key(adjacent))) queue.addLast(adjacent);
                 } else if (isTank(adjacent, owner)) {
-                    BlockState state = adjacent.getState();
-                    if (state instanceof Container container && !tanks.contains(container.getInventory())) {
-                        tanks.add(container.getInventory());
-                    }
+                    if (!tanks.contains(adjacent)) tanks.add(adjacent);
                 }
             }
         }
         return new Network(visited, tanks, queue.isEmpty());
     }
 
-    private void moveOnePurifiedWater(List<Inventory> tanks) {
+    private void moveFluid(List<Block> tanks) {
         if (tanks.size() < 2) return;
+        for (Block tank : tanks) migrateLegacyTankInventory(tank);
+
         for (int sourceIndex = 0; sourceIndex < tanks.size(); sourceIndex++) {
-            Inventory source = tanks.get(sourceIndex);
-            for (int slot = 0; slot < source.getSize(); slot++) {
-                ItemStack stack = source.getItem(slot);
-                if (!isPurifiedWater(stack)) continue;
-                for (int targetIndex = 0; targetIndex < tanks.size(); targetIndex++) {
-                    if (targetIndex == sourceIndex) continue;
-                    Inventory target = tanks.get(targetIndex);
-                    int targetSlot = firstCompatibleSlot(target, stack);
-                    if (targetSlot < 0) continue;
-                    ItemStack existing = target.getItem(targetSlot);
-                    if (existing == null || existing.getType().isAir()) {
-                        ItemStack moved = stack.clone();
-                        moved.setAmount(1);
-                        target.setItem(targetSlot, moved);
-                    } else {
-                        existing.setAmount(existing.getAmount() + 1);
-                        target.setItem(targetSlot, existing);
-                    }
-                    if (stack.getAmount() == 1) source.setItem(slot, null);
-                    else {
-                        stack.setAmount(stack.getAmount() - 1);
-                        source.setItem(slot, stack);
-                    }
-                    return;
-                }
+            Block source = tanks.get(sourceIndex);
+            FluidTankContents sourceContents = readTankContents(source);
+            if (sourceContents.isEmpty()) continue;
+            for (int targetIndex = 0; targetIndex < tanks.size(); targetIndex++) {
+                if (targetIndex == sourceIndex) continue;
+                Block target = tanks.get(targetIndex);
+                FluidTankPolicy.TransferResult plan = FluidTankPolicy.transfer(
+                        sourceContents, readTankContents(target), transferRateMb(), tankCapacityMb());
+                if (plan.transferredMb() <= 0) continue;
+                if (persistTransfer(source, target, plan)) return;
             }
         }
     }
 
-    private int firstCompatibleSlot(Inventory inventory, ItemStack item) {
-        int empty = -1;
+    private boolean persistTransfer(Block source, Block target, FluidTankPolicy.TransferResult plan) {
+        FluidTankContents originalSource = readTankContents(source);
+        FluidTankContents originalTarget = readTankContents(target);
+        if (!writeTankContents(target, plan.target())) return false;
+        if (!writeTankContents(source, plan.source())) {
+            writeTankContents(target, originalTarget);
+            writeTankContents(source, originalSource);
+            return false;
+        }
+        return true;
+    }
+
+    private void migrateLegacyTankInventory(Block block) {
+        if (block == null || !(block.getState() instanceof Container container)) return;
+        Inventory inventory = container.getInventory();
+        FluidTankContents current = readTankContents(block);
+        boolean inventoryChanged = false;
+        boolean tankChanged = false;
+
         for (int slot = 0; slot < inventory.getSize(); slot++) {
-            ItemStack current = inventory.getItem(slot);
-            if (current == null || current.getType().isAir()) {
-                if (empty < 0) empty = slot;
-            } else if (current.isSimilar(item) && current.getAmount() < current.getMaxStackSize()) {
-                return slot;
+            ItemStack stack = inventory.getItem(slot);
+            FluidItem offer = fluidItem(stack);
+            if (offer == null) continue;
+            int room = Math.max(0, tankCapacityMb() - current.amountMb());
+            int maxItems = Math.min(stack.getAmount(), room / offer.millibucketsPerItem());
+            if (maxItems <= 0) continue;
+            FluidTankPolicy.FillResult fill = FluidTankPolicy.fill(current, offer.fluidId(),
+                    maxItems * offer.millibucketsPerItem(), tankCapacityMb());
+            int consumed = fill.acceptedMb() / offer.millibucketsPerItem();
+            if (consumed <= 0) continue;
+            current = fill.contents();
+            int remaining = stack.getAmount() - consumed;
+            if (remaining == 0) inventory.setItem(slot, null);
+            else {
+                ItemStack left = stack.clone();
+                left.setAmount(remaining);
+                inventory.setItem(slot, left);
+            }
+            inventoryChanged = true;
+            tankChanged = true;
+        }
+
+        if (tankChanged) {
+            BlockState state = block.getState();
+            if (state instanceof TileState tile) {
+                writeContents(tile, current);
+                tile.update(true, false);
             }
         }
-        return empty;
+        if (inventoryChanged && container != block.getState()) {
+            container.update(true, false);
+        }
     }
 
-    private boolean isPurifiedWater(ItemStack item) {
-        if (item == null || item.getType().isAir() || !item.hasItemMeta()) return false;
-        return "purified_water".equals(item.getItemMeta().getPersistentDataContainer()
-                .get(itemIdKey, PersistentDataType.STRING));
+    private FluidTankContents readTankContents(Block block) {
+        if (block == null || !(block.getState() instanceof TileState tile)) return FluidTankContents.empty();
+        String id = tile.getPersistentDataContainer().get(fluidIdKey, PersistentDataType.STRING);
+        int amount = Math.max(0, Math.min(tankCapacityMb(),
+                tile.getPersistentDataContainer().getOrDefault(fluidAmountKey, PersistentDataType.INTEGER, 0)));
+        if (amount == 0 || id == null) return FluidTankContents.empty();
+        try {
+            return new FluidTankContents(id, amount);
+        } catch (IllegalArgumentException exception) {
+            plugin.getLogger().warning("ID de fluido inválido em tanque MECHANIUM em "
+                    + block.getWorld().getName() + " " + block.getX() + "," + block.getY() + "," + block.getZ());
+            return FluidTankContents.empty();
+        }
+    }
+
+    private boolean writeTankContents(Block block, FluidTankContents contents) {
+        if (block == null || !(block.getState() instanceof TileState tile)) return false;
+        writeContents(tile, contents);
+        return tile.update(true, false);
+    }
+
+    private void writeContents(TileState tile, FluidTankContents contents) {
+        if (contents.isEmpty()) {
+            tile.getPersistentDataContainer().remove(fluidIdKey);
+            tile.getPersistentDataContainer().set(fluidAmountKey, PersistentDataType.INTEGER, 0);
+        } else {
+            tile.getPersistentDataContainer().set(fluidIdKey, PersistentDataType.STRING, contents.fluidId());
+            tile.getPersistentDataContainer().set(fluidAmountKey, PersistentDataType.INTEGER, contents.amountMb());
+        }
+    }
+
+    private void extractOneFluidUnit(Player player, Block tank, FluidTankContents current) {
+        if (current.isEmpty()) {
+            player.sendMessage(ComponentMessage.info("O tanque está vazio."));
+            return;
+        }
+        FluidTankPolicy.DrainResult drained = FluidTankPolicy.drain(current, MILLIBUCKETS_PER_ITEM);
+        if (drained.removedMb() == 0) {
+            player.sendMessage(ComponentMessage.error("O tanque não contém volume suficiente para retirar um item."));
+            return;
+        }
+        String outputItemId = outputItemFor(current.fluidId());
+        if (outputItemId == null) {
+            player.sendMessage(ComponentMessage.error("Não existe um item de saída configurado para este fluido."));
+            return;
+        }
+        ItemStack output = api.createItemStack(outputItemId, 1).orElse(null);
+        if (output == null || !writeTankContents(tank, drained.contents())) {
+            player.sendMessage(ComponentMessage.error("Não foi possível retirar o fluido do tanque."));
+            return;
+        }
+        Map<Integer, ItemStack> leftover = player.getInventory().addItem(output);
+        leftover.values().forEach(item -> player.getWorld().dropItemNaturally(player.getLocation(), item));
+        player.sendMessage(ComponentMessage.success("Retirados " + drained.removedMb() + " mB de " + current.fluidId() + "."));
+    }
+
+    private List<ItemStack> fluidItemsFor(FluidTankContents contents) {
+        List<ItemStack> drops = new ArrayList<>();
+        if (contents.isEmpty()) return drops;
+        String itemId = outputItemFor(contents.fluidId());
+        if (itemId == null) return drops;
+        int units = contents.amountMb() / MILLIBUCKETS_PER_ITEM;
+        int maxStackSize = api.getItem(itemId).map(item -> item.maxStackSize()).orElse(16);
+        while (units > 0) {
+            int stackSize = Math.min(maxStackSize, units);
+            ItemStack stack = api.createItemStack(itemId, stackSize).orElse(null);
+            if (stack == null) break;
+            drops.add(stack);
+            units -= stackSize;
+        }
+        return drops;
+    }
+
+    private FluidItem fluidItem(ItemStack item) {
+        String id = itemId(item);
+        if (id == null) return null;
+        return switch (id) {
+            case "purified_water" -> new FluidItem("purified_water", MILLIBUCKETS_PER_ITEM);
+            case "purified_water_cell" -> new FluidItem("purified_water", 1_000);
+            case "coolant_cell" -> new FluidItem("industrial_coolant", MILLIBUCKETS_PER_ITEM);
+            default -> null;
+        };
+    }
+
+    private String outputItemFor(String fluidId) {
+        return switch (fluidId) {
+            case "purified_water" -> "purified_water";
+            case "industrial_coolant" -> "coolant_cell";
+            default -> null;
+        };
+    }
+
+    private void consumeOneFromHand(Player player, ItemStack hand) {
+        if (hand.getAmount() <= 1) player.getInventory().setItemInMainHand(null);
+        else hand.setAmount(hand.getAmount() - 1);
+    }
+
+    private int tankCapacityMb() {
+        return Math.max(250, plugin.getConfig().getInt("fluids.tank-capacity-mb", DEFAULT_TANK_CAPACITY_MB));
+    }
+
+    private int transferRateMb() {
+        return Math.max(250, plugin.getConfig().getInt("fluids.transfer-mb-per-cycle", DEFAULT_TRANSFER_RATE_MB));
     }
 
     private boolean isPipe(Block block, String owner) {
@@ -345,11 +535,6 @@ final class FluidPipeManager implements Listener {
         return world.getBlockAt(x, y, z);
     }
 
-    private boolean isLoaded(Location location) {
-        return location.getWorld() != null
-                && location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4);
-    }
-
     private String key(Block block) {
         return block.getWorld().getUID() + ":" + block.getX() + ":" + block.getY() + ":" + block.getZ();
     }
@@ -359,5 +544,6 @@ final class FluidPipeManager implements Listener {
                 + location.getBlockY() + ":" + location.getBlockZ();
     }
 
-    private record Network(Set<String> pipes, List<Inventory> tanks, boolean complete) { }
+    private record FluidItem(String fluidId, int millibucketsPerItem) { }
+    private record Network(Set<String> pipes, List<Block> tanks, boolean complete) { }
 }

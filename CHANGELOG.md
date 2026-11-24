@@ -19,7 +19,9 @@
 - Corrigidas definições empilháveis de três máquinas (FN Amplifications, Industrial Chemistry e Mining Automation), que agora têm pilha máxima 1; adicionada regressão na API.
 - A manutenção de máquinas só consome material após confirmar a gravação do estado. O débito energético registra e verifica falhas de rollback.
 - A Wiki das máquinas mostra todos os ingredientes/produtos e o custo energético; o proprietário pode consultar nós, baterias e carga/capacidade agregada da rede elétrica.
-- CI #45508690080 aprovou Java 21/Maven `clean verify` com 116 testes, compilação dos sete módulos e do addon de exemplo; o artefato foi enviado pelo workflow. Testes de gameplay Paper/Purpur continuam pendentes.
+- Slime Customizer: editor administrativo `/mechanium admin customizer` permite criar, listar, entregar, editar nome/material/pesquisa/pilha e remover itens com ownership SQLite por item; exclusão bloqueada quando há referências em receitas/máquinas/drops/fluidos.
+- Slime Customizer: assistente para criar e remover receitas shapeless com até nove ingredientes vanilla ou MECHANIUM, resultado e pesquisa já registrados; ownership SQLite individual por receita. Receitas shaped, edição de receitas e criação de categorias/tecnologias seguem pendentes.
+- CI #45510163868 aprovou Java 21/Maven `clean verify` com 118 testes, compilação dos sete módulos e addon de exemplo para a revisão anterior à criação do assistente de receitas. O CI desta última ampliação ainda está pendente. Testes de gameplay Paper/Purpur continuam pendentes.
 - Tanques de fluido armazenam volume tipado em mB no PDC: 16.000 mB por padrão, transferência de 250 mB/ciclo, água purificada e refrigerante como exemplos, sem mistura entre tipos. A API permite registrar volumes/recipientes personalizados.
 - Itens de fluido legados no inventário do tanque são migrados para volume; tipo e volume também ficam preservados no item de tanque recuperado.
 - Corrigida a retirada de fluidos: agora seleciona o maior recipiente de extração desbloqueado cujo volume caiba no tanque, em vez de exigir sempre 250 mB. Testes unitários para 250, 500 e 1.000 mB passaram no CI #45506733683.

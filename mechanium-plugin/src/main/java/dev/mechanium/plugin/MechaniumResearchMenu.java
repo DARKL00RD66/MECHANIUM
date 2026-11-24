@@ -116,7 +116,7 @@ final class MechaniumResearchMenu implements Listener {
                 fabricationMenu::open);
         button(holder, 31, Material.BOOK, "§6Wiki",
                 List.of("§7Consulte itens, receitas e máquinas.", "§7A Wiki não consome ingredientes."),
-                wikiMenu::openHome);
+                p -> wikiMenu.openHome(p, this::openHome));
         button(holder, 49, Material.BARRIER, "§cFechar", List.of(), Player::closeInventory);
         animateOpen(player, holder);
     }

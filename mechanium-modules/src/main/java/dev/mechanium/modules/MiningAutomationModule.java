@@ -27,6 +27,6 @@ final class MiningAutomationModule extends AbstractBuiltinModule {
         registerRecipe(api, new RecipeDefinition("drill_casing_recipe", RecipeDefinition.Type.SHAPELESS, "drill_casing", 1, List.of(), Map.of('I', "IRON_INGOT", 'C', "COPPER_INGOT"), "automated_surveying"));
         registerRecipe(api, new RecipeDefinition("mining_module_recipe", RecipeDefinition.Type.SHAPED, "mining_module", 1, List.of(" I ", "RPI", " I "), Map.of('I', "IRON_INGOT", 'R', "REDSTONE", 'P', "PISTON"), "automated_extraction"));
         registerRecipe(api, new RecipeDefinition("mining_assembler_recipe", RecipeDefinition.Type.SHAPED, "mining_assembler", 1, List.of("ICI", "RDR", "III"), Map.of('I', "IRON_INGOT", 'C', "mechanium:drill_casing", 'R', "REDSTONE", 'D', "DISPENSER"), "automated_extraction"));
-        registerMachine(api, new MachineDefinition("mining_assembler", "Montadora de mineração", "mining_assembler", "DISPENSER", "mechanium:drill_casing", 1, "mining_module", 1, 1800, "automated_extraction"));
+        registerMachine(api, new MachineDefinition("mining_assembler", "Montadora de mineração", "mining_assembler", "DISPENSER", "mechanium:drill_casing", 1, "mining_module", 1, 1800, 2, "automated_extraction"));
     }
 }

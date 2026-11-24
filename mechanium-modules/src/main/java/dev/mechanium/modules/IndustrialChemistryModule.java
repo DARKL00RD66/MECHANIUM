@@ -27,6 +27,6 @@ final class IndustrialChemistryModule extends AbstractBuiltinModule {
         registerRecipe(api, new RecipeDefinition("polymer_resin_recipe", RecipeDefinition.Type.SHAPELESS, "polymer_resin", 2, List.of(), Map.of('S', "SLIME_BALL", 'C', "CHARCOAL"), "industrial_reagents"));
         registerRecipe(api, new RecipeDefinition("synthetic_fiber_recipe", RecipeDefinition.Type.SHAPELESS, "synthetic_fiber", 4, List.of(), Map.of('R', "mechanium:polymer_resin", 'W', "WHITE_WOOL"), "polymer_engineering"));
         registerRecipe(api, new RecipeDefinition("polymer_mixer_recipe", RecipeDefinition.Type.SHAPED, "polymer_mixer", 1, List.of("III", "RDR", "III"), Map.of('I', "IRON_INGOT", 'R', "REDSTONE", 'D', "DISPENSER"), "polymer_engineering"));
-        registerMachine(api, new MachineDefinition("polymer_mixer", "Misturador de polímeros", "polymer_mixer", "DISPENSER", "mechanium:polymer_resin", 1, "synthetic_fiber", 2, 1400, "polymer_engineering"));
+        registerMachine(api, new MachineDefinition("polymer_mixer", "Misturador de polímeros", "polymer_mixer", "DISPENSER", "mechanium:polymer_resin", 1, "synthetic_fiber", 2, 1400, 2, "polymer_engineering"));
     }
 }

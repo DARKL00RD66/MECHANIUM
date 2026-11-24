@@ -1,5 +1,7 @@
 # MECHANIUM
 
+![Logo oficial do MECHANIUM](assets/mechanium-logo.png)
+
 **MECHANIUM** é um plugin independente para Minecraft, voltado a tecnologia, progressão histórica, indústria, automação e geopolítica.
 
 - **Minecraft:** 1.21.11
@@ -41,7 +43,7 @@ mvn clean verify
 JAR principal:
 
 ```text
-mechanium-plugin/target/MECHANIUM-0.7.2.00-SNAPSHOT.jar
+mechanium-plugin/target/MECHANIUM-0.7.3.01-SNAPSHOT.jar
 ```
 
 ## Instalar

@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -187,7 +186,6 @@ final class GreenhouseManager implements Listener {
                 .orElseGet(() -> new ItemStack(Material.DISPENSER));
         Location drop = block.getLocation().add(0.5, 0.5, 0.5);
         Location controllerLocation = block.getLocation();
-        String blockKey = locationKey(controllerLocation);
         event.setDropItems(false);
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (event.isCancelled() || !block.getType().isAir()) {

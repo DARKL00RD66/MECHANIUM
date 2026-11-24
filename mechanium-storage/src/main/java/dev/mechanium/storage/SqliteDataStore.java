@@ -146,8 +146,35 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                     """);
                 statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (7)");
             }
+            if (currentVersion < 8) {
+                statement.execute("""
+                    ALTER TABLE mechanium_machines
+                    ADD COLUMN energy_cost_per_operation INTEGER NOT NULL DEFAULT 0
+                    CHECK (energy_cost_per_operation BETWEEN 0 AND 1000000)
+                    """);
+                statement.execute("""
+                    UPDATE mechanium_machines SET energy_cost_per_operation=1
+                    WHERE id IN (
+                        'water_filter_machine','advanced_assembly_machine',
+                        'industrial_crusher_machine','industrial_smelter_machine',
+                        'industrial_mill_machine','industrial_canner_machine',
+                        'chicken_incubator_machine','cow_incubator_machine',
+                        'pig_incubator_machine','sheep_incubator_machine',
+                        'rapid_press_machine','rapid_coil_winder_machine','air_purifier',
+                        'metallurgy_furnace','pressure_chamber','auto_assembler',
+                        'cargo_router','forestry_station','textile_loom',
+                        'biomass_processor','industrial_mixer'
+                    )
+                    """);
+                statement.execute("""
+                    UPDATE mechanium_machines SET energy_cost_per_operation=2
+                    WHERE id IN ('mining_assembler','polymer_mixer','glass_furnace',
+                                 'refrigeration_unit','aquaculture_hatchery')
+                    """);
+                statement.execute("INSERT OR IGNORE INTO mechanium_schema_version(version) VALUES (8)");
+            }
         }
-        logger.info("MECHANIUM SQLite schema até a versão 7 pronta.");
+        logger.info("MECHANIUM SQLite schema até a versão 8 pronta.");
     }
 
 
@@ -605,16 +632,20 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
 
     @Override public synchronized void saveMachine(MachineDefinition v) {
         try (PreparedStatement p = connection.prepareStatement("""
-                INSERT INTO mechanium_machines VALUES(?,?,?,?,?,?,?,?,?,?)
+                INSERT INTO mechanium_machines(
+                    id,display_name,machine_item_id,block_material,input_id,input_amount,
+                    output_item_id,output_amount,processing_ticks,required_technology_id,
+                    energy_cost_per_operation
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
                 ON CONFLICT(id) DO UPDATE SET display_name=excluded.display_name,
                 machine_item_id=excluded.machine_item_id,block_material=excluded.block_material,
                 input_id=excluded.input_id,input_amount=excluded.input_amount,
                 output_item_id=excluded.output_item_id,output_amount=excluded.output_amount,
                 processing_ticks=excluded.processing_ticks,
-                required_technology_id=excluded.required_technology_id
+                required_technology_id=excluded.required_technology_id,
+                energy_cost_per_operation=excluded.energy_cost_per_operation
                 """)) {
-            // Keep the legacy columns populated so older readers can still inspect
-            // the primary input and output while new readers use the normalized tables.
+            // Legacy columns stay populated for older readers; normalized tables hold every IO entry.
             p.setString(1, v.id());
             p.setString(2, v.displayName());
             p.setString(3, v.machineItemId());
@@ -625,6 +656,7 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
             p.setInt(8, v.outputAmount());
             p.setInt(9, v.processingTicks());
             p.setString(10, v.requiredTechnologyId());
+            p.setInt(11, v.energyCostPerOperation());
             p.executeUpdate();
 
             try (PreparedStatement deleteInputs = connection.prepareStatement(
@@ -667,11 +699,11 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
     @Override public synchronized Collection<MachineDefinition> loadMachines() {
         List<MachineDefinition> legacyRows = new ArrayList<>();
         try (Statement s = connection.createStatement();
-             ResultSet r = s.executeQuery("SELECT id,display_name,machine_item_id,block_material,input_id,input_amount,output_item_id,output_amount,processing_ticks,required_technology_id FROM mechanium_machines ORDER BY id")) {
+             ResultSet r = s.executeQuery("SELECT id,display_name,machine_item_id,block_material,input_id,input_amount,output_item_id,output_amount,processing_ticks,required_technology_id,energy_cost_per_operation FROM mechanium_machines ORDER BY id")) {
             while (r.next()) {
                 legacyRows.add(new MachineDefinition(r.getString(1), r.getString(2), r.getString(3),
                         r.getString(4), r.getString(5), r.getInt(6), r.getString(7),
-                        r.getInt(8), r.getInt(9), r.getString(10)));
+                        r.getInt(8), r.getInt(9), r.getInt(11), r.getString(10)));
             }
         } catch (SQLException e) {
             throw failure("load machines", e);
@@ -685,7 +717,7 @@ public final class SqliteDataStore implements MechaniumDataStore, MechaniumConte
                     legacy.blockMaterial(),
                     inputs.isEmpty() ? legacy.inputs() : inputs,
                     outputs.isEmpty() ? legacy.outputs() : outputs,
-                    legacy.processingTicks(), legacy.requiredTechnologyId()));
+                    legacy.processingTicks(), legacy.energyCostPerOperation(), legacy.requiredTechnologyId()));
         }
         return List.copyOf(out);
     }

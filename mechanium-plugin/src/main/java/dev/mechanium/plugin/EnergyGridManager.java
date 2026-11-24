@@ -31,8 +31,10 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -53,6 +55,7 @@ final class EnergyGridManager implements Listener {
     private final NamespacedKey ownerKey;
     private final NamespacedKey chargeKey;
     private final NamespacedKey reactorFuelUntilKey;
+    private final Map<String, Location> loadedGenerators = new HashMap<>();
     private BukkitTask task;
 
     EnergyGridManager(JavaPlugin plugin, MechaniumApi api) {
@@ -65,6 +68,9 @@ final class EnergyGridManager implements Listener {
     }
 
     void start() {
+        for (World world : Bukkit.getWorlds()) {
+            for (Chunk chunk : world.getLoadedChunks()) registerChunkGenerators(chunk);
+        }
         task = Bukkit.getScheduler().runTaskTimer(plugin, this::generate, 20L, 20L);
     }
 
@@ -73,6 +79,7 @@ final class EnergyGridManager implements Listener {
             task.cancel();
             task = null;
         }
+        loadedGenerators.clear();
     }
 
     boolean consume(UUID owner, Location machine, int amount) {
@@ -153,7 +160,9 @@ final class EnergyGridManager implements Listener {
         if (!tile.update(true, false)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage("§cNão foi possível registrar o componente energético.");
+            return;
         }
+        if (isGenerator(id)) loadedGenerators.put(key(block.getLocation()), block.getLocation());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -226,9 +235,13 @@ final class EnergyGridManager implements Listener {
         Location drop = event.getBlock().getLocation().add(0.5, 0.5, 0.5);
         Block block = event.getBlock();
         event.setDropItems(false);
+        String locationKey = key(block.getLocation());
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (!event.isCancelled() && block.getType().isAir()) {
+                loadedGenerators.remove(locationKey);
                 block.getWorld().dropItemNaturally(drop, recovered);
+            } else if (isGenerator(id) && !event.isCancelled()) {
+                loadedGenerators.put(locationKey, block.getLocation());
             }
         });
     }
@@ -260,28 +273,66 @@ final class EnergyGridManager implements Listener {
     }
 
     private void generate() {
-        for (World world : Bukkit.getWorlds()) {
-            for (Chunk chunk : world.getLoadedChunks()) {
-                for (BlockState state : chunk.getTileEntities()) {
-                    if (!(state instanceof TileState tile)) continue;
-                    String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
-                    if (!"wind_rotor".equals(id) && !"solar_cell".equals(id) && !"abstract_reactor".equals(id)) continue;
-                    String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
-                    if (owner == null) continue;
-                    int production;
-                    if ("wind_rotor".equals(id)) {
-                        production = 1;
-                    } else if ("solar_cell".equals(id)) {
-                        production = world.getTime() < 12_000 && !world.hasStorm() ? 2 : 0;
-                    } else {
-                        long fuelUntil = tile.getPersistentDataContainer().getOrDefault(
-                                reactorFuelUntilKey, PersistentDataType.LONG, 0L);
-                        production = fuelUntil > System.currentTimeMillis() ? 8 : 0;
-                    }
-                    if (production > 0) chargeConnectedBatteries(state.getBlock(), owner, production);
-                }
+        for (Location location : new ArrayList<>(loadedGenerators.values())) {
+            World world = location.getWorld();
+            if (world == null || !world.isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+                loadedGenerators.remove(key(location));
+                continue;
             }
+            BlockState state = location.getBlock().getState();
+            if (!(state instanceof TileState tile)) {
+                loadedGenerators.remove(key(location));
+                continue;
+            }
+            String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
+            if (!isGenerator(id)) {
+                loadedGenerators.remove(key(location));
+                continue;
+            }
+            String owner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+            if (owner == null) continue;
+
+            int production;
+            if ("wind_rotor".equals(id)) {
+                production = 1;
+            } else if ("solar_cell".equals(id)) {
+                production = world.getTime() < 12_000 && !world.hasStorm() ? 2 : 0;
+            } else {
+                long fuelUntil = tile.getPersistentDataContainer().getOrDefault(
+                        reactorFuelUntilKey, PersistentDataType.LONG, 0L);
+                production = fuelUntil > System.currentTimeMillis() ? 8 : 0;
+            }
+            if (production > 0) chargeConnectedBatteries(state.getBlock(), owner, production);
         }
+    }
+
+    private void registerChunkGenerators(Chunk chunk) {
+        for (BlockState state : chunk.getTileEntities()) {
+            if (!(state instanceof TileState tile)) continue;
+            String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
+            if (isGenerator(id)) loadedGenerators.put(key(state.getLocation()), state.getLocation());
+        }
+    }
+
+    private boolean isGenerator(String id) {
+        return "wind_rotor".equals(id) || "solar_cell".equals(id) || "abstract_reactor".equals(id);
+    }
+
+    @EventHandler
+    public void onEnergyChunkLoad(org.bukkit.event.world.ChunkLoadEvent event) {
+        registerChunkGenerators(event.getChunk());
+    }
+
+    @EventHandler
+    public void onEnergyChunkUnload(org.bukkit.event.world.ChunkUnloadEvent event) {
+        int chunkX = event.getChunk().getX();
+        int chunkZ = event.getChunk().getZ();
+        UUID worldId = event.getWorld().getUID();
+        loadedGenerators.entrySet().removeIf(entry -> {
+            Location location = entry.getValue();
+            return location.getWorld() != null && location.getWorld().getUID().equals(worldId)
+                    && (location.getBlockX() >> 4) == chunkX && (location.getBlockZ() >> 4) == chunkZ;
+        });
     }
 
     private void chargeConnectedBatteries(Block generator, String owner, int production) {

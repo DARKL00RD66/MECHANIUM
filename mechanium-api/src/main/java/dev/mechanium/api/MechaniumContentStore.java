@@ -34,6 +34,8 @@ public interface MechaniumContentStore {
     Map<String, Set<String>> reconcileContentOwner(String ownerId, Map<String, Set<String>> activeContent);
     /** Removes all owned content whose owner is not in activeOwnerIds. Must run in a transaction. */
     Map<String, Set<String>> pruneInactiveContentOwners(Set<String> activeOwnerIds);
+    /** Renames an owner identity without deleting any registered content. Must run in a transaction. */
+    void migrateContentOwner(String previousOwnerId, String newOwnerId);
     void commitContentTransaction();
     void rollbackContentTransaction();
 }

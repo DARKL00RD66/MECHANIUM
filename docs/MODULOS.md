@@ -32,9 +32,9 @@ A ferramenta atual é uma prospecção local. Depósitos regionais, veios minera
 | ID | Funcionalidade jogável |
 |---|---|
 | `extra-gear` | Picareta reforçada concede breve Haste após mineração; bússola de levantamento informa coordenadas, biome, direção e bloco observado. |
-| `eco-power` | Geradores eólicos/solares, baterias com capacidade e consumo real de energia por máquinas. |
+| `eco-power` | Geradores eólico/solar, baterias de 10.000 unidades e conduítes energéticos; rede por proprietário de até 256 nós em chunks carregados. |
 | `sfcalc` | `/mechanium calc <receita> [quantidade]` calcula lotes, produção e materiais recursivos. |
-| `liquid` | Filtro de água, tanques e tubulações conectadas que transferem água purificada. |
+| `liquid` | Filtro, tanques de fluido tipado e tubulações; água purificada e refrigerante em volumes de mB, sem mistura de tipos. |
 | `advanced-tech` | Montadora, britador e refinaria industrial com receitas e processamento. |
 | `simple-storage` | Nós de armazenamento conectados por faces, com inventário virtual paginado e proteção por proprietário/permissões. |
 | `sensible-toolbox` | Kit de campo com efeitos temporários e kit de manutenção que repara equipamentos. |\n| `exotic-garden` | Sementes diversificadas, ervas desidratadas, extrato botânico, conservas tropicais e caixote de pomar. |\n| `dank-tech2` | Upgrade fabricável para um armazém portátil de 54 espaços; o item mantém os conteúdos no PDC. |
@@ -43,7 +43,7 @@ A ferramenta atual é uma prospecção local. Depósitos regionais, veios minera
 
 | ID | Funcionalidade jogável |
 |---|---|
-| `electric-spawners` | Incubadoras elétricas de galinha, vaca, porco e ovelha; exigem insumos, pesquisa e bateria adjacente; produzem spawn eggs vanilla de animais passivos. |
+| `electric-spawners` | Incubadoras elétricas de galinha, vaca, porco e ovelha; exigem insumos, pesquisa e custo de energia por operação na rede do proprietário; produzem spawn eggs vanilla de animais passivos. |
 | `fast-machines` | Prensa rápida (20 ticks) e enrolador de bobinas (40 ticks), ambos acelerados e alimentados pela rede de energia. |
 | `hardcore-slimefun` | Pesquisas de confiabilidade e manutenção, kit reparador desbloqueável e regras hardcore opcionais para desgaste e custo de reparo. |
 
@@ -92,12 +92,16 @@ Esta etapa amplia itens e receitas; não adiciona ainda novas plantas com cresci
 - Máquinas acumulam desgaste por ciclo até 100; ao atingir o limite, param. O proprietário pode agachar e clicar com uma barra de ferro para reparar e zerar o desgaste.
 - A rede atual é local, limitada a 256 nós e não carrega chunks automaticamente. Ao desmontar uma bateria, a carga é preservada no PDC do item e restaurada ao recolocar.
 
-### Liquid — distribuição de água
+### Liquid — tanques de fluido tipado
 
-- O filtro transforma um balde de água em um item MECHANIUM `purified_water`.
-- O tanque é um barril e a tubulação é um dispenser identificado pelo MECHANIUM.
-- Tanques do mesmo proprietário conectados por tubulações adjacentes pelas faces formam uma rede. A cada 2 segundos, um item de água purificada é transferido de um tanque para outro tanque que tenha espaço.
-- Cada rede examina até 128 tubulações e apenas chunks carregados. Tubulações e tanques não transferem itens vanilla por funis; a rede transporta apenas o item `purified_water`.
+- O filtro transforma um balde de água e um cartucho filtrante em um item MECHANIUM `purified_water`.
+- Tanques usam barris e guardam o fluido no PDC como ID + volume em milibuckets (mB), com capacidade padrão de 16.000 mB.
+- Cada unidade `purified_water` representa 250 mB; `purified_water_cell` representa 1.000 mB; `coolant_cell` representa 250 mB de `industrial_coolant`.
+- O tanque aceita somente um tipo de fluido por vez. Água purificada e refrigerante não se misturam; o volume não ultrapassa a capacidade configurada.
+- Para abastecer, clique no tanque com um item de fluido desbloqueado. Para retirar, agache e clique com a mão vazia; cada retirada converte 250 mB em um item equivalente.
+- Tubulações são dispensers identificados. Tanques do mesmo proprietário conectados por faces formam uma rede; a cada dois segundos podem transferir até 250 mB para outro tanque compatível.
+- As redes examinam até 128 tubulações indexadas nos chunks carregados. Não carregam chunks automaticamente, não transportam fluidos vanilla e ainda não possuem válvulas, bombas nem API pública para addons registrarem novos fluidos.
+- Itens de fluido legados encontrados no inventário de um tanque são convertidos para volume tipado quando o tanque é acessado/inspecionado; ao desmontar o tanque, tipo e volume são preservados no PDC do próprio item de tanque.
 - O acesso aos tanques respeita o proprietário; a tubulação é um bloco de conexão, não um inventário acessível.
 
 ### SFCalc — cálculo de produção
@@ -148,7 +152,7 @@ Cada módulo opcional possui classe, IDs, era e pesquisas próprios. Não altera
 
 - O build automatizado pode verificar compilação e testes unitários, mas não confirma comportamento real em Paper/Purpur 1.21.11.
 - Máquinas continuam hospedadas em dispenser; o runtime suporta até seis entradas e três saídas, mas ainda não possui filas nem processamento paralelo.
-- Energia e fluidos são redes locais simples, não um simulador genérico de cabos ou líquidos.
+- Energia e fluidos são redes locais tipadas e limitadas; não são simuladores universais. A energia ainda não tem telemetria, perdas ou throughput configurável; fluidos suportam apenas água purificada e refrigerante, sem válvulas/bombas nem API pública de registro.
 - Armazenamento conectado exige nós face a face; não é uma rede logística de longa distância.
 - Não há integração com economia para calcular preços monetários.
 - Não há filas de produção, processamento paralelo ou múltiplas receitas simultâneas; manutenção de máquinas já existe via ferro e kit pesquisável.
@@ -171,7 +175,7 @@ Todos são opcionais e podem ser configurados individualmente.
 
 - O módulo usa um gerador cristalino fictício colocado como blast furnace.
 - Clique com um cristal energético MECHANIUM na mão para abastecer o gerador; uma unidade dura cinco minutos.
-- Enquanto abastecido, gera 8 unidades de energia por segundo para uma bateria MECHANIUM adjacente do mesmo proprietário.
+- Enquanto abastecido, gera 8 unidades de energia por segundo para a rede de baterias conectada por faces/conduítes do mesmo proprietário.
 - A energia é uma mecânica abstrata do jogo. Não há combustível nuclear real, parâmetros físicos, projeto técnico ou simulação de reator real.
 
 ### Industrial Networks — transporte de itens

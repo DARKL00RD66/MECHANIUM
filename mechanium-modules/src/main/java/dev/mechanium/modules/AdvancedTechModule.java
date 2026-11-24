@@ -67,19 +67,19 @@ final class AdvancedTechModule extends AbstractBuiltinModule {
                 "industrial_food_machinery"));
 
         registerMachine(api, new MachineDefinition("industrial_crusher_machine", "Britador industrial",
-                "industrial_crusher", "DISPENSER", "mechanium:crushed_ore", 2, "iron_concentrate", 2, 120,
+                "industrial_crusher", "DISPENSER", "mechanium:crushed_ore", 2, "iron_concentrate", 2, 120, 1,
                 "precision_engineering"));
         registerMachine(api, new MachineDefinition("industrial_smelter_machine", "Refinaria industrial",
-                "industrial_smelter", "DISPENSER", "mechanium:iron_concentrate", 2, "refined_alloy", 2, 180,
+                "industrial_smelter", "DISPENSER", "mechanium:iron_concentrate", 2, "refined_alloy", 2, 180, 1,
                 "advanced_assembly"));
         registerMachine(api, new MachineDefinition("advanced_assembly_machine", "Montadora industrial",
-                "assembly_machine", "DISPENSER", "mechanium:mechanical_parts", 2, "precision_parts", 1, 160,
+                "assembly_machine", "DISPENSER", "mechanium:mechanical_parts", 2, "precision_parts", 1, 160, 1,
                 "advanced_assembly"));
         registerMachine(api, new MachineDefinition("industrial_mill_machine", "Moinho industrial",
-                "industrial_mill", "DISPENSER", "WHEAT", 2, "mechanium:mechanium_flour", 2, 100,
+                "industrial_mill", "DISPENSER", "WHEAT", 2, "mechanium:mechanium_flour", 2, 100, 1,
                 "industrial_food_machinery"));
         registerMachine(api, new MachineDefinition("industrial_canner_machine", "Conservadora industrial",
-                "industrial_canner", "DISPENSER", "SWEET_BERRIES", 3, "mechanium:preserved_berries", 1, 120,
+                "industrial_canner", "DISPENSER", "SWEET_BERRIES", 3, "mechanium:preserved_berries", 1, 120, 1,
                 "industrial_food_machinery"));
     }
 }

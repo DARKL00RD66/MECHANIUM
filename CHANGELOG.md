@@ -12,7 +12,14 @@
 - Interface de interação das máquinas informa entradas, saídas, duração e custo energético.
 - Módulo cosmético renomeado para Head Collection; não possui dependência nem integração Geyser, GeyserMC, Floodgate ou Bedrock. A migração preserva IDs antigos de configuração/ownership e a categoria persistente.
 - Corrigidos IDs de produtos das máquinas de moinho e conservadora que impediam seu registro correto.
-- CI #45506733683 aprovou Java 21/Maven `clean verify` com 111 testes e compilação do addon de exemplo; o commit validado inclui a API pública de fluidos, SQLite v9, recipientes de volume variável e seleção do maior recipiente de extração desbloqueado que cabe no tanque.
+- `greenhouse_controller` implementado como controlador de crescimento local: após um crescimento normal aceito, aplica +1 estágio a plantas `Ageable` no raio configurado, desde que o proprietário tenha a pesquisa e energia disponível na rede dele. Não colhe, replanta, coloca ou quebra blocos.
+- Preservados o item e a receita legados `climate_controller`; o controlador funcional usa um novo item `greenhouse_controller` para evitar conflito com dados SQLite de instalações anteriores.
+- Corrigida a extração de fluidos para escolher o maior recipiente desbloqueado que caiba no volume, e o sistema agora preserva volume antigo mesmo quando a capacidade configurada é reduzida.
+- Transferências/migrações de fluidos verificam o salvamento e registram falhas de rollback; definições rejeitam o mesmo item de recipiente usado para identificar dois fluidos diferentes.
+- Corrigidas definições empilháveis de três máquinas (FN Amplifications, Industrial Chemistry e Mining Automation), que agora têm pilha máxima 1; adicionada regressão na API.
+- A manutenção de máquinas só consome material após confirmar a gravação do estado. O débito energético registra e verifica falhas de rollback.
+- A Wiki das máquinas mostra todos os ingredientes/produtos e o custo energético; o proprietário pode consultar nós, baterias e carga/capacidade agregada da rede elétrica.
+- CI #45508690080 aprovou Java 21/Maven `clean verify` com 116 testes, compilação dos sete módulos e do addon de exemplo; o artefato foi enviado pelo workflow. Testes de gameplay Paper/Purpur continuam pendentes.
 - Tanques de fluido armazenam volume tipado em mB no PDC: 16.000 mB por padrão, transferência de 250 mB/ciclo, água purificada e refrigerante como exemplos, sem mistura entre tipos. A API permite registrar volumes/recipientes personalizados.
 - Itens de fluido legados no inventário do tanque são migrados para volume; tipo e volume também ficam preservados no item de tanque recuperado.
 - Corrigida a retirada de fluidos: agora seleciona o maior recipiente de extração desbloqueado cujo volume caiba no tanque, em vez de exigir sempre 250 mB. Testes unitários para 250, 500 e 1.000 mB passaram no CI #45506733683.

@@ -198,7 +198,8 @@ final class MechaniumResearchMenu implements Listener {
                     "§7Ainda bloqueadas: §c" + (eraTechnologies.size() - researched - researchable),
                     isCurrent ? "§6ERA ATUAL" : "§aClique para abrir esta era."
             )));
-            holder.actions.put(clockSlot, p -> openEraTree(p, index, 0));
+            int selectedEraIndex = index;
+            holder.actions.put(clockSlot, p -> openEraTree(p, selectedEraIndex, 0));
         }
 
         button(holder, 49, Material.ARROW, "§eVoltar ao menu principal", List.of(), this::openHome);

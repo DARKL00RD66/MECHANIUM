@@ -51,6 +51,6 @@ final class LiquidModule extends AbstractBuiltinModule {
                 "liquid_tank", 1, List.of("III", "IBI", "III"),
                 Map.of('I', "IRON_INGOT", 'B', "BARREL"), "fluid_distribution"));
         registerMachine(api, new MachineDefinition("water_filter_machine", "Filtro de água",
-                "water_filter", "DISPENSER", "WATER_BUCKET", 1, "purified_water", 1, 100, "water_filtration"));
+                "water_filter", "DISPENSER", "WATER_BUCKET", 1, "purified_water", 1, 100, 1, "water_filtration"));
     }
 }

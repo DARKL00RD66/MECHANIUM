@@ -513,6 +513,19 @@ final class FluidPipeManager implements Listener {
                 || api.canUseTechnology(playerId, fluid.requiredTechnologyId()));
     }
 
+    private FluidItem fluidItem(ItemStack item) {
+        String id = itemId(item);
+        if (id == null) return null;
+        for (FluidDefinition fluid : api.getFluids()) {
+            for (FluidContainerDefinition container : fluid.containers()) {
+                if (container.canFill() && container.itemId().equals(id)) {
+                    return new FluidItem(id, fluid.id(), container.amountMb());
+                }
+            }
+        }
+        return null;
+    }
+
     private void consumeOneFromHand(Player player, ItemStack hand) {
         if (hand.getAmount() <= 1) player.getInventory().setItemInMainHand(null);
         else hand.setAmount(hand.getAmount() - 1);

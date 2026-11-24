@@ -2,8 +2,8 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** máquinas, energia, fluidos tipados e controlador inicial de estufa implementados no código; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos de energia por definição, SQLite v9, API pública de fluidos tipados, conduítes energéticos, telemetria básica de redes, preservação de carga/volume em itens e controlador inicial de estufa implementados. CI #45508690080 aprovou 116 testes, sete módulos Maven e addon de exemplo. Paper/Purpur ainda não testados.  
+**Fase atual:** máquinas, energia, fluidos tipados, estufa inicial e editor de itens/receitas do Slime Customizer implementados no código; CI da ampliação de receitas em execução; teste em servidor real pendente
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer de itens/receitas shapeless implementados. O CI do commit anterior aprovou 118 testes; a ampliação do assistente de receitas ainda aguarda CI. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -140,11 +140,11 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 
 - **FN Amplifications:** núcleos, bobinas, módulos e estação de amplificação; a estação usa o runtime genérico com buffers multi-entrada/multi-saída.
 - **Head Collection:** fichas cosméticas, cabeças de coleção e expositores locais; não usa Geyser/GeyserMC, Floodgate, Bedrock nem integração de plataforma externa. IDs legados são mantidos apenas por compatibilidade de dados.
-- **Slime Customizer:** páginas de modelo, projetos em branco, ferramenta e catálogo de conteúdo; a interface administrativa completa de criação/edição permanece pendente.
+- **Slime Customizer:** editor administrativo `/mechanium admin customizer` para criar/listar/entregar/editar/remover itens e criar/remover receitas shapeless de até nove ingredientes. Ownership SQLite por item/receita e bloqueio de exclusão de itens referenciados. Receitas shaped, edição de receitas e criação de categorias/tecnologias ainda pendentes.
 - **Industrial Chemistry:** reagentes abstratos, resina, fibra sintética e misturador industrial; não simula processos químicos reais.
 - **Mining Automation:** componentes fictícios de prospecção e módulo minerador com montadora; não implementa extração autônoma de blocos nesta etapa.
 - Os cinco módulos são opcionais, ativados por padrão e podem ser desligados individualmente em `config.yml`. Cada um registra duas tecnologias, uma categoria, quatro itens e quatro receitas. Três declaram máquinas no runtime genérico.
-- Build Maven/CI Java 21 aprovado no workflow 45508690080 (116 testes automatizados). O controlador inicial de estufa e a compatibilidade do item climático legado estão incluídos; testes reais em Paper/Purpur 1.21.11 ainda precisam ser realizados.
+- Build Maven/CI Java 21 aprovado no workflow 45510163868 (118 testes automatizados) para o commit anterior. A criação de receitas shapeless no Slime Customizer está na revisão seguinte; testes reais em Paper/Purpur 1.21.11 ainda precisam ser realizados.
 
 
 ## Atualização de interface 0.7.3.01-SNAPSHOT

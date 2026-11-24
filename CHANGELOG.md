@@ -6,7 +6,8 @@
 - Implementados modelos de máquina com múltiplos ingredientes e produtos, preservando o construtor legado.
 - Runtime de dispensador agora reserva seis slots de entrada e três de saída e planeja o lote completo antes de consumir insumos/energia.
 - Adicionada migração SQLite v7 com tabelas normalizadas de entradas e saídas, mantendo fallback para definições legadas.
-- Testes de modelo, registro via API, persistência e migração adicionados; resultados do CI e validação Paper/Purpur ainda pendentes.
+- CI #45484853405 aprovado em Java 21/Maven `clean verify`: 84 testes automatizados passaram nos seis módulos; o addon de exemplo também compilou.
+- Artefato `MECHANIUM-0.9.9.00-SNAPSHOT` publicado no workflow; testes dentro de servidores Paper/Purpur ainda pendentes.
 - Próximas prioridades: rede energética por conduítes e estrutura genérica de fluidos.
 
 ## 0.7.4.02-SNAPSHOT

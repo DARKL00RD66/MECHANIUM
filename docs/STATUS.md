@@ -2,8 +2,8 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** primeira entrega da fundação industrial implementada no código; CI e runtime ainda pendentes
-**Progresso 0.9.9:** API de máquinas multi-entrada/multi-saída, buffers 6+3, validação integral e migração SQLite v7 adicionados.  
+**Fase atual:** primeira entrega da fundação industrial implementada; CI Java 21/Maven aprovado; teste em servidor real pendente
+**Progresso 0.9.9:** API multi-entrada/multi-saída, buffers 6+3, validação integral e migração SQLite v7 implementados. CI #45484853405 aprovado com 84 testes automatizados; Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -12,7 +12,8 @@
 
 - API pública para eras, tecnologias, progressão, módulos e addons.
 - Registro persistente de categorias, itens, receitas, máquinas e regras de drops.
-- Persistência SQLite com schema versionado até a versão 6; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
+- Definições de máquinas multi-entrada/multi-saída (1–6 entradas e 1–3 saídas), com runtime de dispensador e buffers dedicados.
+- Persistência SQLite com schema versionado até a versão 7; era global, sobrescritas de teste, máquinas e drops são restaurados no carregamento da API.
 - Criação de `ItemStack` com identificador PDC, lore, modelo customizado e limite de pilha configurável.
 - Receitas Bukkit nativas (shaped e shapeless), incluindo ingredientes MECHANIUM exatos.
 - Verificação central de tecnologia ao fabricar, usar, consumir e posicionar itens personalizados.
@@ -142,7 +143,7 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - **Industrial Chemistry:** reagentes abstratos, resina, fibra sintética e misturador industrial; não simula processos químicos reais.
 - **Mining Automation:** componentes fictícios de prospecção e módulo minerador com montadora; não implementa extração autônoma de blocos nesta etapa.
 - Os cinco módulos são opcionais, ativados por padrão e podem ser desligados individualmente em `config.yml`. Cada um registra duas tecnologias, uma categoria, quatro itens e quatro receitas. Três declaram máquinas no runtime genérico.
-- Build Maven/CI e testes reais em Paper/Purpur 1.21.11 ainda precisam ser confirmados.
+- Build Maven/CI Java 21 aprovado no workflow 45484853405 (84 testes automatizados). Testes reais em Paper/Purpur 1.21.11 ainda precisam ser realizados.
 
 
 ## Atualização de interface 0.7.3.01-SNAPSHOT

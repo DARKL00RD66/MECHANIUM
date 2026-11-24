@@ -77,6 +77,7 @@ A linha 0.7.0.01 amplia os módulos Forestry, Textile Industry, Biofuel, Constru
 - [Matriz de portabilidade](docs/PORTABILIDADE_ADDONS.md)
 - [Licenças e atribuição](docs/LICENCAS_E_ORIGENS.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Plano de consolidação 0.9.9](docs/PLANO-0.9.9.md)
 - [Política de versionamento até 0.9.9](docs/VERSIONAMENTO.md)
 - [Contribuição](CONTRIBUTING.md)
 

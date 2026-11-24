@@ -37,6 +37,7 @@ MECHANIUM não exige Slimefun nem Historical Ages para funcionar. Implementaçõ
 - [Addons externos — contrato da API](../ADDONS_EXTERNOS.md)
 - [Estado real e limitações conhecidas](../STATUS.md)
 - [Roadmap](../ROADMAP.md)
+- [Plano de consolidação 0.9.9](../PLANO-0.9.9.md)
 - [Política de versionamento](../VERSIONAMENTO.md)
 - [Licenças e atribuição](../LICENCAS_E_ORIGENS.md)
 - [Changelog](../../CHANGELOG.md)

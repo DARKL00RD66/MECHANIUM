@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. Um build Maven bem-sucedido não substitui um teste dentro de um servidor real.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI Java 21/Maven passou no commit `e37e14abf6988035cc192c2be4d14895c1f73a8b`; essa aprovação não substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 
@@ -26,7 +26,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 ### Limitações técnicas importantes encontradas
 
-- `MachineDefinition` é um modelo single-input/single-output e o runtime é baseado em `DISPENSER`.
+- `MachineDefinition` e o runtime agora aceitam 1–6 tipos de entrada e 1–3 tipos de saída, distribuídos em seis slots de entrada e três de saída; o bloco físico ainda é `DISPENSER`.
 - O gerenciador de energia procura baterias adjacentes à máquina e percorre baterias conectadas diretamente; não existe ainda uma camada geral de cabos energéticos.
 - O gerenciador de fluidos movimenta somente o item customizado `purified_water` entre tanques, por tubos adjacentes.
 - A rede industrial percorre até 128 conduítes e movimenta um item MECHANIUM por ciclo de transferência.
@@ -40,7 +40,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - Runtime de dispensador atualizado para seis slots de entrada e três de saída.
 - Produção valida todos os insumos e planeja todas as saídas antes de debitar recursos.
 - Migração SQLite v7 grava entradas/saídas normalizadas e lê linhas legadas pelos campos antigos.
-- Testes unitários, de registro e persistência/migração adicionados; aguardam execução do CI.
+- CI GitHub Actions #45484853405 passou em Java 21/Maven `clean verify`; 84 testes automatizados passaram (API 19, Storage 13, Engine 12, Modules 9, Addon Loader 2, Plugin 29).
 
 ## 2. Marcos internos de implementação
 
@@ -53,7 +53,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [x] Reservar buffers separados de entrada e saída no inventário da máquina.
 - [x] Fazer pré-validação integral dos ingredientes e da capacidade de saída antes de consumir qualquer item ou energia.
 - [ ] Manter progresso e propriedade seguros ao quebrar, carregar e descarregar chunks.
-- [ ] Adicionar testes de validação do modelo, persistência e migração de dados legados.
+- [x] Adicionar e executar testes de validação do modelo, persistência e migração de dados legados.
 
 ### Marco B — Rede de energia (equivalente interno a 0.8.1)
 

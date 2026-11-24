@@ -131,8 +131,13 @@ class SqliteDataStoreTest {
     void machineAndMobDropDefinitionsPersistAcrossStoreInstances() throws Exception {
         Path database = directory.resolve("machine-content.db");
         MachineDefinition machine = new MachineDefinition(
-                "mechanical_press", "Prensa mecânica", "mechanical_press", "DISPENSER",
-                "IRON_INGOT", 2, "mechanical_parts", 1, 100, "basic_mechanics");
+                "industrial_mixer", "Misturador industrial", "industrial_mixer", "DISPENSER",
+                List.of(new MachineIngredient("IRON_INGOT", 2),
+                        new MachineIngredient("COPPER_INGOT", 1),
+                        new MachineIngredient("mechanium:industrial_resin", 3)),
+                List.of(new MachineProduct("mechanical_parts", 2),
+                        new MachineProduct("copper_coil", 1)),
+                240, "basic_mechanics");
         MobDropDefinition drop = new MobDropDefinition(
                 "cow_animal_fat", "COW", "animal_fat", 1, 2, 0.35, "crop_rotation");
 
@@ -143,10 +148,42 @@ class SqliteDataStoreTest {
 
         try (SqliteDataStore reopened = new SqliteDataStore(database, Logger.getLogger("test"))) {
             assertEquals(List.of(machine), List.copyOf(reopened.loadMachines()));
+            MachineDefinition restored = reopened.loadMachines().getFirst();
+            assertEquals(machine.inputs(), restored.inputs());
+            assertEquals(machine.outputs(), restored.outputs());
             assertEquals(List.of(drop), List.copyOf(reopened.loadMobDrops()));
         }
     }
 
+
+
+    @Test
+    void schemaSevenMigrationPreservesLegacySingleInputSingleOutputMachines() throws Exception {
+        Path database = directory.resolve("legacy-machine-v6.db");
+        MachineDefinition legacy = new MachineDefinition(
+                "mechanical_press", "Prensa mecânica", "mechanical_press", "DISPENSER",
+                "IRON_INGOT", 2, "mechanical_parts", 1, 100, "basic_mechanics");
+
+        try (SqliteDataStore store = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            store.saveMachine(legacy);
+        }
+
+        try (var connection = java.sql.DriverManager.getConnection("jdbc:sqlite:" + database.toAbsolutePath());
+             var statement = connection.createStatement()) {
+            statement.execute("DROP TABLE mechanium_machine_inputs");
+            statement.execute("DROP TABLE mechanium_machine_outputs");
+            statement.execute("DELETE FROM mechanium_schema_version WHERE version >= 7");
+        }
+
+        try (SqliteDataStore migrated = new SqliteDataStore(database, Logger.getLogger("test"))) {
+            assertEquals(1, migrated.loadMachines().size());
+            MachineDefinition restored = migrated.loadMachines().getFirst();
+            assertEquals(legacy.inputs(), restored.inputs());
+            assertEquals(legacy.outputs(), restored.outputs());
+            assertEquals("IRON_INGOT", restored.inputId());
+            assertEquals("mechanical_parts", restored.outputItemId());
+        }
+    }
 
     @Test
     void ownedContentIsReconciledAndInactiveOwnersArePruned() throws Exception {

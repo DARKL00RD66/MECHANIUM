@@ -29,6 +29,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -118,7 +119,7 @@ final class FluidPipeManager implements Listener {
             } catch (IllegalArgumentException exception) {
                 restored = FluidTankContents.empty();
             }
-            writeContents(tile, restored);
+            writeContents(tile.getPersistentDataContainer(), restored);
         }
         if (!tile.update(true, false)) {
             event.setCancelled(true);
@@ -160,7 +161,7 @@ final class FluidPipeManager implements Listener {
         if ("liquid_tank".equals(id)) {
             var meta = recovered.getItemMeta();
             meta.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, "liquid_tank");
-            writeContents(meta, storedFluid);
+            writeContents(meta.getPersistentDataContainer(), storedFluid);
             recovered.setItemMeta(meta);
         }
         Location drop = block.getLocation().add(0.5, 0.5, 0.5);
@@ -405,7 +406,7 @@ final class FluidPipeManager implements Listener {
         }
 
         if (changed) {
-            writeContents(tile, current);
+            writeContents(tile.getPersistentDataContainer(), current);
             container.update(true, false);
         }
     }
@@ -427,17 +428,17 @@ final class FluidPipeManager implements Listener {
 
     private boolean writeTankContents(Block block, FluidTankContents contents) {
         if (block == null || !(block.getState() instanceof TileState tile)) return false;
-        writeContents(tile, contents);
+        writeContents(tile.getPersistentDataContainer(), contents);
         return tile.update(true, false);
     }
 
-    private void writeContents(TileState tile, FluidTankContents contents) {
+    private void writeContents(PersistentDataContainer data, FluidTankContents contents) {
         if (contents.isEmpty()) {
-            tile.getPersistentDataContainer().remove(fluidIdKey);
-            tile.getPersistentDataContainer().set(fluidAmountKey, PersistentDataType.INTEGER, 0);
+            data.remove(fluidIdKey);
+            data.set(fluidAmountKey, PersistentDataType.INTEGER, 0);
         } else {
-            tile.getPersistentDataContainer().set(fluidIdKey, PersistentDataType.STRING, contents.fluidId());
-            tile.getPersistentDataContainer().set(fluidAmountKey, PersistentDataType.INTEGER, contents.amountMb());
+            data.set(fluidIdKey, PersistentDataType.STRING, contents.fluidId());
+            data.set(fluidAmountKey, PersistentDataType.INTEGER, contents.amountMb());
         }
     }
 

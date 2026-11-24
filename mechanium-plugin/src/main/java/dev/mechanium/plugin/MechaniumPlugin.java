@@ -244,11 +244,26 @@ public final class MechaniumPlugin extends JavaPlugin implements Listener, Comma
             }
         }
 
-        // This was an explicitly packaged default from the previous config, not an auto-seeded value.
-        String observerPath = "vanilla-recipe-gates.recipes.minecraft:observer";
-        if ("modern".equalsIgnoreCase(getConfig().getString(observerPath, ""))) {
-            getConfig().set(observerPath, "digital_age");
-            updated++;
+        // Correct the former packaged sample values that disagreed with the old/new classifier.
+        Map<String, String> packagedDefaults = Map.of(
+                "minecraft:anvil", "renaissance",
+                "minecraft:blast_furnace", "modern",
+                "minecraft:smoker", "modern",
+                "minecraft:daylight_detector", "modern",
+                "minecraft:observer", "modern");
+        Map<String, String> correctedDefaults = Map.of(
+                "minecraft:anvil", "medieval",
+                "minecraft:blast_furnace", "industrial_revolution",
+                "minecraft:smoker", "industrial_revolution",
+                "minecraft:daylight_detector", "electrification",
+                "minecraft:observer", "digital_age");
+        for (Map.Entry<String, String> correction : correctedDefaults.entrySet()) {
+            String configPath = "vanilla-recipe-gates.recipes." + correction.getKey();
+            String configuredEra = getConfig().getString(configPath, "");
+            if (packagedDefaults.get(correction.getKey()).equalsIgnoreCase(configuredEra)) {
+                getConfig().set(configPath, correction.getValue());
+                updated++;
+            }
         }
 
         getConfig().set(migrationPath, true);

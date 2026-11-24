@@ -31,6 +31,10 @@ abstract class AbstractBuiltinModule implements MechaniumModule {
         requireRegistered(api.registerMachine(value), "máquina", value.id());
     }
 
+    protected final void registerFluid(MechaniumApi api, FluidDefinition value) {
+        requireRegistered(api.registerFluid(value), "fluido", value.id());
+    }
+
     private void requireRegistered(boolean registered, String type, String contentId) {
         if (!registered) {
             throw new IllegalStateException("Conflito ao registrar " + type + " no módulo "

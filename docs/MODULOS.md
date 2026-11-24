@@ -223,3 +223,14 @@ O módulo opcional `emc-exchange` adiciona um ledger individual por UUID e dez e
 - `/mechanium emc` abre o painel; `/mechanium emc balance` mostra o saldo.
 
 A primeira etapa usa uma lista explícita de valores para evitar conversão de itens não balanceados. Rede de energia, automação por conduítes/funis, PlaceholderAPI e cobertura automática de todos os itens ainda não estão implementadas.
+
+## Slime Customizer — oficina administrativa
+
+O módulo opcional `slime-customizer` disponibiliza `/mechanium admin customizer` e um atalho no HUD administrativo. O editor atual permite:
+
+- Criar itens personalizados usando IDs únicos, material vanilla, categoria própria, pesquisa existente opcional e limite de pilha.
+- Listar, entregar, editar nome/material/pesquisa/pilha e remover os itens criados no editor.
+- Criar e remover receitas shapeless de até nove ingredientes vanilla ou MECHANIUM, apontando para itens e pesquisas já registrados.
+- Persistir cada item e receita com ownership SQLite individual; a remoção de um registro não apaga os outros. Itens referenciados em receitas, máquinas, drops ou recipientes de fluidos não podem ser removidos.
+
+As listas `slime-customizer.user-item-ids` e `slime-customizer.user-recipe-ids` são geridas pelo plugin. Não as edite manualmente. Ainda faltam receitas shaped, edição de receitas existentes e formulários para criar categorias ou tecnologias. O editor não altera nem depende do Geyser/Bedrock.

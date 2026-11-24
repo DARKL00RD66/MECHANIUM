@@ -1,6 +1,6 @@
 # Estado real do projeto
 
-**Versão:** 0.7.4.00-SNAPSHOT  
+**Versão:** 0.7.4.01-SNAPSHOT  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
 
@@ -161,3 +161,12 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - Valores padrão iniciais cobrem alguns materiais vanilla e dois itens MECHANIUM. Itens não listados não podem ser dissolvidos.
 - Ainda pendentes: integração de consumo/produção com a rede de energia, transporte automático por redes logísticas, PlaceholderAPI e suporte amplo a todos os itens/addons sem configuração manual.
 - Build e validação dentro de Paper/Purpur 1.21.11 ainda precisam concluir.
+
+
+## HUD EMC — 0.7.4.01-SNAPSHOT
+
+- O HUD principal mostra o saldo EMC atual do jogador na área de resumo.
+- Novo item **Carteira EMC**, identificado por esmeralda, exibe saldo pessoal e quantidade de itens aprendidos.
+- Ao clicar, abre o painel EMC com catálogo aprendido e acesso às regras de dissolução e síntese.
+- Se `emc-exchange` estiver desativado, o item aparece como indisponível.
+- O saldo continua pessoal, isolado por UUID e persistido em `emc-exchange.db`.

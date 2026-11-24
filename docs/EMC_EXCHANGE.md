@@ -6,6 +6,8 @@ O módulo opcional `emc-exchange` cria um saldo EMC individual e persistente par
 
 ## Acesso
 
+O HUD principal também possui o item **Carteira EMC**, que mostra seu saldo e a quantidade de itens aprendidos. Clique nele para abrir o ledger.
+
 - `/mechanium emc`: abre o painel do ledger.
 - `/mechanium emc balance`: consulta o saldo atual por chat.
 - Estações: coloque o item de estação e clique com o botão direito no dispensador instalado.

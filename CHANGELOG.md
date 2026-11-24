@@ -1,14 +1,18 @@
 # Changelog
 
 ## 0.9.9.00-SNAPSHOT — consolidação em andamento
-- Aberta a linha consolidada de desenvolvimento diretamente no alvo 0.9.9, sem publicação de snapshots intermediários 0.8.x/0.9.x.
-- Adicionado plano de execução com auditoria da arquitetura atual, marcos internos, critérios de aceite e limitações conhecidas.
-- Implementados modelos de máquina com múltiplos ingredientes e produtos, preservando o construtor legado.
-- Runtime de dispensador agora reserva seis slots de entrada e três de saída e planeja o lote completo antes de consumir insumos/energia.
-- Adicionada migração SQLite v7 com tabelas normalizadas de entradas e saídas, mantendo fallback para definições legadas.
-- CI #45484853405 aprovado em Java 21/Maven `clean verify`: 84 testes automatizados passaram nos seis módulos; o addon de exemplo também compilou.
-- Artefato `MECHANIUM-0.9.9.00-SNAPSHOT` publicado no workflow; testes dentro de servidores Paper/Purpur ainda pendentes.
-- Próximas prioridades: rede energética por conduítes e estrutura genérica de fluidos.
+- Mantida a linha de trabalho consolidada 0.9.9, sem publicar snapshots intermediários.
+- API e runtime de máquinas multi-entrada/multi-saída: seis slots de entrada e três de saída, com pré-validação do lote completo.
+- Custos de energia agora são declarados por máquina (energyCostPerOperation), persistidos no SQLite v8 e migrados para preservar os custos das máquinas antigas.
+- Rede energética com conduítes HOPPER craftáveis, topologia de até 256 nós, isolamento por proprietário e acesso somente a chunks carregados.
+- Débito de energia agregado entre baterias com plano completo antes das alterações; geradores distribuem produção entre baterias conectadas.
+- Carga de baterias é preservada no PDC do item ao desmontar e restaurada ao recolocar.
+- Geradores passaram a usar índice de chunks carregados em vez de varrer todos os chunks a cada segundo.
+- Interface de interação das máquinas informa entradas, saídas, duração e custo energético.
+- Módulo cosmético renomeado para Head Collection; integração Geyser/Bedrock removida, com migração de config e ownership preservando os IDs legados.
+- Corrigidos IDs de produtos das máquinas de moinho e conservadora que impediam seu registro correto.
+- CI #45502503078 aprovou Java 21/Maven clean verify com 91 testes antes das últimas melhorias de preservação de carga e interface; os novos commits aguardam CI.
+- Testes reais em servidores Paper/Purpur 1.21.11 continuam pendentes.
 
 ## 0.7.4.02-SNAPSHOT
 - Reclassificado o catálogo automático de receitas vanilla para distribuir melhor os itens pelas eras; receitas não reconhecidas deixam de cair automaticamente na Antiguidade e usam Renascimento como faixa neutra para revisão administrativa.
@@ -45,10 +49,10 @@
 
 
 ## 0.7.3.01-SNAPSHOT
-- Adicionados cinco módulos nativos opcionais: FN Amplifications, Geyser Heads (catálogo cosmético local), Slime Customizer, Industrial Chemistry e Mining Automation.
+- Adicionados cinco módulos nativos opcionais: FN Amplifications, Head Collection (catálogo cosmético local), Slime Customizer, Industrial Chemistry e Mining Automation.
 - Cada módulo registra duas tecnologias, uma categoria, quatro itens e quatro receitas; FN Amplifications, Industrial Chemistry e Mining Automation também declaram máquinas no runtime genérico.
 - Os módulos foram registrados no catálogo oficial, nos testes de presença e na configuração padrão.
-- Geyser Heads ainda não implementa sincronização de skins nem integração específica com Geyser/Bedrock; Slime Customizer ainda não possui editor administrativo visual completo.
+- Head Collection não possui integração com Geyser nem camada Bedrock; Slime Customizer ainda não possui editor administrativo visual completo.
 - Atualizado o reactor Maven para 0.7.3.01-SNAPSHOT. Build/CI e validação em Paper/Purpur 1.21.11 ainda precisam concluir.
 
 

@@ -24,6 +24,7 @@ class MechaniumConfigTest {
             assertEquals(16_000, config.getInt("fluids.tank-capacity-mb"));
             assertEquals(250, config.getInt("fluids.transfer-mb-per-cycle"));
 
+            assertEquals(256, config.getInt("machines.max-updates-per-cycle"));
             assertEquals(100, config.getInt("machines.wear.max-cycles"));
             assertEquals(1, config.getInt("machines.wear.cycles-per-operation"));
             assertFalse(config.getBoolean("machines.hardcore.enabled"));

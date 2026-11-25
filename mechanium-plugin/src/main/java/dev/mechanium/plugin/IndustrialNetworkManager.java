@@ -50,6 +50,7 @@ final class IndustrialNetworkManager implements Listener {
     private final MechaniumApi api;
     private final NamespacedKey itemIdKey;
     private final NamespacedKey ownerKey;
+    private final NamespacedKey filterItemsKey;
     private final Map<String, Location> loadedPipes = new HashMap<>();
     private BukkitTask task;
 
@@ -58,6 +59,7 @@ final class IndustrialNetworkManager implements Listener {
         this.api = api;
         this.itemIdKey = NamespacedKey.fromString("mechanium:item_id");
         this.ownerKey = new NamespacedKey(plugin, "industrial_network_owner");
+        this.filterItemsKey = new NamespacedKey(plugin, "industrial_network_filter_items");
     }
 
     void start() {
@@ -89,6 +91,13 @@ final class IndustrialNetworkManager implements Listener {
         tile.getPersistentDataContainer().set(itemIdKey, PersistentDataType.STRING, id);
         tile.getPersistentDataContainer().set(ownerKey, PersistentDataType.STRING,
                 event.getPlayer().getUniqueId().toString());
+        if ("network_crate".equals(id) && event.getItemInHand().hasItemMeta()) {
+            String savedFilter = event.getItemInHand().getItemMeta().getPersistentDataContainer()
+                    .get(filterItemsKey, PersistentDataType.STRING);
+            if (savedFilter != null && !savedFilter.isBlank()) {
+                tile.getPersistentDataContainer().set(filterItemsKey, PersistentDataType.STRING, savedFilter);
+            }
+        }
         if (!tile.update(true, false)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage("§cNão foi possível registrar o componente da rede.");
@@ -119,6 +128,14 @@ final class IndustrialNetworkManager implements Listener {
             }
         }
         ItemStack recovered = api.createItemStack(id, 1).orElseGet(() -> new ItemStack(block.getType()));
+        if ("network_crate".equals(id)) {
+            String savedFilter = tile.getPersistentDataContainer().get(filterItemsKey, PersistentDataType.STRING);
+            if (savedFilter != null && !savedFilter.isBlank()) {
+                var meta = recovered.getItemMeta();
+                meta.getPersistentDataContainer().set(filterItemsKey, PersistentDataType.STRING, savedFilter);
+                recovered.setItemMeta(meta);
+            }
+        }
         Location drop = block.getLocation().add(0.5, 0.5, 0.5);
         event.setDropItems(false);
         String locationKey = key(block.getLocation());
@@ -133,17 +150,60 @@ final class IndustrialNetworkManager implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInteract(PlayerInteractEvent event) {
         if (event.getClickedBlock() == null
-                || event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK) return;
-        String id = tileItemId(event.getClickedBlock());
+                || event.getAction() != org.bukkit.event.block.Action.RIGHT_CLICK_BLOCK
+                || event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) return;
+        Block clicked = event.getClickedBlock();
+        String id = tileItemId(clicked);
         if ("industrial_conduit".equals(id)) {
             event.setCancelled(true);
             event.getPlayer().sendMessage("§bConduíte industrial: §7conecte caixas do mesmo proprietário pelas faces.");
         } else if ("network_crate".equals(id)) {
-            String owner = tileOwner(event.getClickedBlock());
-            if (owner != null && !event.getPlayer().hasPermission("mechanium.admin")
-                    && !owner.equals(event.getPlayer().getUniqueId().toString())) {
+            Player player = event.getPlayer();
+            String owner = tileOwner(clicked);
+            if (owner != null && !player.hasPermission("mechanium.admin")
+                    && !owner.equals(player.getUniqueId().toString())) {
                 event.setCancelled(true);
-                event.getPlayer().sendMessage("§cEsta caixa pertence a outro jogador.");
+                player.sendMessage("§cEsta caixa pertence a outro jogador.");
+                return;
+            }
+            if (!player.isSneaking()) return;
+
+            event.setCancelled(true);
+            ItemStack held = player.getInventory().getItemInMainHand();
+            String filterId = itemId(held);
+            BlockState state = clicked.getState();
+            if (!(state instanceof TileState tile)) return;
+
+            Set<String> accepted = filterIds(clicked);
+            if (held == null || held.getType().isAir()) {
+                tile.getPersistentDataContainer().remove(filterItemsKey);
+                if (!tile.update(true, false)) {
+                    player.sendMessage("§cNão foi possível limpar o filtro da caixa.");
+                    return;
+                }
+                player.sendMessage("§aFiltro removido. A caixa aceitará todos os itens MECHANIUM.");
+                return;
+            }
+            if (filterId == null || api.getItem(filterId).isEmpty()) {
+                player.sendMessage("§eSegure um item MECHANIUM desbloqueado para adicioná-lo/removê-lo do filtro.");
+                return;
+            }
+
+            Set<String> updated = IndustrialItemFilterPolicy.toggle(accepted, filterId);
+            if (updated.isEmpty()) tile.getPersistentDataContainer().remove(filterItemsKey);
+            else tile.getPersistentDataContainer().set(filterItemsKey, PersistentDataType.STRING,
+                    IndustrialItemFilterPolicy.encode(updated));
+            if (!tile.update(true, false)) {
+                player.sendMessage("§cNão foi possível salvar o filtro da caixa.");
+                return;
+            }
+            player.sendMessage(updated.contains(filterId)
+                    ? "§aFiltro: esta caixa agora aceita " + filterId + "."
+                    : "§eFiltro: " + filterId + " removido da lista de aceitação.");
+            if (updated.isEmpty()) {
+                player.sendMessage("§7A lista ficou vazia; a caixa voltou a aceitar todos os itens MECHANIUM.");
+            } else {
+                player.sendMessage("§7Agache com a mão vazia para limpar todos os filtros.");
             }
         }
     }
@@ -262,6 +322,7 @@ final class IndustrialNetworkManager implements Listener {
                 for (int targetIndex = 0; targetIndex < crates.size(); targetIndex++) {
                     if (targetIndex == sourceIndex) continue;
                     Inventory target = crates.get(targetIndex);
+                    if (!acceptsItem(target, stack)) continue;
                     int requestedAmount = IndustrialTransferPolicy.batchSize(
                             stack.getAmount(), stack.getMaxStackSize(), configuredLimit);
                     if (requestedAmount <= 0) continue;
@@ -286,6 +347,22 @@ final class IndustrialNetworkManager implements Listener {
                 }
             }
         }
+    }
+
+    private boolean acceptsItem(Inventory target, ItemStack item) {
+        if (target == null || item == null) return false;
+        Location location = target.getLocation();
+        if (location == null || location.getWorld() == null
+                || !location.getWorld().isChunkLoaded(location.getBlockX() >> 4, location.getBlockZ() >> 4)) {
+            return false;
+        }
+        return IndustrialItemFilterPolicy.accepts(filterIds(location.getBlock()), itemId(item));
+    }
+
+    private Set<String> filterIds(Block crate) {
+        if (crate == null || !(crate.getState() instanceof TileState tile)) return Set.of();
+        String encoded = tile.getPersistentDataContainer().get(filterItemsKey, PersistentDataType.STRING);
+        return IndustrialItemFilterPolicy.decode(encoded);
     }
 
     private boolean isMechaniumItem(ItemStack item) {

@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-/** Renewable generators charge adjacent batteries; powered machines draw from connected batteries. */
+/** Generators, batteries and powered machines share owner-isolated conduit networks. */
 final class EnergyGridManager implements Listener {
     private static final BlockFace[] FACES = {
             BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN

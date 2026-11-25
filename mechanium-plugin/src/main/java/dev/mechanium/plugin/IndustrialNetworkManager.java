@@ -53,6 +53,7 @@ final class IndustrialNetworkManager implements Listener {
     private final NamespacedKey ownerKey;
     private final NamespacedKey filterItemsKey;
     private final Map<String, Location> loadedPipes = new HashMap<>();
+    private final Map<String, IndustrialNetworkCursor> transferCursors = new HashMap<>();
     private BukkitTask task;
 
     IndustrialNetworkManager(JavaPlugin plugin, MechaniumApi api) {
@@ -76,6 +77,7 @@ final class IndustrialNetworkManager implements Listener {
             task = null;
         }
         loadedPipes.clear();
+        transferCursors.clear();
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -256,7 +258,7 @@ final class IndustrialNetworkManager implements Listener {
             if (network.pipes().isEmpty()) continue;
             boolean overlap = network.pipes().stream().anyMatch(processed::contains);
             processed.addAll(network.pipes());
-            if (!overlap && network.complete()) moveItemsBatch(network.crates());
+            if (!overlap && network.complete()) moveItemsBatch(network);
         }
     }
 
@@ -311,43 +313,67 @@ final class IndustrialNetworkManager implements Listener {
         return new Network(visited, crates, queue.isEmpty());
     }
 
-    private void moveItemsBatch(List<Inventory> crates) {
+    private void moveItemsBatch(Network network) {
+        List<Inventory> crates = network.crates();
         if (crates.size() < 2) return;
         int configuredLimit = Math.max(1, Math.min(64,
                 plugin.getConfig().getInt("industrial-networks.items-per-cycle", 16)));
-        for (int sourceIndex = 0; sourceIndex < crates.size(); sourceIndex++) {
+        int totalSlots = crates.stream().mapToInt(Inventory::getSize).sum();
+        if (totalSlots == 0) return;
+
+        String networkId = network.pipes().stream().min(String::compareTo).orElseThrow();
+        IndustrialNetworkCursor cursor = transferCursors.computeIfAbsent(
+                networkId, ignored -> new IndustrialNetworkCursor());
+        int start = cursor.start(totalSlots);
+
+        // Inspect every source slot at most once, beginning after the previous
+        // successful transfer. A blocked first slot therefore cannot starve later crates.
+        for (int offset = 0; offset < totalSlots; offset++) {
+            int flatSlot = (start + offset) % totalSlots;
+            int sourceIndex = 0;
+            int slot = flatSlot;
+            while (sourceIndex < crates.size() && slot >= crates.get(sourceIndex).getSize()) {
+                slot -= crates.get(sourceIndex).getSize();
+                sourceIndex++;
+            }
+            if (sourceIndex >= crates.size()) continue;
+
             Inventory source = crates.get(sourceIndex);
-            for (int slot = 0; slot < source.getSize(); slot++) {
-                ItemStack stack = source.getItem(slot);
-                if (!isMechaniumItem(stack)) continue;
-                for (int targetIndex = 0; targetIndex < crates.size(); targetIndex++) {
-                    if (targetIndex == sourceIndex) continue;
-                    Inventory target = crates.get(targetIndex);
-                    if (!acceptsItem(target, stack)) continue;
-                    int requestedAmount = IndustrialTransferPolicy.batchSize(
-                            stack.getAmount(), stack.getMaxStackSize(), configuredLimit);
-                    if (requestedAmount <= 0) continue;
+            ItemStack stack = source.getItem(slot);
+            if (!isMechaniumItem(stack)) continue;
 
-                    ItemStack moved = stack.clone();
-                    moved.setAmount(requestedAmount);
-                    Map<Integer, ItemStack> leftovers = target.addItem(moved);
-                    int leftoverAmount = leftovers.values().stream()
-                            .mapToInt(ItemStack::getAmount).sum();
-                    IndustrialTransferPolicy.TransferResult transfer =
-                            IndustrialTransferPolicy.afterInsertion(
-                                    stack.getAmount(), requestedAmount, leftoverAmount);
-                    if (transfer.insertedAmount() <= 0) continue;
+            for (int targetOffset = 1; targetOffset < crates.size(); targetOffset++) {
+                int targetIndex = (sourceIndex + targetOffset) % crates.size();
+                Inventory target = crates.get(targetIndex);
+                if (!acceptsItem(target, stack)) continue;
 
-                    if (transfer.sourceRemaining() == 0) source.setItem(slot, null);
-                    else {
-                        ItemStack remaining = stack.clone();
-                        remaining.setAmount(transfer.sourceRemaining());
-                        source.setItem(slot, remaining);
-                    }
-                    return;
+                int requestedAmount = IndustrialTransferPolicy.batchSize(
+                        stack.getAmount(), stack.getMaxStackSize(), configuredLimit);
+                if (requestedAmount <= 0) continue;
+
+                ItemStack moved = stack.clone();
+                moved.setAmount(requestedAmount);
+                Map<Integer, ItemStack> leftovers = target.addItem(moved);
+                int leftoverAmount = leftovers.values().stream()
+                        .mapToInt(ItemStack::getAmount).sum();
+                IndustrialTransferPolicy.TransferResult transfer =
+                        IndustrialTransferPolicy.afterInsertion(
+                                stack.getAmount(), requestedAmount, leftoverAmount);
+                if (transfer.insertedAmount() <= 0) continue;
+
+                if (transfer.sourceRemaining() == 0) source.setItem(slot, null);
+                else {
+                    ItemStack remaining = stack.clone();
+                    remaining.setAmount(transfer.sourceRemaining());
+                    source.setItem(slot, remaining);
                 }
+                cursor.advance(totalSlots, flatSlot);
+                return;
             }
         }
+        // Rotate even on a blocked cycle, so a temporarily full destination
+        // does not pin the scheduler to the same source slot forever.
+        cursor.advance(totalSlots, start);
     }
 
     private boolean acceptsItem(Inventory target, ItemStack item) {

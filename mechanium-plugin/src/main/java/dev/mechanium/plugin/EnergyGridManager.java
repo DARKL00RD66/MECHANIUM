@@ -56,6 +56,7 @@ final class EnergyGridManager implements Listener {
     private final NamespacedKey chargeKey;
     private final NamespacedKey reactorFuelUntilKey;
     private final Map<String, Location> loadedGenerators = new HashMap<>();
+    private final EnergyTelemetry telemetry = new EnergyTelemetry();
     private BukkitTask task;
 
     EnergyGridManager(JavaPlugin plugin, MechaniumApi api) {
@@ -115,6 +116,7 @@ final class EnergyGridManager implements Listener {
                 return false;
             }
         }
+        telemetry.recordConsumed(owner.toString(), amount);
         return true;
     }
 
@@ -365,6 +367,7 @@ final class EnergyGridManager implements Listener {
                 currentCharges, production, BATTERY_CAPACITY);
 
         List<ChargeChange> applied = new ArrayList<>();
+        long accepted = 0;
         for (int i = 0; i < batteries.size(); i++) {
             int oldCharge = currentCharges.get(i);
             int newCharge = newCharges.get(i);
@@ -384,10 +387,12 @@ final class EnergyGridManager implements Listener {
                 rollbackChargeChanges(applied);
                 return;
             }
+            accepted += newCharge - oldCharge;
         }
+        if (accepted > 0) telemetry.recordStored(owner, accepted);
     }
 
-    private void sendNetworkSummary(Player player, Block anchor, String owner) {
+    void sendNetworkSummary(Player player, Block anchor, String owner) {
         EnergyNetwork network = collectConnectedEnergyNetwork(anchor, owner);
         if (!network.complete()) {
             player.sendMessage("§cRede energética incompleta: limite de " + MAX_NETWORK_NODES
@@ -396,9 +401,13 @@ final class EnergyGridManager implements Listener {
         }
         int stored = network.batteries().stream().mapToInt(this::batteryCharge).sum();
         int capacity = network.batteries().size() * BATTERY_CAPACITY;
+        EnergyTelemetry.Snapshot totals = telemetry.snapshot(owner);
         player.sendMessage("§bRede energética: §f" + network.nodes() + " nós §7| §f"
+                + network.generators().size() + " gerador(es) §7| §f"
                 + network.batteries().size() + " bateria(s)");
         player.sendMessage("§eCarga armazenada: §f" + stored + " / " + capacity + " unidades");
+        player.sendMessage("§aArmazenado desde a inicialização: §f" + totals.storedUnits()
+                + " §7| §cConsumido: §f" + totals.consumedUnits());
         if (network.batteries().isEmpty()) {
             player.sendMessage("§7Nenhuma bateria conectada. Conecte pelo menos uma bateria para armazenar energia.");
         }
@@ -408,6 +417,7 @@ final class EnergyGridManager implements Listener {
         ArrayDeque<Block> queue = new ArrayDeque<>();
         Set<String> visited = new HashSet<>();
         List<Block> batteries = new ArrayList<>();
+        List<Block> generators = new ArrayList<>();
         if (isEnergyLink(anchor, owner)) {
             queue.addLast(anchor);
         } else {
@@ -421,6 +431,7 @@ final class EnergyGridManager implements Listener {
             Block block = queue.removeFirst();
             if (!visited.add(key(block)) || !isEnergyLink(block, owner)) continue;
             if (isBattery(block, owner)) batteries.add(block);
+            if (isGeneratorBlock(block, owner)) generators.add(block);
             for (BlockFace face : FACES) {
                 Block adjacent = adjacentLoaded(block, face);
                 if (adjacent != null && isEnergyLink(adjacent, owner) && !visited.contains(key(adjacent))) {
@@ -428,11 +439,19 @@ final class EnergyGridManager implements Listener {
                 }
             }
         }
-        return new EnergyNetwork(List.copyOf(batteries), visited.size(), queue.isEmpty());
+        return new EnergyNetwork(List.copyOf(batteries), List.copyOf(generators),
+                visited.size(), queue.isEmpty());
     }
 
     private boolean isEnergyLink(Block block, String owner) {
-        return isBattery(block, owner) || isConduit(block, owner);
+        return isBattery(block, owner) || isConduit(block, owner) || isGeneratorBlock(block, owner);
+    }
+
+    private boolean isGeneratorBlock(Block block, String owner) {
+        if (block == null || !(block.getState() instanceof TileState tile)) return false;
+        String id = tile.getPersistentDataContainer().get(itemIdKey, PersistentDataType.STRING);
+        String blockOwner = tile.getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
+        return isGenerator(id) && owner.equals(blockOwner);
     }
 
     private boolean isConduit(Block block, String owner) {
@@ -504,6 +523,7 @@ final class EnergyGridManager implements Listener {
                 + location.getBlockY() + ":" + location.getBlockZ();
     }
 
-    private record EnergyNetwork(List<Block> batteries, int nodes, boolean complete) { }
+    private record EnergyNetwork(List<Block> batteries, List<Block> generators,
+                                 int nodes, boolean complete) { }
     private record ChargeChange(Block block, int oldCharge, int newCharge) { }
 }

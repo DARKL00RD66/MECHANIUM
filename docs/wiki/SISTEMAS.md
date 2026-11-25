@@ -92,7 +92,18 @@ Os tanques guardam volume tipado no PDC do bloco, medido em milibuckets (mB). A 
 
 ### Industrial Networks
 
-Conduítes e caixas de rede formam uma rede local. A cada dois segundos, o sistema tenta mover um lote de itens MECHANIUM entre caixas com espaço. O padrão é 16 itens por rede/ciclo, configurável entre 1 e 64 em `industrial-networks.items-per-cycle`. Se o destino aceitar apenas parte do lote, somente os itens efetivamente inseridos são removidos da origem. A rede aceita até 128 conduítes adjacentes, com propriedade compatível. Apenas itens identificados como MECHANIUM são transportados; itens vanilla permanecem nos depósitos. Chunks descarregados e depósitos distantes não são conectados. Filtros e prioridades por caixa ainda não existem.
+Conduítes e caixas de rede formam uma rede local. A cada dois segundos, o sistema tenta mover um lote de itens MECHANIUM entre caixas com espaço. O padrão é 16 itens por rede/ciclo, configurável entre 1 e 64 em `industrial-networks.items-per-cycle`. Se o destino aceitar apenas parte do lote, somente os itens efetivamente inseridos são removidos da origem. A rede aceita até 128 conduítes adjacentes, com propriedade compatível. Apenas itens identificados como MECHANIUM são transportados; itens vanilla permanecem nos depósitos. Chunks descarregados e depósitos distantes não são conectados.
+
+### Filtro de aceitação por caixa
+
+O proprietário pode configurar cada caixa sem comandos:
+
+1. Agache e clique com o botão direito na caixa segurando um item MECHANIUM para adicioná-lo à lista de aceitação.
+2. Repita com o mesmo item para removê-lo.
+3. Agache e clique com a mão vazia para limpar toda a lista.
+4. Uma lista vazia significa que a caixa aceita qualquer item MECHANIUM; uma lista preenchida aceita somente os IDs listados.
+
+O filtro fica salvo no bloco e é copiado para o item recuperado quando a caixa é desmontada. Só o proprietário ou um administrador pode alterá-lo. Prioridades entre caixas ainda não existem.
 
 ### Simple Storage
 

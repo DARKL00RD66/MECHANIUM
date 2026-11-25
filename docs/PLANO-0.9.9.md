@@ -17,7 +17,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 | Processamento | Um ciclo central por máquina, com progresso salvo no PDC | Filas, lotes, concorrência limitada e controle de throughput |
 | Energia | Geradores, baterias e máquinas podem ser conectados por conduítes energéticos do mesmo proprietário; até 256 nós, somente chunks carregados | Testes funcionais em servidor, métricas de rede, telemetria e limites de throughput configuráveis |
 | Fluidos | API pública registra definições tipadas e recipientes; tanques guardam mB no PDC, bloqueiam mistura e extraem pelo maior recipiente desbloqueado que caiba no volume | Válvulas, bombas, telemetria, integração com processos e testes em servidor |
-| Logística | Conduítes e caixas transportam itens MECHANIUM entre caixas do mesmo proprietário | Filtros, prioridades, limites de transferência, múltiplos itens por ciclo e escalabilidade |
+| Logística | Conduítes/caixas isolados por proprietário; lotes de até 16 itens por rede/ciclo por padrão, configurável de 1 a 64 | Filtros, prioridades, controle fairness entre várias redes, escalabilidade e validação funcional em servidor |
 | Persistência | Definições ficam no SQLite; identidade, dono e progresso da máquina ficam no PDC do bloco | Migrações compatíveis, recuperação após reinício e testes de chunks/mundos |
 | EMC | Saldo individual, dissolução e síntese já existem | Integração com energia, máquinas e logística; revisar limites e operações atômicas |
 | Pesquisa | Pontos, tecnologias, pré-requisitos e pesquisas temporizadas existem | Auditar aquisição, custos, cancelamentos, offline e sincronização com módulos |
@@ -29,7 +29,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - `MachineDefinition` e o runtime agora aceitam 1–6 tipos de entrada e 1–3 tipos de saída, distribuídos em seis slots de entrada e três de saída; o bloco físico ainda é `DISPENSER`.
 - A rede elétrica agora possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga; faltam testes em servidor e telemetria da rede.
 - A rede de fluidos usa `FluidDefinition` e `FluidContainerDefinition` registradas via API pública, volumes em mB no PDC dos tanques, bloqueio de misturas e transferência por tubos conectados. Itens de tanque preservam tipo e volume ao serem desmontados; a retirada escolhe o maior recipiente desbloqueado que caiba no volume disponível.
-- A rede industrial percorre até 128 conduítes indexados nos chunks carregados e movimenta um item MECHANIUM por ciclo; filtros e prioridades continuam pendentes.
+- A rede industrial percorre até 128 conduítes indexados nos chunks carregados e move um lote configurável (1–64 itens, 16 por padrão) a cada 40 ticks. O débito da caixa de origem usa apenas a quantidade realmente inserida no destino; filtros e prioridades continuam pendentes.
 - O processamento atual não possui fila de ordens configurável nem um plano genérico de entradas/saídas.
 - Ainda não há confirmação de teste funcional completo em Paper e Purpur 1.21.11. As verificações Maven/CI devem ser relatadas separadamente.
 
@@ -87,7 +87,9 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 ### Marco D — Logística e produção (equivalente interno a 0.8.3–0.8.4)
 
 - [ ] Implementar filas e ordens de produção por máquina.
-- [ ] Adicionar filtros de item, prioridades, throughput e limites por tick.
+- [x] Adicionar limite de transferência em lote configurável para redes industriais (`industrial-networks.items-per-cycle`, padrão 16, faixa 1–64), com contabilização exata de inserções parciais.
+- [ ] Adicionar filtros de item e prioridades por caixa/rede.
+- [ ] Implementar fairness e limites de throughput por tick entre múltiplas redes.
 - [ ] Melhorar o balanceamento de transferência entre caixas.
 - [ ] Permitir redes com mais de um tipo de recurso, mantendo isolamento por proprietário.
 - [x] Evitar varrer todos os chunks a cada ciclo; manter índices de tubos e conduítes carregados, com atualização por eventos de chunk.
@@ -95,7 +97,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 
 ### Marco E — Completar módulos (equivalente interno a 0.8.5)
 
-- O módulo Head Collection é cosmético e local. Não instala, detecta nem exige Geyser, GeyserMC, Floodgate ou qualquer plataforma Bedrock. Os IDs antigos de categoria/configuração são mantidos apenas para migrar dados já existentes.
+- Geyser/GeyserMC, Floodgate e integração Bedrock estão fora do escopo do MECHANIUM. Head Collection permanece apenas como módulo cosmético/local, sem integração de plataforma. IDs antigos de categoria/configuração são mantidos somente para compatibilidade de mundos existentes.
 
 - [ ] Mining Automation: definir e implementar a extração de jogo prometida; não anunciar mineração automática antes do teste.
 - [x] Slime Customizer: editor inicial para criar/listar/entregar/editar/remover itens personalizados, com validação de referências e ownership SQLite por item.

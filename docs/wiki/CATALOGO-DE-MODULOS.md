@@ -55,7 +55,7 @@ A tabela descreve o escopo atualmente documentado. “Parcial” significa que e
 
 | ID | Finalidade |
 |---|---|
-| `industrial-networks` | Conduítes e caixas protegidas para transporte local de itens MECHANIUM. Limite documentado de 128 conduítes por rede. |
+| `industrial-networks` | Conduítes e caixas protegidas para transporte local de itens MECHANIUM; até 128 conduítes e lote configurável de 1–64 itens por ciclo (16 por padrão). Filtros/prioridades ainda pendentes. |
 | `better-reactor` | Gerador cristalino fictício que abastece a rede de baterias conectada por faces/conduítes; abstração de jogo, não simulação técnica real. |
 | `material-generators` | Oito geradores passivos, com baú superior e intervalo configurável (200 ticks por padrão). |
 | `water-treatment` | Cartuchos, células de água purificada e refrigerante; os tanques armazenam os dois fluidos por volume tipado, sem misturá-los. |

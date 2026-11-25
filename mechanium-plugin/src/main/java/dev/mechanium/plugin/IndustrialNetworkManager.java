@@ -342,7 +342,9 @@ final class IndustrialNetworkManager implements Listener {
             ItemStack stack = source.getItem(slot);
             if (!isMechaniumItem(stack)) continue;
 
-            for (int targetOffset = 1; targetOffset < crates.size(); targetOffset++) {
+            int targetStartOffset = cursor.targetOffset(crates.size());
+            for (int attempt = 0; attempt < crates.size() - 1; attempt++) {
+                int targetOffset = 1 + ((targetStartOffset - 1 + attempt) % (crates.size() - 1));
                 int targetIndex = (sourceIndex + targetOffset) % crates.size();
                 Inventory target = crates.get(targetIndex);
                 if (!acceptsItem(target, stack)) continue;
@@ -367,13 +369,13 @@ final class IndustrialNetworkManager implements Listener {
                     remaining.setAmount(transfer.sourceRemaining());
                     source.setItem(slot, remaining);
                 }
-                cursor.advance(totalSlots, flatSlot);
+                cursor.advance(totalSlots, flatSlot, crates.size(), targetOffset);
                 return;
             }
         }
         // Rotate even on a blocked cycle, so a temporarily full destination
         // does not pin the scheduler to the same source slot forever.
-        cursor.advance(totalSlots, start);
+        cursor.rotateAfterBlockedCycle(totalSlots, crates.size());
     }
 
     private boolean acceptsItem(Inventory target, ItemStack item) {

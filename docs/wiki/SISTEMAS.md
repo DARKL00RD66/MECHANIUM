@@ -70,6 +70,8 @@ O sistema energético é local e baseado em geradores, baterias e conduítes de 
 
 Geradores carregam baterias ligadas diretamente ou por conduítes. Máquinas debitam o valor energyCostPerOperation de sua definição; o sistema agrega carga entre baterias conectadas e calcula o débito completo antes de atualizar cada bateria. A rede suporta até 256 nós, respeita o proprietário e examina somente chunks carregados. A carga da bateria é preservada no item ao desmontar e restaurada quando recolocada. Os geradores são indexados por chunk carregado em vez de varrer todos os chunks a cada segundo.
 
+Ao clicar em uma bateria, gerador, conduíte ou máquina alimentada, o proprietário vê quantos geradores e baterias pertencem à rede conectada, carga atual/capacidade e os totais de energia efetivamente armazenada e consumida pelo seu UUID desde que o plugin iniciou. Os totais são agregados entre as redes desse proprietário e ficam apenas em memória; são reiniciados quando o servidor reinicia. Energia gerada quando todas as baterias estão cheias não entra no contador de armazenamento.
+
 ### Better Reactor
 
 O módulo opcional `better-reactor` usa um gerador cristalino fictício. Um cristal energético MECHANIUM abastece o bloco por cinco minutos; enquanto ativo, o gerador fornece 8 unidades por segundo à rede de baterias conectada por faces/conduítes do mesmo proprietário. É uma abstração de jogo, não uma simulação de engenharia nuclear.

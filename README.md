@@ -2,24 +2,25 @@
 
 ![Logo oficial do MECHANIUM](assets/mechanium-logo.png)
 
-**MECHANIUM** é um plugin independente para Minecraft, voltado a tecnologia, progressão histórica, indústria, automação e geopolítica.
+**MECHANIUM** é um plugin independente para Minecraft focado em progressão histórica, tecnologia, indústria, automação e geopolítica.
 
+- **Versão em consolidação:** `0.9.9.00-SNAPSHOT`
 - **Minecraft:** 1.21.11
 - **Java:** 21
-- **Servidores-alvo:** Paper e Purpur
+- **Plataformas-alvo:** Paper e Purpur
 - **Distribuição:** um único `MECHANIUM.jar`
-- **Módulos oficiais:** incorporados ao JAR e ativados por configuração
-- **Addons externos:** suportados por uma API pública versionada
-- **Dependências:** nenhuma dependência obrigatória de Slimefun ou Historical Ages
+- **Módulos oficiais:** incorporados ao JAR e configuráveis
+- **Addons externos:** API pública versionada e carregador próprio
+- **Geyser/Floodgate/Bedrock:** fora do escopo; não são dependências e não há integração Bedrock.
 
-## Decisões de arquitetura
+## Arquitetura
 
-1. MECHANIUM não carrega Slimefun nem Historical Ages como dependências.
-2. Conceitos e funcionalidades desses projetos serão reimplementados em APIs próprias; código upstream só será portado após auditoria de licença e atribuição.
-3. Módulos históricos/industriais formam o conjunto padrão.
-4. Fantasia e ficção futurista ficam em módulos internos separados, desativados por padrão.
-5. Addons comunitários são JARs externos carregados por `plugins/MECHANIUM/addons/`.
-6. A progressão é consultada pelo serviço central. Módulos não devem criar listas duplicadas de eras nem contornar o motor.
+1. O MECHANIUM não depende de Slimefun, Historical Ages, Geyser ou Floodgate.
+2. A progressão é centralizada na API e no motor de eras, tecnologias e pesquisas.
+3. Os módulos históricos e industriais formam o conjunto principal. Conteúdo de fantasia/futurista é opcional.
+4. Addons comunitários são JARs externos carregados de `plugins/MECHANIUM/addons/`.
+5. Código de terceiros só pode ser incorporado após auditoria de licença, origem e atribuição.
+6. Head Collection é exclusivamente cosmético/local; não usa API ou serviço de plataforma Bedrock.
 
 ## Estrutura Maven
 
@@ -28,9 +29,9 @@
 | `mechanium-api` | API pública para módulos e addons |
 | `mechanium-storage` | Persistência SQLite e migrações |
 | `mechanium-engine` | Eras, pesquisas e autorização tecnológica |
-| `mechanium-modules` | Módulos oficiais, inclusive opcionais |
-| `mechanium-addon-loader` | Descoberta, dependências e ciclo de vida de addons externos |
-| `mechanium-plugin` | Bootstrap Bukkit e montagem do JAR único |
+| `mechanium-modules` | Módulos oficiais |
+| `mechanium-addon-loader` | Descoberta, dependências e ciclo de vida de addons |
+| `mechanium-plugin` | Bootstrap Bukkit/Paper e montagem do JAR |
 
 ## Compilar
 
@@ -46,48 +47,38 @@ JAR principal:
 mechanium-plugin/target/MECHANIUM-0.9.9.00-SNAPSHOT.jar
 ```
 
-A linha 0.9.9.00-SNAPSHOT acrescenta uma Carteira EMC diretamente no HUD. A linha 0.7.4 adiciona a primeira implementação de equivalência EMC, com saldo por jogador, dissolução, síntese, catálogo aprendido e cinco níveis de estações. Consulte [EMC Exchange](docs/EMC_EXCHANGE.md) para uso, configuração e limitações.
-
 ## Instalar
 
-1. Faça backup do servidor.
+1. Faça backup do servidor e do banco SQLite.
 2. Copie o JAR MECHANIUM para `plugins/`.
-3. Inicie Paper/Purpur 1.21.11.
-4. Ajuste `plugins/MECHANIUM/config.yml`.
-5. Coloque addons externos em `plugins/MECHANIUM/addons/` e reinicie.
+3. Inicie Paper ou Purpur 1.21.11.
+4. Revise `plugins/MECHANIUM/config.yml`.
+5. Coloque addons compatíveis em `plugins/MECHANIUM/addons/` e reinicie.
 
-A linha 0.7.0.01 amplia os módulos Forestry, Textile Industry, Biofuel, Construction Materials, Networks e Better Reactor (geração fictícia por cristais), incluindo transporte local de itens MECHANIUM por conduítes. A linha 0.6.0 adiciona cinco domínios industriais: filtragem do ar, metalurgia avançada, engenharia de pressão, automação industrial e logística. Também inclui um catálogo de fabricação por clique e recompensas científicas por descobertas minerais e avanços. A linha 0.5.0 acrescentou ElectricSpawners, FastMachines e HardcoreSlimefun. A linha 0.4.1 também traz pesquisas temporizadas com duração dinâmica e progresso offline, e 0.4.0 ampliou o catálogo vanilla e trouxe as primeiras cadeias ExoticGarden/DankTech2. A expansão 0.7.0.01 acrescentou oito geradores de materiais passivos. A expansão 0.7.1.00 acrescentou quatro domínios: tratamento de água, estufas/hidroponia, reciclagem industrial e fragmentação de minérios. A expansão 0.7.2.00 acrescenta cinco domínios: aquicultura, vidro industrial, carga ferroviária, fabricação de baterias e cadeia de frio. O projeto segue experimental e precisa de validação funcional em Paper/Purpur 1.21.11. Consulte [STATUS](docs/STATUS.md), [MÓDULOS](docs/MODULOS.md) e [ROADMAP](docs/ROADMAP.md).
+## Estado da consolidação 0.9.9
 
-## CI e estado
+A implementação já inclui máquinas multi-entrada/multi-saída, agendamento round-robin, redes de energia por conduítes, fluidos tipados, filtros e transferência em lote na logística, EMC individual, editor inicial de conteúdo e módulos industriais expandidos.
 
-- O CI da linha 0.5.0 deve validar Java 21 / Maven verify antes de considerar o snapshot pronto.
-- O [pré-release mais recente](https://github.com/davitremea1-ops/MECHANIUM/releases/tag/snapshot) deve conter o JAR correspondente ao snapshot após o CI desta atualização.
-- A versão é experimental. O build automatizado não substitui o teste de gameplay em Paper/Purpur.
+O CI Java 21/Maven do commit atual passou e gerou o artefato `MECHANIUM-0.9.9.00-SNAPSHOT`. Isso confirma compilação e testes automatizados, mas não substitui smoke tests em servidores Paper e Purpur reais. A validação de reinícios, chunks, propriedade, permissões e migrações em ambiente de jogo continua pendente. Não considerar a versão pronta para produção até concluir essa etapa.
 
 ## Documentação
 
-- [Wiki completa em português](docs/wiki/README.md) — guia de jogadores, sistemas, módulos, comandos, administração e desenvolvimento.
-- [Auditoria da distribuição histórica](docs/wiki/DISTRIBUICAO-HISTORICA.md) — critérios de classificação dos itens e receitas por era.
-- [Arquitetura](docs/ARQUITETURA.md)
-- [Painel administrativo e configuração de progressão](docs/ADMINISTRACAO.md)
-- [Desenvolvimento de addons externos](docs/ADDONS_EXTERNOS.md)
-- [Projeto-exemplo de addon Maven](examples/mechanium-addon-example/README.md)
-- [Módulos oficiais e opcionais](docs/MODULOS.md)
-- [Equivalência EMC](docs/EMC_EXCHANGE.md)
-- [Matriz de portabilidade](docs/PORTABILIDADE_ADDONS.md)
-- [Licenças e atribuição](docs/LICENCAS_E_ORIGENS.md)
-- [Roadmap](docs/ROADMAP.md)
+- [Wiki em português](docs/wiki/README.md)
+- [Auditoria da distribuição histórica](docs/wiki/DISTRIBUICAO-HISTORICA.md)
+- [Estado real do projeto](docs/STATUS.md)
 - [Plano de consolidação 0.9.9](docs/PLANO-0.9.9.md)
-- [Política de versionamento até 0.9.9](docs/VERSIONAMENTO.md)
-- [Contribuição](CONTRIBUTING.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Arquitetura](docs/ARQUITETURA.md)
+- [Comandos e administração](docs/ADMINISTRACAO.md)
+- [Desenvolvimento de addons](docs/ADDONS_EXTERNOS.md)
+- [Módulos oficiais](docs/MODULOS.md)
+- [Equivalência EMC](docs/EMC_EXCHANGE.md)
+- [Licenças e atribuição](docs/LICENCAS_E_ORIGENS.md)
+- [Política de versionamento](docs/VERSIONAMENTO.md)
+- [Projeto-exemplo de addon](examples/mechanium-addon-example/README.md)
 
 ## Licença
 
-O MECHANIUM pode ser instalado, executado e configurado em servidores, mas seu
-código-fonte não pode ser modificado, adaptado ou redistribuído em versões
-alteradas sem autorização prévia e por escrito do titular dos direitos.
-A redistribuição gratuita de uma versão oficial sem modificações é permitida,
-desde que a licença e os avisos de autoria sejam preservados.
+O MECHANIUM pode ser instalado, executado e configurado em servidores. Modificações, obras derivadas e redistribuição de versões alteradas exigem autorização prévia e por escrito do titular. A redistribuição gratuita de uma versão oficial sem modificações é permitida, desde que os avisos de autoria e a licença sejam preservados.
 
-Leia a licença completa em [LICENSE.md](LICENSE.md). Esta é uma licença proprietária
-personalizada, não uma licença open source.
+Leia [LICENSE.md](LICENSE.md). Esta é uma licença proprietária personalizada, não uma licença open source.

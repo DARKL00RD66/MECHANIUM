@@ -240,6 +240,9 @@ slime-customizer:
   user-recipe-ids: []
 
 machines:
+  # Maximum loaded machine updates executed by the round-robin scheduler every 20 ticks.
+  # Allowed range: 1..1024. Machines beyond the budget continue in the next cycle.
+  max-updates-per-cycle: 256
   wear:
     enabled: true
     max-cycles: 100

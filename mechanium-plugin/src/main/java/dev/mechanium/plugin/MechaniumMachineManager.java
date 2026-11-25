@@ -191,6 +191,9 @@ final class MechaniumMachineManager implements Listener {
                             + definition.energyCostPerOperation() + " unidades.", NamedTextColor.AQUA));
                     player.sendMessage(Component.text("Conecte esta máquina a uma bateria carregada por conduítes energéticos do mesmo proprietário.",
                             NamedTextColor.GRAY));
+                    if (energyGridManager != null) {
+                        energyGridManager.sendNetworkSummary(player, event.getClickedBlock(), machine.get().ownerId());
+                    }
                 } else {
                     player.sendMessage(Component.text("Esta máquina não exige energia.", NamedTextColor.GRAY));
                 }

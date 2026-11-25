@@ -15,7 +15,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 | Bloco de máquina | O runtime atual aceita dispensadores | Separar o modelo de processo do tipo de bloco e ampliar os blocos suportados com segurança |
 | Inventário de máquina | Seis slots de entrada e três slots de saída, com planejamento do lote completo | Filas de produção e buffers/slots configuráveis |
 | Processamento | Progresso salvo no PDC; agendador round-robin dos dispensadores carregados com orçamento configurável de 1–1024 atualizações por ciclo | Fila explícita de ordens/lotes por máquina e throughput por tipo de máquina |
-| Energia | Geradores, baterias e máquinas podem ser conectados por conduítes energéticos do mesmo proprietário; até 256 nós, somente chunks carregados | Testes funcionais em servidor, métricas de rede, telemetria e limites de throughput configuráveis |
+| Energia | Geradores, baterias e máquinas podem ser conectados por conduítes; até 256 nós, proprietário isolado, resumo com geradores/baterias/carga e totais owner-wide desde startup | Testes funcionais em servidor, limites de throughput configuráveis e métricas persistentes se desejado |
 | Fluidos | API pública registra definições tipadas e recipientes; tanques guardam mB no PDC, bloqueiam mistura e extraem pelo maior recipiente desbloqueado que caiba no volume | Válvulas, bombas, telemetria, integração com processos e testes em servidor |
 | Logística | Conduítes/caixas isolados por proprietário; lotes configuráveis e lista de aceitação por caixa persistente | Prioridades, fairness entre redes, throughput agregado e validação funcional em servidor |
 | Persistência | Definições ficam no SQLite; identidade, dono e progresso da máquina ficam no PDC do bloco | Migrações compatíveis, recuperação após reinício e testes de chunks/mundos |
@@ -27,7 +27,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 ### Limitações técnicas importantes encontradas
 
 - `MachineDefinition` e o runtime agora aceitam 1–6 tipos de entrada e 1–3 tipos de saída, distribuídos em seis slots de entrada e três de saída; o bloco físico ainda é `DISPENSER`.
-- A rede elétrica agora possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga; faltam testes em servidor e telemetria da rede.
+- A rede elétrica possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga. O resumo mostra geradores, baterias, carga/capacidade e totais armazenados/consumidos do proprietário desde a inicialização (contadores em memória, reiniciam com o servidor); testes em servidor ainda pendentes.
 - A rede de fluidos usa `FluidDefinition` e `FluidContainerDefinition` registradas via API pública, volumes em mB no PDC dos tanques, bloqueio de misturas e transferência por tubos conectados. Itens de tanque preservam tipo e volume ao serem desmontados; a retirada escolhe o maior recipiente desbloqueado que caiba no volume disponível.
 - A rede industrial percorre até 128 conduítes indexados nos chunks carregados, move um lote configurável (1–64 itens, 16 por padrão) a cada 40 ticks e aplica uma lista de aceitação por caixa. O débito da origem usa apenas a quantidade inserida no destino; prioridades e fairness continuam pendentes.
 - O processamento atual não possui fila explícita de ordens configuráveis. Os slots de entrada funcionam como buffer da receita fixa da máquina. O agendador round-robin limita a quantidade de dispensadores atualizados por ciclo, sem impor uma fila de receitas.
@@ -45,7 +45,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - Conduíte energético adicionada como item craftável; geradores, baterias e máquinas usam rede conectada com limite de 256 nós.
 - Carga da bateria é armazenada no PDC do item quando desmontada e restaurada ao recolocar.
 - Geradores são indexados em chunks carregados, evitando a varredura de todos os chunks a cada segundo.
-- O clique na máquina mostra insumos, produtos, duração e custo de energia.
+- O clique na máquina mostra insumos, produtos, duração e custo de energia, além do resumo da rede energética conectada.
 - Produção valida todos os insumos e planeja todas as saídas antes de debitar recursos.
 - Migração SQLite v7 grava entradas/saídas normalizadas e lê linhas legadas pelos campos antigos.
 - Agendador round-robin dos dispensadores carregados; orçamento padrão 256 atualizações a cada 20 ticks, configurável entre 1 e 1024; remoção de entradas de fila ao descarregar chunks e quebrar máquinas.
@@ -72,7 +72,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [x] Permitir geradores, baterias e máquinas conectados através de conduítes.
 - [ ] Definir capacidade, taxa de transferência, perda/eficiência de gameplay e política de distribuição.
 - [ ] Garantir débito atômico: uma máquina não pode consumir parcialmente energia nem duplicar energia em uma falha.
-- [x] Exibir para o proprietário o número de nós/baterias e a carga/capacidade agregada da rede.
+- [x] Exibir para o proprietário geradores, baterias, carga/capacidade e totais de energia armazenada/consumida desde a inicialização do plugin.
 - [ ] Exibir geração, consumo instantâneo e motivos detalhados de bloqueio.
 - [ ] Testar redes fragmentadas, limite de tamanho, chunks, explosões, pistões e propriedade.
 

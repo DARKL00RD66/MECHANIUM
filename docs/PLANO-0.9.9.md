@@ -14,7 +14,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 | Definição de máquinas | Cada definição aceita 1–6 tipos de entrada e 1–3 produtos; custo energético por operação é parte da definição | Filas, processamento em lote contínuo, concorrência e blocos físicos adicionais |
 | Bloco de máquina | O runtime atual aceita dispensadores | Separar o modelo de processo do tipo de bloco e ampliar os blocos suportados com segurança |
 | Inventário de máquina | Seis slots de entrada e três slots de saída, com planejamento do lote completo | Filas de produção e buffers/slots configuráveis |
-| Processamento | Um ciclo central por máquina, com progresso salvo no PDC | Filas, lotes, concorrência limitada e controle de throughput |
+| Processamento | Progresso salvo no PDC; agendador round-robin dos dispensadores carregados com orçamento configurável de 1–1024 atualizações por ciclo | Fila explícita de ordens/lotes por máquina e throughput por tipo de máquina |
 | Energia | Geradores, baterias e máquinas podem ser conectados por conduítes energéticos do mesmo proprietário; até 256 nós, somente chunks carregados | Testes funcionais em servidor, métricas de rede, telemetria e limites de throughput configuráveis |
 | Fluidos | API pública registra definições tipadas e recipientes; tanques guardam mB no PDC, bloqueiam mistura e extraem pelo maior recipiente desbloqueado que caiba no volume | Válvulas, bombas, telemetria, integração com processos e testes em servidor |
 | Logística | Conduítes/caixas isolados por proprietário; lotes configuráveis e lista de aceitação por caixa persistente | Prioridades, fairness entre redes, throughput agregado e validação funcional em servidor |
@@ -30,7 +30,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - A rede elétrica agora possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga; faltam testes em servidor e telemetria da rede.
 - A rede de fluidos usa `FluidDefinition` e `FluidContainerDefinition` registradas via API pública, volumes em mB no PDC dos tanques, bloqueio de misturas e transferência por tubos conectados. Itens de tanque preservam tipo e volume ao serem desmontados; a retirada escolhe o maior recipiente desbloqueado que caiba no volume disponível.
 - A rede industrial percorre até 128 conduítes indexados nos chunks carregados, move um lote configurável (1–64 itens, 16 por padrão) a cada 40 ticks e aplica uma lista de aceitação por caixa. O débito da origem usa apenas a quantidade inserida no destino; prioridades e fairness continuam pendentes.
-- O processamento atual não possui fila de ordens configurável. Os slots de entrada funcionam como buffer de materiais para a receita fixa da máquina; uma ordem explícita de fabricação ainda está pendente.
+- O processamento atual não possui fila explícita de ordens configuráveis. Os slots de entrada funcionam como buffer da receita fixa da máquina. O agendador round-robin limita a quantidade de dispensadores atualizados por ciclo, sem impor uma fila de receitas.
 - Ainda não há confirmação de teste funcional completo em Paper e Purpur 1.21.11. As verificações Maven/CI devem ser relatadas separadamente.
 
 ### Progresso da primeira entrega 0.9.9
@@ -48,6 +48,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - O clique na máquina mostra insumos, produtos, duração e custo de energia.
 - Produção valida todos os insumos e planeja todas as saídas antes de debitar recursos.
 - Migração SQLite v7 grava entradas/saídas normalizadas e lê linhas legadas pelos campos antigos.
+- Agendador round-robin dos dispensadores carregados; orçamento padrão 256 atualizações a cada 20 ticks, configurável entre 1 e 1024; remoção de entradas de fila ao descarregar chunks e quebrar máquinas.
 - O `greenhouse_controller` foi adicionado sem alterar o item/receita legado `climate_controller`; o controlador acelera em um estágio plantas `Ageable` somente depois de um crescimento normal aceito, dentro do raio configurado e com energia da rede do proprietário.
 
 ## 2. Marcos internos de implementação
@@ -60,7 +61,8 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [x] Atualizar validação de conteúdo para conferir todos os ingredientes, produtos, tecnologias e limites de pilha.
 - [x] Reservar buffers separados de entrada e saída no inventário da máquina.
 - [x] Fazer pré-validação integral dos ingredientes e da capacidade de saída antes de consumir qualquer item ou energia.
-- [ ] Manter progresso e propriedade seguros ao quebrar, carregar e descarregar chunks.
+- [x] Agendar máquinas em fila round-robin limitada, mantendo remoção/registro por chunk e por quebra de bloco; progresso e proprietário continuam persistidos no PDC.
+- [ ] Testar smoke tests de progresso e propriedade em servidores Paper/Purpur com unload/reload real de chunks.
 - [x] Adicionar e executar testes de validação do modelo, persistência e migração de dados legados.
 
 ### Marco B — Rede de energia (equivalente interno a 0.8.1)

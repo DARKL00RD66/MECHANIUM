@@ -138,6 +138,9 @@ Define quantos itens MECHANIUM uma rede tenta transferir por ciclo de 40 ticks. 
 
 ```yaml
 machines:
+  # Maximum loaded machines updated by the round-robin scheduler every 20 ticks.
+  # Effective range: 1..1024.
+  max-updates-per-cycle: 256
   wear:
     enabled: true
     max-cycles: 100
@@ -148,7 +151,7 @@ machines:
     repair-iron-ingots: 2
 ```
 
-O desgaste padrão é habilitado, com limite de 100 ciclos e um ciclo por operação. O modo hardcore é opcional e começa desabilitado. Quando ativado, aumenta o desgaste e o custo de reparação.
+O agendador round-robin atualiza até 256 máquinas por ciclo de 20 ticks por padrão; ajuste `max-updates-per-cycle` entre 1 e 1024 conforme o número de máquinas carregadas. Máquinas além do orçamento aguardam a próxima rotação. O desgaste padrão é habilitado, com limite de 100 ciclos e um ciclo por operação. O modo hardcore é opcional e começa desabilitado. Quando ativado, aumenta o desgaste e o custo de reparação.
 
 ### Slime Customizer
 

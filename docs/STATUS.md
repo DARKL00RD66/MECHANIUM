@@ -2,8 +2,8 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** máquinas, energia, fluidos tipados, estufa inicial e editor de itens/receitas do Slime Customizer implementados; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless, e transferência industrial em lotes configuráveis implementados. CI #45515317546 aprovou 130 testes; JAR `MECHANIUM-0.9.9.00-SNAPSHOT` gerado. Paper/Purpur ainda não testados.  
+**Fase atual:** máquinas multi-entrada/saída, agendador round-robin, energia, fluidos tipados, estufa inicial, EMC e filtros de logística implementados; revisão do agendador em CI; teste em servidor real pendente
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless, e transferência industrial em lotes configuráveis implementados. Último CI verde #45515317546 aprovou 130 testes e gerou o JAR `MECHANIUM-0.9.9.00-SNAPSHOT`; o agendador round-robin e seu novo teste ainda aguardam CI nesta revisão. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -207,3 +207,12 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - CI #45515317546 passou em Java 21/Maven `clean verify`; 130 testes passaram, sem falhas ou erros. O artefato foi publicado em [GitHub Actions](https://github.com/DARKL00RD66/MECHANIUM/actions/runs/45515317546).
 - Testes puros cobrem allow-list vazia, aceitação/bloqueio, toggle, serialização e entradas inválidas.
 - Prioridades e fairness entre caixas continuam pendentes; Geyser/Bedrock não faz parte do escopo.
+
+
+## Agendamento de máquinas — revisão 0.9.9
+
+- O runtime utiliza uma fila round-robin para dispensadores MECHANIUM em chunks carregados.
+- `machines.max-updates-per-cycle` define o limite de máquinas processadas a cada 20 ticks; padrão 256 e faixa efetiva de 1 a 1024.
+- Cada máquina válida é recolocada no fim da fila após a tentativa; se uma máquina descarregar, for removida ou deixar de ser dispensador, sua chave é retirada.
+- Erros no processamento são registrados e a máquina permanece elegível para nova tentativa no próximo ciclo.
+- Testes puros de fairness, registro duplicado, remoção e limites de lote foram adicionados; a nova revisão ainda aguarda resultado do CI.

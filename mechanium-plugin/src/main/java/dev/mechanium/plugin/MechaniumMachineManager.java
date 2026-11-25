@@ -46,8 +46,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * First playable machine runtime: a dispenser-hosted processor with one input slot
- * and one output slot. Machine identity, owner and progress live in block PDC.
+ * Dispenser-hosted processor with six input slots and three output slots.
+ * Machine identity, owner and progress live in block PDC; loaded machines are
+ * scheduled through a bounded round-robin work queue.
  */
 final class MechaniumMachineManager implements Listener {
     private static final int FIRST_INPUT_SLOT = 0;
@@ -65,6 +66,7 @@ final class MechaniumMachineManager implements Listener {
     private final NamespacedKey emissionsKey;
     private final NamespacedKey wearKey;
     private final Map<String, Location> loadedMachines = new HashMap<>();
+    private final MachineWorkQueue workQueue = new MachineWorkQueue();
     private BukkitTask ticker;
 
     MechaniumMachineManager(JavaPlugin plugin, MechaniumApi api, EnergyGridManager energyGridManager) {
@@ -92,6 +94,7 @@ final class MechaniumMachineManager implements Listener {
             ticker = null;
         }
         loadedMachines.clear();
+        workQueue.clear();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -125,7 +128,7 @@ final class MechaniumMachineManager implements Listener {
             event.getPlayer().sendMessage(Component.text("Não foi possível salvar os dados da máquina.", NamedTextColor.RED));
             return;
         }
-        loadedMachines.put(key(block.getLocation()), block.getLocation());
+        registerLoadedMachine(key(block.getLocation()), block.getLocation());
         event.getPlayer().sendMessage(Component.text(definition.displayName() + " instalada. Slots 1–6: entradas; slots 7–9: saídas.", NamedTextColor.GREEN));
     }
 
@@ -225,11 +228,11 @@ final class MechaniumMachineManager implements Listener {
         // Defer drops until all other BlockBreakEvent handlers have had a chance to cancel.
         plugin.getServer().getScheduler().runTask(plugin, () -> {
             if (event.isCancelled() || !block.getType().isAir()) {
-                if (machineState(block).isPresent()) loadedMachines.put(blockKey, block.getLocation());
-                else loadedMachines.remove(blockKey);
+                if (machineState(block).isPresent()) registerLoadedMachine(blockKey, block.getLocation());
+                else unregisterLoadedMachine(blockKey);
                 return;
             }
-            loadedMachines.remove(blockKey);
+            unregisterLoadedMachine(blockKey);
             for (ItemStack content : contents) {
                 block.getWorld().dropItemNaturally(dropLocation, content);
             }
@@ -313,11 +316,26 @@ final class MechaniumMachineManager implements Listener {
         int chunkX = event.getChunk().getX();
         int chunkZ = event.getChunk().getZ();
         UUID worldId = event.getWorld().getUID();
-        loadedMachines.entrySet().removeIf(entry -> {
-            Location location = entry.getValue();
-            return location.getWorld() != null && location.getWorld().getUID().equals(worldId)
-                    && (location.getBlockX() >> 4) == chunkX && (location.getBlockZ() >> 4) == chunkZ;
-        });
+        List<String> unloading = loadedMachines.entrySet().stream()
+                .filter(entry -> {
+                    Location location = entry.getValue();
+                    return location.getWorld() != null && location.getWorld().getUID().equals(worldId)
+                            && (location.getBlockX() >> 4) == chunkX
+                            && (location.getBlockZ() >> 4) == chunkZ;
+                })
+                .map(Map.Entry::getKey)
+                .toList();
+        unloading.forEach(this::unregisterLoadedMachine);
+    }
+
+    private void registerLoadedMachine(String machineKey, Location location) {
+        loadedMachines.put(machineKey, location);
+        workQueue.add(machineKey);
+    }
+
+    private void unregisterLoadedMachine(String machineKey) {
+        loadedMachines.remove(machineKey);
+        workQueue.remove(machineKey);
     }
 
     private void registerChunkMachines(Chunk chunk) {
@@ -326,22 +344,36 @@ final class MechaniumMachineManager implements Listener {
             String machineId = dispenser.getPersistentDataContainer()
                     .get(machineIdKey, PersistentDataType.STRING);
             if (machineId == null || api.getMachine(machineId).isEmpty()) continue;
-            loadedMachines.put(key(state.getLocation()), state.getLocation());
+            registerLoadedMachine(key(state.getLocation()), state.getLocation());
         }
     }
 
     private void tickMachines() {
-        for (Location location : new ArrayList<>(loadedMachines.values())) {
+        int budget = Math.max(1, Math.min(1024,
+                plugin.getConfig().getInt("machines.max-updates-per-cycle", 256)));
+        for (String machineKey : workQueue.nextBatch(budget)) {
+            Location location = loadedMachines.get(machineKey);
+            if (location == null) continue;
             if (location.getWorld() == null || !location.getChunk().isLoaded()) {
-                loadedMachines.remove(key(location));
+                unregisterLoadedMachine(machineKey);
                 continue;
             }
             BlockState state = location.getBlock().getState();
             if (!(state instanceof Dispenser dispenser)) {
-                loadedMachines.remove(key(location));
+                unregisterLoadedMachine(machineKey);
                 continue;
             }
-            process(dispenser);
+            try {
+                process(dispenser);
+            } catch (RuntimeException exception) {
+                plugin.getLogger().log(java.util.logging.Level.SEVERE,
+                        "Falha ao processar máquina em " + location.getWorld().getName()
+                                + " " + location.getBlockX() + "," + location.getBlockY()
+                                + "," + location.getBlockZ() + "; ela será tentada novamente no próximo ciclo.",
+                        exception);
+            } finally {
+                if (loadedMachines.containsKey(machineKey)) workQueue.add(machineKey);
+            }
         }
     }
 

@@ -92,7 +92,7 @@ Os tanques guardam volume tipado no PDC do bloco, medido em milibuckets (mB). A 
 
 ### Industrial Networks
 
-Conduítes e caixas de rede formam uma rede local. A cada dois segundos, o sistema tenta mover um item MECHANIUM de uma caixa para outra com espaço. A rede aceita até 128 conduítes adjacentes, com propriedade compatível. Apenas itens identificados como MECHANIUM são transportados; itens vanilla permanecem nos depósitos. Chunks descarregados e depósitos distantes não são conectados.
+Conduítes e caixas de rede formam uma rede local. A cada dois segundos, o sistema tenta mover um lote de itens MECHANIUM entre caixas com espaço. O padrão é 16 itens por rede/ciclo, configurável entre 1 e 64 em `industrial-networks.items-per-cycle`. Se o destino aceitar apenas parte do lote, somente os itens efetivamente inseridos são removidos da origem. A rede aceita até 128 conduítes adjacentes, com propriedade compatível. Apenas itens identificados como MECHANIUM são transportados; itens vanilla permanecem nos depósitos. Chunks descarregados e depósitos distantes não são conectados. Filtros e prioridades por caixa ainda não existem.
 
 ### Simple Storage
 

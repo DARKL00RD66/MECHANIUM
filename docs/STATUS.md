@@ -2,7 +2,7 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** máquinas multi-entrada/saída, agendador round-robin, energia, fluidos tipados, estufa inicial, EMC e filtros de logística implementados; revisão do agendador em CI; teste em servidor real pendente
+**Fase atual:** máquinas multi-entrada/saída, agendador round-robin, energia com telemetria owner-wide, fluidos tipados, estufa inicial, EMC, filtros de logística e agendador round-robin implementados; revisão mais recente em CI; teste em servidor real pendente
 **Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless, e transferência industrial em lotes configuráveis implementados. Último CI verde #45515317546 aprovou 130 testes e gerou o JAR `MECHANIUM-0.9.9.00-SNAPSHOT`; o agendador round-robin e seu novo teste ainda aguardam CI nesta revisão. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
@@ -216,3 +216,12 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - Cada máquina válida é recolocada no fim da fila após a tentativa; se uma máquina descarregar, for removida ou deixar de ser dispensador, sua chave é retirada.
 - Erros no processamento são registrados e a máquina permanece elegível para nova tentativa no próximo ciclo.
 - Testes puros de fairness, registro duplicado, remoção e limites de lote foram adicionados; a nova revisão ainda aguarda resultado do CI.
+
+
+## Telemetria energética — revisão 0.9.9
+
+- O resumo da rede mostra geradores, baterias, carga atual/capacidade e totais de energia efetivamente armazenada/consumida por proprietário desde a inicialização do plugin.
+- Os contadores são agregados por UUID entre as redes daquele proprietário e são voláteis: reiniciam quando o servidor reinicia.
+- O resumo também aparece ao inspecionar uma máquina que exige energia.
+- Geração que não consegue ser armazenada por falta de capacidade não é contada como energia armazenada.
+- Testes puros cobrem isolamento por proprietário, incrementos, contadores iniciais e prevenção de overflow; CI desta revisão ainda pendente.

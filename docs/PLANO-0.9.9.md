@@ -5,7 +5,7 @@
 **Alvo:** Minecraft 1.21.11, Java 21, Paper e Purpur  
 **Regra de publicação:** não publicar snapshots intermediários. As etapas 0.8.x e 0.9.x são marcos internos de execução; a linha pública de trabalho permanece 0.9.9.00-SNAPSHOT até o pré-lançamento.
 
-Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. O CI da implementação do editor de receitas passou no commit `dc1cea4c4503d4dc6bbd2150bf3b79a02a3bcf80` (workflow #45510790964): 119 testes automatizados, sete módulos Maven e addon de exemplo aprovados. O commit documental final `fc17b0f7b38d1097c9a83ebcc8184ba6f471475c` também passou no workflow #45510951756. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
+Este documento separa o que existe no código, o que está limitado e o que ainda precisa ser implementado. A revisão de máquinas, fluidos, redes de energia e logística passou no CI #45515317546, commit `f55122607e41f26f7ec6a0dd9ac9ffbee0196f3a`: 130 testes automatizados e os sete módulos Maven aprovados; o JAR foi empacotado. Nenhuma aprovação automatizada substitui testes dentro de Paper e Purpur reais.
 
 ## 1. Auditoria inicial do código existente
 
@@ -30,7 +30,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - A rede elétrica agora possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga; faltam testes em servidor e telemetria da rede.
 - A rede de fluidos usa `FluidDefinition` e `FluidContainerDefinition` registradas via API pública, volumes em mB no PDC dos tanques, bloqueio de misturas e transferência por tubos conectados. Itens de tanque preservam tipo e volume ao serem desmontados; a retirada escolhe o maior recipiente desbloqueado que caiba no volume disponível.
 - A rede industrial percorre até 128 conduítes indexados nos chunks carregados, move um lote configurável (1–64 itens, 16 por padrão) a cada 40 ticks e aplica uma lista de aceitação por caixa. O débito da origem usa apenas a quantidade inserida no destino; prioridades e fairness continuam pendentes.
-- O processamento atual não possui fila de ordens configurável nem um plano genérico de entradas/saídas.
+- O processamento atual não possui fila de ordens configurável. Os slots de entrada funcionam como buffer de materiais para a receita fixa da máquina; uma ordem explícita de fabricação ainda está pendente.
 - Ainda não há confirmação de teste funcional completo em Paper e Purpur 1.21.11. As verificações Maven/CI devem ser relatadas separadamente.
 
 ### Progresso da primeira entrega 0.9.9
@@ -89,6 +89,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [ ] Implementar filas e ordens de produção por máquina.
 - [x] Adicionar limite de transferência em lote configurável para redes industriais (`industrial-networks.items-per-cycle`, padrão 16, faixa 1–64), com contabilização exata de inserções parciais.
 - [x] Adicionar lista de aceitação por caixa para itens MECHANIUM; lista vazia aceita todos. O filtro é persistido no bloco e no item recuperado ao desmontar.
+- [x] Testar política de filtragem, alternância de IDs, serialização e lista vazia.
 - [ ] Implementar fairness e limites de throughput por tick entre múltiplas redes.
 - [ ] Melhorar o balanceamento de transferência entre caixas.
 - [ ] Permitir redes com mais de um tipo de recurso, mantendo isolamento por proprietário.

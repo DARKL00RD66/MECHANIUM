@@ -6,6 +6,7 @@
 - Caixas industriais agora têm allow-list de itens MECHANIUM configurável pelo proprietário (agachar + clique com o item); filtro persistido no bloco e na caixa recuperada.
 - Adicionados testes para filtragem, toggle e serialização da lista de aceitação.
 - Documentação de logística e configuração atualizada; Geyser/Bedrock explicitamente fora do escopo, com Head Collection mantido apenas como cosmético local.
+- CI #45515317546 aprovado no commit `f55122607e41f26f7ec6a0dd9ac9ffbee0196f3a`: Java 21/Maven `clean verify`, 130 testes automatizados e JAR 0.9.9.00-SNAPSHOT empacotado. Validação Paper/Purpur ainda pendente.
 - Mantida a linha de trabalho consolidada 0.9.9, sem publicar snapshots intermediários.
 - API e runtime de máquinas multi-entrada/multi-saída: seis slots de entrada e três de saída, com pré-validação do lote completo.
 - Custos de energia agora são declarados por máquina (energyCostPerOperation), persistidos no SQLite v8 e migrados para preservar os custos das máquinas antigas.

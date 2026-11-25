@@ -3,7 +3,7 @@
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
 **Fase atual:** máquinas, energia, fluidos tipados, estufa inicial e editor de itens/receitas do Slime Customizer implementados; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless, e transferência industrial em lotes configuráveis implementados. CI #45511165269 aprovou 119 testes; o commit documental final também passou no CI #45510951756. Paper/Purpur ainda não testados.  
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless, e transferência industrial em lotes configuráveis implementados. CI #45515317546 aprovou 130 testes; JAR `MECHANIUM-0.9.9.00-SNAPSHOT` gerado. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -204,5 +204,6 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - O proprietário configura o filtro agachando e clicando com um item MECHANIUM; repetir remove o ID. Mão vazia limpa a lista.
 - A allow-list fica salva no PDC do barril e é carregada no item de caixa recuperado quando desmontada.
 - Somente o proprietário ou um administrador altera o filtro.
+- CI #45515317546 passou em Java 21/Maven `clean verify`; 130 testes passaram, sem falhas ou erros. O artefato foi publicado em [GitHub Actions](https://github.com/DARKL00RD66/MECHANIUM/actions/runs/45515317546).
 - Testes puros cobrem allow-list vazia, aceitação/bloqueio, toggle, serialização e entradas inválidas.
 - Prioridades e fairness entre caixas continuam pendentes; Geyser/Bedrock não faz parte do escopo.

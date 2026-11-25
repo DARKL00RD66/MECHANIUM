@@ -3,7 +3,7 @@
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
 **Fase atual:** máquinas, energia, fluidos tipados, estufa inicial e editor de itens/receitas do Slime Customizer implementados; CI Java 21/Maven aprovado; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless implementados. CI #45510790964 aprovou 119 testes; o commit documental final também passou no CI #45510951756. Paper/Purpur ainda não testados.  
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless, e transferência industrial em lotes configuráveis implementados. CI #45511165269 aprovou 119 testes; o commit documental final também passou no CI #45510951756. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`
@@ -186,3 +186,13 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - Nos módulos próprios, as três tecnologias explicitamente antigas no núcleo industrial são Bronze, Irrigação e Alvenaria. O comentário incorreto que classificava Mecânica básica como Antiga foi corrigido; ela permanece na Renascença.
 - Prensa mecânica, receita e máquina agora exigem Energia a vapor, da Revolução Industrial, porque a receita depende de pistão.
 - Testes unitários cobrem classificação por era, fallback neutro, distinção entre redstone e pedra simples e distribuição das tecnologias próprias. A validação de servidor Paper/Purpur 1.21.11 ainda é necessária.
+
+
+## Logística industrial — expansão 0.9.9
+
+- Redes industriais agora transferem lotes de até 16 itens MECHANIUM por ciclo de 40 ticks, por padrão.
+- A configuração `industrial-networks.items-per-cycle` aceita 1–64; valores fora do intervalo são limitados pelo runtime.
+- Inserção parcial na caixa de destino debita apenas o número de itens efetivamente recebido, evitando perda de itens quando o destino está parcialmente cheio.
+- Adicionados testes puros para tamanho do lote, inserção parcial, pilha totalmente transferida, destino cheio e argumentos inválidos.
+- Filtros e prioridades por caixa continuam pendentes.
+- Não haverá suporte Geyser/Bedrock. Head Collection é local/cosmético; não depende de Geyser, Floodgate ou APIs de plataforma externa.

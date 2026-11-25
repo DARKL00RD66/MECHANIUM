@@ -125,6 +125,15 @@ greenhouse:
 - O bônus só é aplicado após um evento normal de crescimento ser concluído; sem energia, o crescimento normal não é bloqueado.
 - O proprietário precisa ter desbloqueado `controlled_environment_farming` e a máquina precisa estar conectada à rede energética dele.
 
+### Logística industrial
+
+```yaml
+industrial-networks:
+  items-per-cycle: 16
+```
+
+Define quantos itens MECHANIUM uma rede tenta transferir por ciclo de 40 ticks. O valor é limitado automaticamente ao intervalo de 1 a 64. Transferências parciais debitam da caixa de origem somente os itens aceitos pela caixa de destino. A rede continua limitada a 128 conduítes carregados e não possui filtros nem prioridades nesta etapa.
+
 ### Máquinas
 
 ```yaml

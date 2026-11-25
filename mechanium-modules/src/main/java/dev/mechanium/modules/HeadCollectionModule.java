@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Native MECHANIUM module for local collectible-head cosmetics; no external platform integration. */
+/** Native MECHANIUM module for local collectible-head cosmetics; no Geyser or Bedrock integration. */
 final class HeadCollectionModule extends AbstractBuiltinModule {
     @Override public String id() { return "head-collection"; }
     @Override public boolean optional() { return true; }
@@ -18,7 +18,7 @@ final class HeadCollectionModule extends AbstractBuiltinModule {
     }
     @Override protected void registerExtra(dev.mechanium.api.MechaniumModuleContext context) {
         var api = context.api();
-        // The category ID is retained as a storage key for existing worlds; it is not a platform integration.
+        // Keep the legacy category ID as a storage key for existing worlds; it does not integrate with any external platform.
         registerCategory(api, new ContentCategory("geyser_heads_goods", "Coleção de cabeças",
                 "Itens cosméticos e expositores locais de coleção do MECHANIUM"));
         // Persisted item/category/recipe IDs intentionally remain stable for existing worlds.

@@ -1,6 +1,9 @@
 # Changelog
 
 ## 0.9.9.00-SNAPSHOT — consolidação em andamento
+- Rede Industrial: transferência passa de 1 item para lotes configuráveis de 1–64 por ciclo (16 padrão); transferência parcial consome da origem somente o que o destino aceitou.
+- Adicionados testes de política para dimensionamento do lote e contabilização de transferência parcial.
+- Documentação de logística e configuração atualizada; Geyser/Bedrock explicitamente fora do escopo, com Head Collection mantido apenas como cosmético local.
 - Mantida a linha de trabalho consolidada 0.9.9, sem publicar snapshots intermediários.
 - API e runtime de máquinas multi-entrada/multi-saída: seis slots de entrada e três de saída, com pré-validação do lote completo.
 - Custos de energia agora são declarados por máquina (energyCostPerOperation), persistidos no SQLite v8 e migrados para preservar os custos das máquinas antigas.

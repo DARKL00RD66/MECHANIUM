@@ -132,7 +132,7 @@ industrial-networks:
   items-per-cycle: 16
 ```
 
-Define quantos itens MECHANIUM uma rede tenta transferir por ciclo de 40 ticks. O valor é limitado automaticamente ao intervalo de 1 a 64. Transferências parciais debitam da caixa de origem somente os itens aceitos pela caixa de destino. A rede continua limitada a 128 conduítes carregados e não possui filtros nem prioridades nesta etapa.
+Define quantos itens MECHANIUM uma rede tenta transferir por ciclo de 40 ticks. O valor é limitado automaticamente ao intervalo de 1 a 64. Transferências parciais debitam da caixa de origem somente os itens aceitos pela caixa de destino. O filtro é configurado agachando e clicando na caixa com um item MECHANIUM; com a mão vazia, limpa-se a lista. A rede continua limitada a 128 conduítes carregados e ainda não possui prioridades.
 
 ### Máquinas
 

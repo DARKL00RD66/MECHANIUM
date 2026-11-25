@@ -2,8 +2,8 @@
 
 **Versão alvo de consolidação:** 0.9.9.00-SNAPSHOT  
 **Base auditada:** 0.7.4.02-SNAPSHOT  
-**Fase atual:** máquinas multi-entrada/saída, agendador round-robin, energia com telemetria owner-wide, fluidos tipados, estufa inicial, EMC, filtros de logística e agendador round-robin implementados; revisão mais recente em CI; teste em servidor real pendente
-**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless, e transferência industrial em lotes configuráveis implementados. Último CI verde #45515317546 aprovou 130 testes e gerou o JAR `MECHANIUM-0.9.9.00-SNAPSHOT`; o agendador round-robin e seu novo teste ainda aguardam CI nesta revisão. Paper/Purpur ainda não testados.  
+**Fase atual:** máquinas multi-entrada/saída, agendador round-robin, energia com telemetria owner-wide, fluidos tipados, estufa inicial, EMC, filtros e transferência logística com rotação justa de origem/destino implementados; CI verde; teste em servidor real pendente
+**Progresso 0.9.9:** máquinas multi-entrada/multi-saída (6+3), custos por definição, SQLite v9, fluidos tipados, conduítes energéticos, telemetria básica, preservação de carga/volume, controlador inicial de estufa e editor Slime Customizer para itens e receitas shapeless, e transferência industrial em lotes configuráveis implementados. Último CI verde #45629903661 aprovou 288 testes automatizados e gerou o JAR `MECHANIUM-0.9.9.00-SNAPSHOT`. A rotação round-robin de caixas e slots da logística foi adicionada e validada no CI. Paper/Purpur ainda não testados.  
 **Plano:** [PLANO-0.9.9.md](PLANO-0.9.9.md)  
 **Plataforma-alvo:** Minecraft 1.21.11, Java 21, Paper/Purpur  
 **Distribuição planejada:** um único `MECHANIUM.jar`

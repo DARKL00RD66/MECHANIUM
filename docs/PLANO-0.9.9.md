@@ -29,7 +29,7 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - `MachineDefinition` e o runtime agora aceitam 1–6 tipos de entrada e 1–3 tipos de saída, distribuídos em seis slots de entrada e três de saída; o bloco físico ainda é `DISPENSER`.
 - A rede elétrica possui conduítes HOPPER identificados, BFS por até 256 nós e isolamento por proprietário. O débito agregado calcula o plano antes de alterar carga. O resumo mostra geradores, baterias, carga/capacidade e totais armazenados/consumidos do proprietário desde a inicialização (contadores em memória, reiniciam com o servidor); testes em servidor ainda pendentes.
 - A rede de fluidos usa `FluidDefinition` e `FluidContainerDefinition` registradas via API pública, volumes em mB no PDC dos tanques, bloqueio de misturas e transferência por tubos conectados. Itens de tanque preservam tipo e volume ao serem desmontados; a retirada escolhe o maior recipiente desbloqueado que caiba no volume disponível.
-- A rede industrial percorre até 128 conduítes indexados nos chunks carregados, move um lote configurável (1–64 itens, 16 por padrão) a cada 40 ticks e aplica uma lista de aceitação por caixa. O débito da origem usa apenas a quantidade inserida no destino; prioridades e fairness continuam pendentes.
+- A rede industrial percorre até 128 conduítes indexados nos chunks carregados, move um lote configurável (1–64 itens, 16 por padrão) a cada 40 ticks e aplica uma lista de aceitação por caixa. O débito da origem usa apenas a quantidade inserida no destino; a origem e o destino inicial são rotacionados entre ciclos para evitar starvation. Prioridades e limite agregado de throughput entre redes continuam pendentes.
 - O processamento atual não possui fila explícita de ordens configuráveis. Os slots de entrada funcionam como buffer da receita fixa da máquina. O agendador round-robin limita a quantidade de dispensadores atualizados por ciclo, sem impor uma fila de receitas.
 - Ainda não há confirmação de teste funcional completo em Paper e Purpur 1.21.11. As verificações Maven/CI devem ser relatadas separadamente.
 
@@ -92,8 +92,9 @@ Este documento separa o que existe no código, o que está limitado e o que aind
 - [x] Adicionar limite de transferência em lote configurável para redes industriais (`industrial-networks.items-per-cycle`, padrão 16, faixa 1–64), com contabilização exata de inserções parciais.
 - [x] Adicionar lista de aceitação por caixa para itens MECHANIUM; lista vazia aceita todos. O filtro é persistido no bloco e no item recuperado ao desmontar.
 - [x] Testar política de filtragem, alternância de IDs, serialização e lista vazia.
-- [ ] Implementar fairness e limites de throughput por tick entre múltiplas redes.
-- [ ] Melhorar o balanceamento de transferência entre caixas.
+- [x] Implementar fairness por rede: cursor round-robin rotaciona os slots de origem e os destinos entre ciclos, evitando que o primeiro slot/caixa monopolize a transferência.
+- [ ] Implementar limite agregado de throughput por tick entre múltiplas redes.
+- [x] Melhorar o balanceamento de transferência entre caixas com rotação do destino inicial.
 - [ ] Permitir redes com mais de um tipo de recurso, mantendo isolamento por proprietário.
 - [x] Evitar varrer todos os chunks a cada ciclo; manter índices de tubos e conduítes carregados, com atualização por eventos de chunk.
 - [ ] Integrar máquinas, energia e logística com contratos comuns e eventos observáveis.

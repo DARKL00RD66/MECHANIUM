@@ -196,3 +196,13 @@ Versão de manutenção que incorpora a auditoria de consistência documentada a
 - Adicionados testes puros para tamanho do lote, inserção parcial, pilha totalmente transferida, destino cheio e argumentos inválidos.
 - Filtros e prioridades por caixa continuam pendentes.
 - Não haverá suporte Geyser/Bedrock. Head Collection é local/cosmético; não depende de Geyser, Floodgate ou APIs de plataforma externa.
+
+
+## Filtros de logística — revisão 0.9.9
+
+- Caixas de rede industrial agora aceitam uma lista de IDs MECHANIUM permitidos; lista vazia mantém o modo aceitar tudo.
+- O proprietário configura o filtro agachando e clicando com um item MECHANIUM; repetir remove o ID. Mão vazia limpa a lista.
+- A allow-list fica salva no PDC do barril e é carregada no item de caixa recuperado quando desmontada.
+- Somente o proprietário ou um administrador altera o filtro.
+- Testes puros cobrem allow-list vazia, aceitação/bloqueio, toggle, serialização e entradas inválidas.
+- Prioridades e fairness entre caixas continuam pendentes; Geyser/Bedrock não faz parte do escopo.

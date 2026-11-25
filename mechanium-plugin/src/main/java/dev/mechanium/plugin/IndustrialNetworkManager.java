@@ -195,7 +195,7 @@ final class IndustrialNetworkManager implements Listener {
             if (network.pipes().isEmpty()) continue;
             boolean overlap = network.pipes().stream().anyMatch(processed::contains);
             processed.addAll(network.pipes());
-            if (!overlap && network.complete()) moveOneCustomItem(network.crates());
+            if (!overlap && network.complete()) moveItemsBatch(network.crates());
         }
     }
 
@@ -250,8 +250,10 @@ final class IndustrialNetworkManager implements Listener {
         return new Network(visited, crates, queue.isEmpty());
     }
 
-    private void moveOneCustomItem(List<Inventory> crates) {
+    private void moveItemsBatch(List<Inventory> crates) {
         if (crates.size() < 2) return;
+        int configuredLimit = Math.max(1, Math.min(64,
+                plugin.getConfig().getInt("industrial-networks.items-per-cycle", 16)));
         for (int sourceIndex = 0; sourceIndex < crates.size(); sourceIndex++) {
             Inventory source = crates.get(sourceIndex);
             for (int slot = 0; slot < source.getSize(); slot++) {
@@ -260,13 +262,25 @@ final class IndustrialNetworkManager implements Listener {
                 for (int targetIndex = 0; targetIndex < crates.size(); targetIndex++) {
                     if (targetIndex == sourceIndex) continue;
                     Inventory target = crates.get(targetIndex);
+                    int requestedAmount = IndustrialTransferPolicy.batchSize(
+                            stack.getAmount(), stack.getMaxStackSize(), configuredLimit);
+                    if (requestedAmount <= 0) continue;
+
                     ItemStack moved = stack.clone();
-                    moved.setAmount(1);
-                    if (!target.addItem(moved).isEmpty()) continue;
-                    if (stack.getAmount() == 1) source.setItem(slot, null);
+                    moved.setAmount(requestedAmount);
+                    Map<Integer, ItemStack> leftovers = target.addItem(moved);
+                    int leftoverAmount = leftovers.values().stream()
+                            .mapToInt(ItemStack::getAmount).sum();
+                    IndustrialTransferPolicy.TransferResult transfer =
+                            IndustrialTransferPolicy.afterInsertion(
+                                    stack.getAmount(), requestedAmount, leftoverAmount);
+                    if (transfer.insertedAmount() <= 0) continue;
+
+                    if (transfer.sourceRemaining() == 0) source.setItem(slot, null);
                     else {
-                        stack.setAmount(stack.getAmount() - 1);
-                        source.setItem(slot, stack);
+                        ItemStack remaining = stack.clone();
+                        remaining.setAmount(transfer.sourceRemaining());
+                        source.setItem(slot, remaining);
                     }
                     return;
                 }

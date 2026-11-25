@@ -219,6 +219,11 @@ modules:
   emc-exchange:
     enabled: true
 
+industrial-networks:
+  # Maximum MECHANIUM items moved by one network in each 40-tick transfer cycle.
+  # Allowed range: 1..64. Partial transfers return only uninserted items to the source crate.
+  items-per-cycle: 16
+
 fluids:
   # Tank storage is measured in millibuckets; 1,000 mB = 1 bucket.
   tank-capacity-mb: 16000
